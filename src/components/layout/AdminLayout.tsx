@@ -3,18 +3,25 @@ import { Link, useLocation } from "wouter";
 import { useLogout } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  Package, 
-  Tags, 
-  Users, 
-  Receipt, 
-  FileText, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Package,
+  Tags,
+  Users,
+  Receipt,
+  FileText,
+  BarChart3,
   LogOut,
   Menu,
   X,
-  Croissant
+  Croissant,
+  Calendar,
+  ClipboardList,
+  Clock,
+  PackageOpen,
+  ShoppingCart,
+  Truck,
+  Umbrella
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -46,6 +53,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: "/admin/employees", icon: Users, label: t('nav.employees') },
     { href: "/admin/expenses", icon: Receipt, label: t('nav.expenses') },
     { href: "/admin/stats", icon: BarChart3, label: t('nav.analytics') },
+    { href: "/admin/fournisseurs", icon: Truck, label: t('nav.suppliers') },
+    { href: "/admin/achats", icon: ShoppingCart, label: t('nav.purchases') },
+    { href: "/admin/matieres-premieres", icon: PackageOpen, label: t('nav.raw_materials') },
+    { href: "/admin/stock-journalier", icon: Calendar, label: t('nav.daily_stock') },
+    { href: "/admin/demandes-achat", icon: ClipboardList, label: t('nav.purchase_requests') },
+    { href: "/admin/conges", icon: Umbrella, label: t('nav.leaves') },
+    { href: "/admin/pointages", icon: Clock, label: t('nav.attendance') },
+    { href: "/admin/fiches-paie", icon: FileText, label: t('nav.payroll') },
   ];
 
   const formattedDate = new Date().toLocaleDateString(
@@ -56,7 +71,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Image de fond pains */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072&auto=format&fit=crop')" }}
       />
@@ -66,7 +81,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Contenu principal */}
       <div className="relative z-10 flex h-screen">
         {isSidebarOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/30 z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
@@ -94,8 +109,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Link key={item.href} href={item.href}>
                     <span className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all text-sm font-medium cursor-pointer",
-                      isActive 
-                        ? "bg-primary text-primary-foreground shadow-sm" 
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-foreground/70 hover:bg-accent hover:text-foreground"
                     )}>
                       <item.icon className="h-5 w-5" />
@@ -117,9 +132,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <p className="text-xs text-foreground/60 capitalize">{user?.role}</p>
               </div>
             </div>
-            
-            <Button 
-              variant="ghost" 
+
+            <Button
+              variant="ghost"
               className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all"
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
@@ -132,7 +147,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <header className="h-16 flex items-center justify-between px-6 lg:px-8 border-b border-border bg-background/80 backdrop-blur-sm">
-            <button 
+            <button
               className="lg:hidden text-foreground p-2 -ml-2 rounded-md hover:bg-accent transition"
               onClick={() => setIsSidebarOpen(true)}
             >

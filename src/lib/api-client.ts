@@ -25,15 +25,17 @@ export type SalarySummary = {
     hoursPerMonth?: number;
 };
 
+// Dans api-client.ts, mettez à jour Employee
 export type Employee = {
-    id: number;
-    name: string;
-    username: string;
-    role: "admin" | "cashier" | "ADMIN" |"CASHIER";
-    hourlyRate?: number;
-    hoursPerMonth?: number;
-    monthlySalary?: number;
-    isActive: boolean;
+  id: number;
+  name: string;
+  username: string;
+  role: "admin" | "cashier" | "ADMIN" | "CASHIER" | "CHEF" | "RESPONSABLE" | "OTHER";
+  poste?: string;           // ← ajoutez ce champ
+  hourlyRate?: number;
+  hoursPerMonth?: number;
+  monthlySalary?: number;
+  isActive: boolean;
 };
 export type Category = {
     id: number;
@@ -72,6 +74,144 @@ export type Order = {
     change?: number;
     items: Array<{ productName: string; quantity: number; unitPrice: number; subtotal: number }>;
 };
+// ==================== FOURNISSEURS ====================
+export interface Fournisseur {
+  id: number;
+  nom: string;
+  societe?: string;
+  telephone: string;
+  email?: string;
+  adresse?: string;
+  actif: boolean;
+  defaultDelayLivraison?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// ==================== ACHATS ====================
+export interface Achat {
+  id: number;
+  fournisseur: Fournisseur;
+  nomProduit: string;
+  quantite: number;
+  uniteMesure: string;
+  prixUnitaire: number;
+  prixTotal: number;
+  dateAchat: string;
+  factureRef?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+// ==================== MATIÈRES PREMIÈRES ====================
+export interface MatierePremiere {
+  id: number;
+  nom: string;
+  uniteMesure: string;
+  seuilAlerte: number;
+  fournisseurPrefere?: Fournisseur;
+  actif: boolean;
+}
+
+export interface StockMatiere {
+  id: number;
+  matiere: MatierePremiere;
+  quantiteActuelle: number;
+  lastUpdated: string;
+}
+
+// ==================== STOCK JOURNALIER ====================
+export interface StockJournalier {
+  id: number;
+  product: Product;
+  date: string;
+  quantiteProduite: number;
+  quantiteVendue?: number;
+  quantiteInvendue?: number;
+  quantitePerdue?: number;
+}
+
+// ==================== DEMANDES D'ACHAT ====================
+export interface DemandeAchat {
+  id: number;
+  produit: string;
+  quantite: number;
+  uniteMesure: string;
+  fournisseurSuggere?: Fournisseur;
+  urgence: boolean;
+  statut: "EN_ATTENTE" | "VALIDEE" | "REJETEE";
+  demandePar?: Employee;
+  createdAt: string;
+}
+
+// ==================== CONGÉS ====================
+export interface Conge {
+  id: number;
+  employeeId: number;
+  employeeName: string;
+  employeePoste?: string;
+  dateDebut: string;
+  dateFin: string;
+  type: string;
+  valide: boolean;
+  motif?: string;
+  demandeLe: string;
+  reponseLe?: string;
+}
+
+// ==================== POINTAGES ====================
+export interface Pointage {
+  id: number;
+  employeeId: number;
+  employeeName: string;
+  date: string;
+  heureArrivee: string;
+  heureDepart?: string;
+  heuresTravaillees?: number;
+  heuresSupplementaires?: number;
+  statut: string;
+}
+
+// ==================== FICHES DE PAIE ====================
+export interface FichePaie {
+  id: number;
+  employeeId: number;
+  employeeName: string;
+  mois: number;
+  annee: number;
+  salaireBrut: number;
+  heuresNormales: number;
+  heuresSupplementaires: number;
+  tauxHoraire: number;
+  indemnites: number;
+  deductions: number;
+  salaireNet: number;
+  dateGeneration: string;
+}
+// Demandes d'achat
+export interface DemandeAchat {
+  id: number;
+  produit: string;
+  quantite: number;
+  uniteMesure: string;
+  fournisseurSuggere?: Fournisseur;
+  urgence: boolean;
+  statut: "EN_ATTENTE" | "VALIDEE" | "REJETEE";
+  demandePar?: Employee;
+  createdAt: string;
+}
+
+// Stock journalier
+export interface StockJournalier {
+  id: number;
+  product: Product;
+  date: string;
+  quantiteProduite: number;
+  quantiteVendue?: number;
+  quantiteInvendue?: number;
+  quantitePerdue?: number;
+}
 // Gestion du token
 export function getToken(): string | null {
     return localStorage.getItem("jwt_token");
@@ -510,6 +650,374 @@ export function getGetSalarySummaryQueryKey() {
     return ["salarySummary"];
 }
 
-// api-client.ts
+// ==================== FOURNISSEURS ====================
+export function useListFournisseurs() {
+  return useQuery({
+    queryKey: ["fournisseurs"],
+    queryFn: async () => {
+      const response = await apiRequest("/fournisseurs");
+      return response.json() as Promise<Fournisseur[]>;
+    },
+  });
+}
 
-// Récupérer le token stocké
+export function useCreateFournisseur() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<Fournisseur>) => {
+      const response = await apiRequest("/fournisseurs", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<Fournisseur>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["fournisseurs"] }),
+  });
+}
+
+export function useUpdateFournisseur() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Fournisseur> }) => {
+      const response = await apiRequest(`/fournisseurs/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<Fournisseur>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["fournisseurs"] }),
+  });
+}
+
+export function useDeleteFournisseur() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest(`/fournisseurs/${id}`, { method: "DELETE" });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["fournisseurs"] }),
+  });
+}
+
+// ==================== ACHATS ====================
+export function useListAchats() {
+  return useQuery({
+    queryKey: ["achats"],
+    queryFn: async () => {
+      const response = await apiRequest("/achats");
+      return response.json() as Promise<Achat[]>;
+    },
+  });
+}
+
+export function useCreateAchat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<Achat>) => {
+      const response = await apiRequest("/achats", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<Achat>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["achats"] }),
+  });
+}
+
+// ==================== MATIÈRES PREMIÈRES ====================
+export function useListMatieresPremieres() {
+  return useQuery({
+    queryKey: ["matieres-premieres"],
+    queryFn: async () => {
+      const response = await apiRequest("/matieres-premieres");
+      return response.json() as Promise<MatierePremiere[]>;
+    },
+  });
+}
+
+export function useCreateMatierePremiere() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<MatierePremiere>) => {
+      const response = await apiRequest("/matieres-premieres", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<MatierePremiere>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["matieres-premieres"] }),
+  });
+}
+
+export function useUpdateMatierePremiere() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<MatierePremiere> }) => {
+      const response = await apiRequest(`/matieres-premieres/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<MatierePremiere>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["matieres-premieres"] }),
+  });
+}
+
+export function useDeleteMatierePremiere() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest(`/matieres-premieres/${id}`, { method: "DELETE" });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["matieres-premieres"] }),
+  });
+}
+
+// Récupérer le stock d'une matière première
+export function useGetStockMatiere(matiereId: number) {
+  return useQuery({
+    queryKey: ["stock-matiere", matiereId],
+    queryFn: async () => {
+      const response = await apiRequest(`/matieres-premieres/${matiereId}/stock`);
+      return response.json() as Promise<StockMatiere>;
+    },
+    enabled: !!matiereId,
+  });
+}
+
+// Mettre à jour le stock (pour ajustement manuel)
+export function useUpdateStockMatiere() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ matiereId, quantite }: { matiereId: number; quantite: number }) => {
+      const response = await apiRequest(`/matieres-premieres/${matiereId}/stock?quantite=${quantite}`, {
+        method: "PUT",
+      });
+      return response.json() as Promise<StockMatiere>;
+    },
+    onSuccess: (_, { matiereId }) => {
+      queryClient.invalidateQueries({ queryKey: ["stock-matiere", matiereId] });
+    },
+  });
+}
+
+// ==================== CONGÉS ====================
+export function useListConges() {
+  return useQuery({
+    queryKey: ["conges"],
+    queryFn: async () => {
+      const response = await apiRequest("/conges");
+      return response.json() as Promise<Conge[]>;
+    },
+  });
+}
+
+export function useCreateConge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<Conge>) => {
+      const response = await apiRequest("/conges", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<Conge>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["conges"] }),
+  });
+}
+
+export function useUpdateConge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Conge> }) => {
+      const response = await apiRequest(`/conges/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<Conge>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["conges"] }),
+  });
+}
+
+export function useDeleteConge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest(`/conges/${id}`, { method: "DELETE" });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["conges"] }),
+  });
+}
+
+export function useApproveConge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, valide }: { id: number; valide: boolean }) => {
+      const response = await apiRequest(`/conges/${id}/approve?valide=${valide}`, {
+        method: "PUT",
+      });
+      return response.json() as Promise<Conge>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["conges"] }),
+  });
+}
+
+// ==================== POINTAGES ====================
+export function useListPointages() {
+  return useQuery({
+    queryKey: ["pointages"],
+    queryFn: async () => {
+      const response = await apiRequest("/pointages");
+      return response.json() as Promise<Pointage[]>;
+    },
+  });
+}
+
+export function useCreatePointageArrivee() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ employeeId, date, heureArrivee }: { employeeId: number; date: string; heureArrivee: string }) => {
+      const response = await apiRequest(`/pointages/arrivee?employeeId=${employeeId}&date=${date}&heureArrivee=${heureArrivee}`, {
+        method: "POST",
+      });
+      return response.json() as Promise<Pointage>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pointages"] }),
+  });
+}
+
+export function useUpdatePointageDepart(id: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (heureDepart: string) => {
+      const response = await apiRequest(`/pointages/${id}/depart?heureDepart=${heureDepart}`, {
+        method: "PUT",
+      });
+      return response.json() as Promise<Pointage>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pointages"] }),
+  });
+}
+
+// ==================== FICHES DE PAIE ====================
+export function useGenerateFichePaie() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ employeeId, mois, annee }: { employeeId: number; mois: number; annee: number }) => {
+      const response = await apiRequest(`/paie/generate/employee/${employeeId}?mois=${mois}&annee=${annee}`, {
+        method: "POST",
+      });
+      return response.json() as Promise<FichePaie>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["fiches-paie"] }),
+  });
+}
+
+export function useListFichesPaieByEmployee(employeeId?: number) {
+  return useQuery({
+    queryKey: ["fiches-paie", employeeId],
+    queryFn: async () => {
+      const response = await apiRequest(`/paie/employee/${employeeId}`);
+      return response.json() as Promise<FichePaie[]>;
+    },
+    enabled: !!employeeId,
+  });
+}
+
+export function useDownloadFichePaie() {
+  return useMutation({
+    mutationFn: async (ficheId: number) => {
+      const response = await fetch(`${API_BASE_URL}/paie/${ficheId}/download`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) throw new Error("Erreur téléchargement");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fiche_paie_${ficheId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    },
+  });
+}
+// ==================== DEMANDES D'ACHAT ====================
+export function useListDemandesAchat() {
+  return useQuery({
+    queryKey: ["demandes-achat"],
+    queryFn: async () => {
+      const response = await apiRequest("/demandes-achat");
+      return response.json() as Promise<DemandeAchat[]>;
+    },
+  });
+}
+
+export function useCreateDemandeAchat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<DemandeAchat>) => {
+      const response = await apiRequest("/demandes-achat", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<DemandeAchat>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["demandes-achat"] }),
+  });
+}
+
+export function useApproveDemandeAchat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, valide }: { id: number; valide: boolean }) => {
+      const response = await apiRequest(`/demandes-achat/${id}/approve?valide=${valide}`, {
+        method: "PUT",
+      });
+      return response.json() as Promise<DemandeAchat>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["demandes-achat"] }),
+  });
+}
+
+
+// ==================== STOCK JOURNALIER ====================
+export function useListStockJournalier() {
+  return useQuery({
+    queryKey: ["stock-journalier"],
+    queryFn: async () => {
+      const response = await apiRequest("/stock-journalier");
+      return response.json() as Promise<StockJournalier[]>;
+    },
+  });
+}
+
+export function useCreateStockJournalier() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<StockJournalier>) => {
+      const response = await apiRequest("/stock-journalier", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<StockJournalier>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock-journalier"] }),
+  });
+}
+
+export function useUpdateStockJournalier() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<StockJournalier> }) => {
+      const response = await apiRequest(`/stock-journalier/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<StockJournalier>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock-journalier"] }),
+  });
+}

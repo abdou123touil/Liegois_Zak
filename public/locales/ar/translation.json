@@ -15,7 +15,8 @@
     "error": "فشل تسجيل الدخول",
     "invalid_credentials": "بيانات الاعتماد غير صالحة.",
     "please_enter": "الرجاء إدخال اسم المستخدم وكلمة المرور"
-  },"dashboard": {
+  },
+  "dashboard": {
     "overview": "نظرة عامة على لوحة القيادة",
     "today_snapshot": "لقطة اليوم والأداء الشهري.",
     "today_sales": "مبيعات اليوم",
@@ -27,7 +28,17 @@
     "monthly_expenses": "المصروفات الشهرية",
     "estimated_profit": "الربح المقدر",
     "from_orders": "من {{count}} طلبات",
-    "revenue_minus_expenses": "الإيرادات ناقص المصروفات"
+    "revenue_minus_expenses": "الإيرادات ناقص المصروفات",
+    "no_data": "لا توجد بيانات لعرضها",
+    "view_details": "عرض التفاصيل",
+    "sales_trends": "اتجاهات المبيعات",
+    "home": "الرئيسية",
+    "purchase_requests": "طلبات الشراء",
+    "raw_materials": "المواد الخام",
+    "daily_stock": "المخزون اليومي",
+    "employees": "الموظفون",
+    "attendance": "الحضور",
+    "leaves": "الإجازات"
   },
   "nav": {
     "dashboard": "لوحة القيادة",
@@ -36,11 +47,20 @@
     "categories": "الفئات",
     "employees": "الموظفون",
     "expenses": "المصروفات",
-    "analytics": "التحليلات"
+    "analytics": "التحليلات",
+    "payroll": "الرواتب",
+    "suppliers": "الموردون",
+    "purchases": "المشتريات",
+    "raw_materials": "المواد الخام",
+    "daily_stock": "المخزون اليومي",
+    "purchase_requests": "طلبات الشراء",
+    "leaves": "الإجازات",
+    "time_tracking": "تتبع الوقت",
+    "attendance": "الحضور",
+    "pay_slips": "قسائم الدفع"
   },
   "actions": {
     "logout": "تسجيل الخروج"
-    
   },
   "common": {
     "loading": "جاري التحميل...",
@@ -67,7 +87,11 @@
     "save_error": "فشل حفظ الفئة.",
     "delete_error": "فشل حذف الفئة.",
     "confirm_delete": "هل أنت متأكد من حذف هذه الفئة؟"
-  },"employees": {
+  },
+  "employees": {
+    "role_chef": "الطباخ",
+    "role_responsable": "مدير",
+    "role_other": "موظف",
     "title": "الموظفون",
     "subtitle": "إدارة موظفيك وأدوارهم",
     "add_button": "إضافة موظف",
@@ -100,7 +124,7 @@
       "actions": "الإجراءات"
     }
   },
-   "expenses": {
+  "expenses": {
     "title": "المصروفات",
     "subtitle": "تتبع نفقات عملك",
     "add_button": "إضافة مصروف",
@@ -157,7 +181,7 @@
       "items": "العناصر"
     }
   },
-   "products": {
+  "products": {
     "title": "المنتجات",
     "subtitle": "إدارة كتالوج المنتجات الخاص بك",
     "add_button": "إضافة منتج",
@@ -190,7 +214,7 @@
       "actions": "الإجراءات"
     }
   },
-    "stats": {
+  "stats": {
     "title": "التحليلات",
     "subtitle": "اتجاهات المبيعات ومقاييس الأداء",
     "daily_sales_title": "المبيعات اليومية (آخر {{days}} أيام)",
@@ -203,7 +227,7 @@
       "salary": "الراتب"
     }
   },
-   "pos": {
+  "pos": {
     "all_products": "جميع المنتجات",
     "current_order": "الطلب الحالي",
     "items": "عناصر",
@@ -228,5 +252,370 @@
     "insufficient_funds": "المبلغ المدخل أقل من الإجمالي.",
     "payment_error": "حدث خطأ أثناء معالجة الطلب.",
     "no_products": "لم يتم العثور على منتجات"
+  },
+  "fournisseurs": {
+    "title": "الموردون",
+    "subtitle": "إدارة موردي المواد الأولية",
+    "add_button": "مورد جديد",
+    "list_title": "قائمة الموردين",
+    "edit_title": "تعديل المورد",
+    "add_title": "إضافة مورد",
+    "validation_nom_telephone": "الاسم ورقم الهاتف مطلوبان",
+    "create_success": "تمت إضافة المورد",
+    "update_success": "تم تعديل المورد",
+    "delete_success": "تم حذف المورد",
+    "save_error": "حدث خطأ أثناء الحفظ",
+    "delete_error": "حدث خطأ أثناء الحذف",
+    "confirm_delete": "هل تريد حذف هذا المورد؟",
+    "empty": "لا يوجد موردون",
+    "table": {
+      "nom": "الاسم",
+      "societe": "الشركة",
+      "telephone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "actif": "نشط",
+      "actions": "الإجراءات"
+    },
+    "nom_label": "الاسم",
+    "societe_label": "الشركة",
+    "telephone_label": "الهاتف",
+    "email_label": "البريد الإلكتروني",
+    "adresse_label": "العنوان",
+    "delay_label": "مدة التسليم (أيام)",
+    "notes_label": "ملاحظات",
+    "actif_label": "نشط"
+  },
+  "achats": {
+    "title": "المشتريات",
+    "subtitle": "إدارة مشتريات المواد الأولية والمستلزمات",
+    "add_button": "عملية شراء جديدة",
+    "list_title": "سجل المشتريات",
+    "table": {
+      "product": "المنتج",
+      "quantity": "الكمية",
+      "unit_price": "سعر الوحدة",
+      "total": "الإجمالي",
+      "date": "التاريخ",
+      "supplier": "المورد"
+    },
+    "empty": "لا توجد مشتريات مسجلة",
+    "add_title": "تسجيل عملية شراء",
+    "supplier": "المورد",
+    "select_supplier": "اختر موردًا",
+    "product_name": "اسم المنتج",
+    "quantity": "الكمية",
+    "unit": "الوحدة",
+    "unit_price": "سعر الوحدة (دينار تونسي)",
+    "date": "التاريخ",
+    "invoice_ref": "مرجع الفاتورة",
+    "notes": "ملاحظات",
+    "validation_required": "يرجى ملء جميع الحقول الإلزامية",
+    "create_success": "تم تسجيل عملية الشراء بنجاح",
+    "save_error": "حدث خطأ أثناء الحفظ"
+  },
+  "matieresPremieres": {
+    "title": "المواد الأولية",
+    "subtitle": "إدارة مخزون المواد الأولية وحدود التنبيه",
+    "add_button": "إضافة",
+    "list_title": "قائمة المواد",
+    "table": {
+      "name": "الاسم",
+      "unit": "الوحدة",
+      "stock": "المخزون الحالي",
+      "threshold": "حد التنبيه",
+      "preferred_supplier": "المورد المفضل",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "empty": "لا توجد مواد أولية",
+    "add_title": "إضافة مادة",
+    "edit_title": "تعديل المادة",
+    "name": "الاسم",
+    "unit": "الوحدة",
+    "threshold": "حد التنبيه",
+    "preferred_supplier": "المورد المفضل",
+    "select_supplier": "اختر موردًا",
+    "validation_required": "الاسم والوحدة مطلوبان",
+    "create_success": "تمت إضافة المادة الأولية",
+    "update_success": "تم تعديل المادة الأولية",
+    "delete_success": "تم حذف المادة الأولية",
+    "save_error": "حدث خطأ أثناء الحفظ",
+    "delete_error": "حدث خطأ أثناء الحذف",
+    "confirm_delete": "هل تريد حذف هذه المادة؟",
+    "stock_alert": "المخزون منخفض!"
+  },
+  "demandesAchat": {
+    "title": "طلبات الشراء",
+    "subtitle": "تقديم وإدارة طلبات إعادة التزويد",
+    "add_button": "طلب جديد",
+    "list_title": "قائمة الطلبات",
+    "table": {
+      "product": "المنتج",
+      "quantity": "الكمية",
+      "unit": "الوحدة",
+      "supplier": "المورد المقترح",
+      "urgent": "عاجل",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "empty": "لا توجد طلبات",
+    "add_title": "إنشاء طلب",
+    "product": "المنتج",
+    "quantity": "الكمية",
+    "unit": "الوحدة",
+    "supplier": "المورد المقترح",
+    "select_supplier": "اختر موردًا",
+    "urgent": "عاجل",
+    "validation_required": "يرجى إدخال المنتج والكمية والوحدة",
+    "create_success": "تم إنشاء الطلب بنجاح",
+    "save_error": "حدث خطأ أثناء الإنشاء",
+    "approved": "تمت الموافقة على الطلب",
+    "rejected": "تم رفض الطلب",
+    "approve_error": "حدث خطأ أثناء المعالجة"
+  },
+  "conges": {
+    "title": "الإجازات",
+    "subtitle": "إدارة طلبات إجازات الموظفين",
+    "add_button": "طلب إجازة",
+    "list_title": "قائمة الطلبات",
+    "table": {
+      "employee": "الموظف",
+      "start": "تاريخ البداية",
+      "end": "تاريخ النهاية",
+      "type": "النوع",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "empty": "لا توجد طلبات إجازة",
+    "add_title": "طلب جديد",
+    "employee": "الموظف",
+    "select_employee": "اختر موظفًا",
+    "start_date": "تاريخ البداية",
+    "end_date": "تاريخ النهاية",
+    "type": "نوع الإجازة",
+    "select_type": "اختر النوع",
+    "type_paid": "إجازة مدفوعة",
+    "type_sick": "إجازة مرضية",
+    "type_unpaid": "إجازة بدون أجر",
+    "motif": "السبب (اختياري)",
+    "validation_required": "يرجى ملء جميع الحقول الإلزامية",
+    "create_success": "تم إرسال الطلب",
+    "save_error": "حدث خطأ أثناء الإرسال",
+    "approved": "تمت الموافقة",
+    "rejected": "مرفوض",
+    "pending": "قيد الانتظار",
+    "approve_error": "حدث خطأ أثناء المعالجة"
+  },
+  "pointages": {
+    "title": "الحضور والانصراف",
+    "subtitle": "إدارة أوقات العمل",
+    "arrival_button": "تسجيل الحضور",
+    "list_title": "سجل الحضور",
+    "table": {
+      "employee": "الموظف",
+      "date": "التاريخ",
+      "arrival": "الحضور",
+      "departure": "الانصراف",
+      "hours": "الساعات",
+      "actions": "الإجراءات"
+    },
+    "empty": "لا توجد سجلات حضور",
+    "arrival_title": "تسجيل الحضور",
+    "depart_title": "تسجيل الانصراف",
+    "employee": "الموظف",
+    "select_employee": "اختر موظفًا",
+    "date": "التاريخ",
+    "arrival_time": "وقت الحضور",
+    "depart_time": "وقت الانصراف",
+    "validation_arrival": "يرجى اختيار موظف وتاريخ ووقت الحضور",
+    "validation_depart": "يرجى إدخال وقت الانصراف",
+    "arrival_success": "تم تسجيل الحضور",
+    "depart_success": "تم تسجيل الانصراف",
+    "save_error": "حدث خطأ أثناء الحفظ"
+  },
+  "fichesPaie": {
+    "title": "كشوف الرواتب",
+    "subtitle": "إنشاء وعرض كشوف الرواتب",
+    "generate_title": "إنشاء كشف راتب",
+    "history_title": "الكشوف المُنشأة",
+    "employee": "الموظف",
+    "select_employee": "اختر موظفًا",
+    "month": "الشهر",
+    "year": "السنة",
+    "generate_button": "إنشاء كشف الراتب",
+    "table": {
+      "period": "الفترة",
+      "gross": "الراتب الإجمالي",
+      "deductions": "الاستقطاعات",
+      "net": "الراتب الصافي",
+      "actions": "الإجراءات"
+    },
+    "empty": "لا توجد كشوف رواتب لهذا الموظف",
+    "select_employee_error": "يرجى اختيار موظف",
+    "generate_success": "تم إنشاء كشف الراتب بنجاح",
+    "generate_error": "حدث خطأ أثناء الإنشاء",
+    "download_success": "تم بدء التنزيل",
+    "download_error": "حدث خطأ أثناء التنزيل"
+  },
+  "stockJournalier": {
+    "title": "المخزون اليومي",
+    "subtitle": "تتبع الإنتاج اليومي والمنتجات غير المباعة",
+    "add_button": "إضافة إنتاج",
+    "list_title": "سجل الإنتاج",
+    "table": {
+      "product": "المنتج",
+      "date": "التاريخ",
+      "produced": "المنتج",
+      "sold": "المباع",
+      "unsold": "غير مباع",
+      "lost": "تالف"
+    },
+    "empty": "لا توجد سجلات إنتاج",
+    "add_title": "تسجيل إنتاج",
+    "product": "المنتج",
+    "select_product": "اختر منتجاً",
+    "date": "التاريخ",
+    "produced": "الكمية المنتجة",
+    "lost": "الكمية التالفة",
+    "validation_required": "يرجى اختيار منتج وإدخال الكمية المنتجة",
+    "create_success": "تم تسجيل الإنتاج",
+    "save_error": "خطأ في التسجيل"
+  },
+  "chef": {
+    "dashboard": {
+      "title": "لوحة التحكم – المدير",
+      "subtitle": "متابعة الطلبات والمخزون",
+      "pending_requests": "الطلبات قيد الانتظار",
+      "low_stock_alerts": "تنبيهات نقص المخزون",
+      "total_products": "المواد الأولية",
+      "pending_requests_list": "طلبات الشراء الأخيرة",
+      "no_pending": "لا توجد طلبات قيد الانتظار",
+      "need_action": "يتطلب انتباهك",
+      "check_stock": "تحقق من مستويات المخزون",
+      "raw_materials_count": "المواد المتابعة",
+      "no_pending_requests": "لا توجد طلبات قيد الانتظار للعرض",
+      "product": "المنتج",
+      "quantity": "الكمية",
+      "supplier": "المورد المقترح",
+      "view": "عرض",
+      "low_stock_items": "العناصر ذات المخزون الحرج",
+      "current_stock": "المخزون الحالي",
+      "threshold": "حد التنبيه",
+      "no_low_stock": "لا توجد عناصر تحت الحد"
+    },
+    "demandesAchat": {
+      "title": "طلبات الشراء",
+      "list_title": "الطلبات قيد الانتظار",
+      "empty": "لا توجد طلبات قيد الانتظار"
+    },
+    "matieresPremieres": {
+      "title": "المواد الأولية",
+      "list_title": "قائمة المواد",
+      "empty": "لا توجد مواد أولية"
+    }
+  },
+  "responsable": {
+    "dashboard": {
+      "title": "لوحة التحكم – المسؤول",
+      "subtitle": "إدارة الإنتاج والطلبات",
+      "pending_requests": "الطلبات قيد الانتظار",
+      "need_validation": "في انتظار الموافقة",
+      "today_production": "إنتاج اليوم",
+      "units_produced_today": "وحدات منتجة",
+      "active_employees": "الموظفون النشطون",
+      "active_staff": "الطاقم النشط",
+      "pending_requests_list": "طلبات الشراء التي يجب معالجتها",
+      "product": "المنتج",
+      "quantity": "الكمية",
+      "supplier": "المورد",
+      "requested_by": "مطلوب من طرف",
+      "actions": "الإجراءات",
+      "no_pending_requests": "لا توجد طلبات قيد الانتظار",
+      "recent_productions": "آخر عمليات الإنتاج",
+      "date": "التاريخ",
+      "produced": "تم إنتاجه",
+      "sold": "تم بيعه",
+      "unsold": "غير مباع",
+      "no_productions": "لا توجد عمليات إنتاج مسجلة",
+      "status": "الحالة",
+      "show_all": "عرض الكل",
+      "show_pending": "عرض قيد الانتظار",
+      "empty": "لا توجد طلبات",
+      "status_pending": "قيد الانتظار",
+      "status_approved": "تمت الموافقة",
+      "status_rejected": "مرفوضة"
+    }
+  },
+  "other": {
+    "dashboard": {
+      "welcome": "مرحبا {{name}}",
+      "employee": "الموظف",
+      "days_worked_this_month": "أيام العمل هذا الشهر",
+      "out_of_month": "من أصل {{total}} يوم",
+      "total_hours": "إجمالي الساعات",
+      "hours_this_month": "ساعات هذا الشهر",
+      "pending_leaves": "الإجازات قيد الانتظار",
+      "awaiting_approval": "في انتظار الموافقة",
+      "recent_attendance": "آخر سجلات الحضور",
+      "view_all": "عرض الكل",
+      "date": "التاريخ",
+      "arrival": "الحضور",
+      "departure": "الانصراف",
+      "hours": "الساعات",
+      "no_attendance": "لا توجد سجلات حضور",
+      "recent_leaves": "الإجازات الأخيرة",
+      "no_leaves": "لا توجد طلبات إجازة",
+      "approved": "تمت الموافقة",
+      "pending": "قيد الانتظار",
+      "quick_actions": "إجراءات سريعة",
+      "clock_in_out": "تسجيل الدخول / الخروج",
+      "request_leave": "طلب إجازة"
+    },
+    "conges": {
+      "title": "إجازاتي",
+      "subtitle": "عرض وطلب الإجازات",
+      "request_button": "طلب إجازة",
+      "pending_requests": "الطلبات قيد الانتظار",
+      "approved_requests": "الطلبات الموافق عليها",
+      "my_leaves": "طلبات الإجازة الخاصة بي",
+      "start_date": "تاريخ البداية",
+      "end_date": "تاريخ النهاية",
+      "type": "النوع",
+      "motif": "السبب",
+      "status": "الحالة",
+      "no_leaves": "لا توجد طلبات إجازة",
+      "new_request": "طلب إجازة جديد",
+      "type_paid": "إجازة مدفوعة",
+      "type_sick": "إجازة مرضية",
+      "type_unpaid": "إجازة بدون أجر",
+      "motif_placeholder": "اختياري – اذكر السبب إن لزم",
+      "validation_required": "يرجى إدخال التواريخ ونوع الإجازة",
+      "create_success": "تم إرسال الطلب",
+      "save_error": "حدث خطأ أثناء الإرسال",
+      "approved": "تمت الموافقة",
+      "pending": "قيد الانتظار"
+    },
+    "pointages": {
+      "title": "حضوري",
+      "subtitle": "تتبع ساعات العمل الخاصة بك",
+      "clock_in": "تسجيل الحضور",
+      "clock_out": "تسجيل الانصراف",
+      "already_done_today": "لقد قمت بالتسجيل اليوم بالفعل",
+      "days_worked_this_month": "أيام العمل هذا الشهر",
+      "out_of_month": "من أصل {{total}} يوم",
+      "total_hours": "إجمالي الساعات",
+      "hours_this_month": "ساعات هذا الشهر",
+      "recent_attendance": "السجل الأخير",
+      "date": "التاريخ",
+      "arrival": "الحضور",
+      "departure": "الانصراف",
+      "hours": "الساعات",
+      "no_attendance": "لا توجد سجلات حضور",
+      "arrival_time": "وقت الحضور",
+      "departure_time": "وقت الانصراف",
+      "arrival_success": "تم تسجيل الحضور",
+      "depart_success": "تم تسجيل الانصراف",
+      "save_error": "حدث خطأ أثناء الحفظ"
+    }
   }
 }

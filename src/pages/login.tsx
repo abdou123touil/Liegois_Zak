@@ -33,10 +33,27 @@ export default function Login() {
       const user = await loginMutation.mutateAsync({ data: { username, password } });
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       toast({ title: t('login.success'), description: t('login.success'), variant: "default" });
-      if (user.role === "admin") {
-        setLocation("/admin");
-      } else {
-        setLocation("/pos");
+
+      // Redirection basée sur le rôle (convertir en minuscules pour la comparaison)
+      const role = user.role?.toLowerCase();
+      switch (role) {
+        case "admin":
+          setLocation("/admin");
+          break;
+        case "chef":
+          setLocation("/chef");
+          break;
+        case "responsable":
+          setLocation("/responsable");
+          break;
+        case "other":
+          setLocation("/other");
+          break;
+        case "cashier":
+          setLocation("/pos");
+          break;
+        default:
+          setLocation("/login"); // fallback
       }
     } catch (err) {
       toast({ title: t('login.error'), description: t('login.invalid_credentials'), variant: "destructive" });

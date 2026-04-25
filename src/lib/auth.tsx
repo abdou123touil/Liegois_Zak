@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useGetMe, Employee } from "@/lib/api-client";
+import { useGetMe, Employee, removeToken } from "@/lib/api-client";
 import { useLocation } from "wouter";
 
 type AuthContextType = {
   user: Employee | null;
   isLoading: boolean;
   setUser: (user: Employee | null) => void;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,7 +15,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Employee | null>(null);
   const { data: meData, isLoading, isFetching, isSuccess, isError } = useGetMe();
 
-  // isLoadingAuth reste vrai tant que la requête n'a pas abouti (succès ou erreur)
   const isLoadingAuth = isLoading || isFetching || (!isSuccess && !isError);
 
   useEffect(() => {
@@ -25,8 +25,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [meData, isError]);
 
+  const logout = () => {
+    removeToken();
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading: isLoadingAuth, setUser }}>
+    <AuthContext.Provider value={{ user, isLoading: isLoadingAuth, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

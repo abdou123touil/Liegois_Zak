@@ -15,15 +15,35 @@ import Orders from "@/pages/admin/orders";
 import Stats from "@/pages/admin/stats";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
+import Fournisseurs from "./pages/admin/Fournisseurs";
+import Achats from "./pages/admin/Achats";
+import Conges from "./pages/admin/Conges";
+import DemandesAchat from "./pages/admin/DemandesAchat";
+import FichesPaie from "./pages/admin/FichesPaie";
+import MatieresPremieres from "./pages/admin/MatieresPremieres";
+import Pointages from "./pages/admin/Pointages";
+import StockJournalier from "./pages/admin/StockJournalier";
+import { AnimatePresence } from "framer-motion";
+import AnimatedPage from "@/components/ui/AnimatedPage";
+// Nouveaux composants pour les rôles
+import ChefDashboard from "./pages/chef/dashboard";
+import ResponsableDashboard from "./pages/responsable/dashboard";
+import ResponsableDemandesAchat from "./pages/responsable/demandes-achat";
+import ResponsableStockJournalier from "./pages/responsable/stock-journalier";
+import OtherDashboard from "./pages/other/dashboard";
+import OtherConges from "./pages/other/conges";
+import OtherPointages from "./pages/other/pointages";
+import ChefDemandesAchat from "./pages/chef/demandes-achat";
+import ChefMatieresPremieres from "./pages/chef/matieres-premieres";
 
 const queryClient = new QueryClient();
 
-// Composant qui contient toute la logique de routage et attend l’utilisateur
+// Composant qui contient toute la logique de routage
 function AppRouter() {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
-  // Redirection initiale si nécessaire
+  // Redirection initiale
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
@@ -32,87 +52,102 @@ function AppRouter() {
         const currentPath = window.location.pathname;
         if (currentPath === "/login" || currentPath === "/") {
           console.log("Redirecting based on user role:", user.role);
-          if (user.role === "admin") {
-            setLocation("/admin");
-          } else if (user.role === "cashier") {
-            setLocation("/pos");
-          } else {
-            setLocation("/login");
-          }
+          const role = user.role?.toLowerCase();
+          if (role === "admin") setLocation("/admin");
+          else if (role === "chef") setLocation("/chef");
+          else if (role === "responsable") setLocation("/responsable");
+          else if (role === "other") setLocation("/other");
+          else if (role === "cashier") setLocation("/pos");
+          else setLocation("/login");
         }
       }
     }
-    console.log("Auth state changed:", { user, isLoading });
-    console.log("Current location:", window.location.pathname);
   }, [user, isLoading, setLocation]);
 
-  // Tant que l’utilisateur n’est pas chargé, afficher un spinner
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingSpinner />;
+  if (!user) return <LoginRoutes />;
 
-  // Si pas d’utilisateur, afficher la page de login (mais elle ne clignotera pas car isLoading=false)
-  if (!user) {
-    console.log("No user found, showing login page");
-    return (
-      <Switch>
-        <Route path="/login">
-          <Login />
-        </Route>
-        <Route path="/">
-          <Login />
-        </Route>
+  const role = user.role?.toLowerCase();
 
-      </Switch>
-    );
-  }
+  return (
+    <AnimatePresence mode="wait">
+      <AnimatedPage key={location}>
+        <Switch>
+          {/* Routes communes */}
+          <Route path="/login" component={Login} />
 
-  // Utilisateur connecté : afficher les routes protégées
+          {/* Routes Admin */}
+          <Route path="/admin" component={Dashboard} />
+          <Route path="/admin/products" component={Products} />
+          <Route path="/admin/categories" component={Categories} />
+          <Route path="/admin/employees" component={Employees} />
+          <Route path="/admin/expenses" component={Expenses} />
+          <Route path="/admin/orders" component={Orders} />
+          <Route path="/admin/stats" component={Stats} />
+          <Route path="/admin/fournisseurs" component={Fournisseurs} />
+          <Route path="/admin/achats" component={Achats} />
+          <Route path="/admin/matieres-premieres" component={MatieresPremieres} />
+          <Route path="/admin/stock-journalier" component={StockJournalier} />
+          <Route path="/admin/demandes-achat" component={DemandesAchat} />
+          <Route path="/admin/conges" component={Conges} />
+          <Route path="/admin/pointages" component={Pointages} />
+          <Route path="/admin/fiches-paie" component={FichesPaie} />
+
+          {/* Routes Chef */}
+          {role === "chef" && (
+            <>
+              <Route path="/chef" component={ChefDashboard} />
+              <Route path="/chef/demandes-achat" component={ChefDemandesAchat} />
+              <Route path="/chef/matieres-premieres" component={ChefMatieresPremieres} />
+            </>
+          )}
+
+          {/* Routes Responsable */}
+          {role === "responsable" && (
+            <>
+              <Route path="/responsable" component={ResponsableDashboard} />
+              <Route path="/responsable/demandes-achat" component={ResponsableDemandesAchat} />
+              <Route path="/responsable/stock-journalier" component={ResponsableStockJournalier} />
+
+            </>
+          )}
+
+          {/* Routes Other (employé standard) */}
+          {role === "other" && (
+            <>
+              <Route path="/other" component={OtherDashboard} />
+              <Route path="/other/conges" component={OtherConges} />
+              <Route path="/other/pointages" component={OtherPointages} />
+            </>
+          )}
+
+          {/* Route POS pour cashier */}
+          <Route path="/pos" component={Pos} />
+
+          {/* Fallback pour les routes non trouvées */}
+          <Route path="/:rest*" component={NotFound} />
+        </Switch>
+      </AnimatedPage>
+    </AnimatePresence>
+  );
+}
+
+// Composant pour l'affichage du spinner
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+    </div>
+  );
+}
+
+// Routes de login (quand utilisateur non connecté)
+function LoginRoutes() {
   return (
     <Switch>
-       <Route path="/login">
-          {user.role === undefined && <Login />}
-        </Route>
-        <Route path="/">
-          {user.role === undefined && <Login />}
-        </Route>
-      <Route path="/pos">
-      {user.role === undefined && <Login />}
-        {user.role === "cashier" && <Pos />}
-        {user.role === "admin" && <Dashboard />}
-        
-      </Route>
-      <Route path="/admin">
-        {user.role === "admin" && <Dashboard />}
-      </Route>
-      <Route path="/admin/products">
-        {user.role === "admin" && <Products />}
-      </Route>
-      <Route path="/admin/categories">
-        {user.role === "admin" && <Categories />}
-      </Route>
-      <Route path="/admin/employees">
-        {user.role === "admin" && <Employees />}
-      </Route>
-      <Route path="/admin/expenses">
-        {user.role === "admin" && <Expenses />}
-      </Route>
-      <Route path="/admin/orders">
-        {user.role === "admin" && <Orders />}
-      </Route>
-      <Route path="/admin/stats">
-        {user.role === "admin" && <Stats />}
-      </Route>
-      <Route path="/">
-        {user.role === "admin" && <Dashboard />}
-        {user.role === "cashier" && <Pos />}
-        {user.role === null && <Login />}
-      </Route>
-    
+      <Route path="/login" component={Login} />
+      <Route path="/" component={Login} />
+      <Route path="/:rest*" component={Login} />
     </Switch>
   );
 }

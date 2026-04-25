@@ -19,7 +19,7 @@ export default function Employees() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState<"ADMIN" | "CASHIER">("CASHIER");
+  const [role, setRole] = useState<"ADMIN" | "CASHIER" | "CHEF" | "RESPONSABLE" | "OTHER">("CASHIER");
   const [hourlyRate, setHourlyRate] = useState("");
   const [hoursPerMonth, setHoursPerMonth] = useState("");
   const [monthlySalary, setMonthlySalary] = useState("");
@@ -47,7 +47,7 @@ export default function Employees() {
     setEditingEmployee(emp);
     setName(emp.name);
     setUsername(emp.username);
-    setRole(emp.role);
+    setRole(emp.role as any);
     setHourlyRate(emp.hourlyRate?.toString() || "");
     setHoursPerMonth(emp.hoursPerMonth?.toString() || "");
     setMonthlySalary(emp.monthlySalary?.toString() || "");
@@ -67,6 +67,7 @@ export default function Employees() {
       isActive: true,
     };
 
+    // ADMIN → mensuel ; tous les autres → horaire
     if (role === "ADMIN") {
       employeeData.monthlySalary = monthlySalary ? parseFloat(monthlySalary) : null;
       employeeData.hourlyRate = null;
@@ -102,6 +103,40 @@ export default function Employees() {
         toast({ title: t('common.error'), description: t('employees.delete_error'), variant: "destructive" });
       }
     }
+  };
+
+  // Fonction pour afficher le badge de rôle avec les bonnes couleurs
+  const getRoleBadge = (role: string) => {
+    const roleLower = role.toLowerCase();
+    let colorClass = "";
+    let label = "";
+
+    switch (roleLower) {
+      case "admin":
+        colorClass = "bg-primary/10 text-primary";
+        label = t('employees.role_admin');
+        break;
+      case "cashier":
+        colorClass = "bg-amber-100 text-amber-700";
+        label = t('employees.role_cashier');
+        break;
+      case "chef":
+        colorClass = "bg-blue-100 text-blue-700";
+        label = t('employees.role_chef');
+        break;
+      case "responsable":
+        colorClass = "bg-purple-100 text-purple-700";
+        label = t('employees.role_responsable');
+        break;
+      case "other":
+        colorClass = "bg-gray-100 text-gray-700";
+        label = t('employees.role_other');
+        break;
+      default:
+        colorClass = "bg-gray-100 text-gray-700";
+        label = role;
+    }
+    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>{label}</span>;
   };
 
   return (
@@ -155,12 +190,10 @@ export default function Employees() {
                           </td>
                           <td className="p-4 text-primary/70">{emp.username}</td>
                           <td className="p-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${emp.role === 'ADMIN' ? 'bg-primary/10 text-primary' : 'bg-amber-100 text-amber-700'}`}>
-                              {emp.role === 'ADMIN' ? t('employees.role_admin') : t('employees.role_cashier')}
-                            </span>
+                            {getRoleBadge(emp.role)}
                           </td>
                           <td className="p-4 text-primary/70">
-                            {emp.role === 'ADMIN'
+                            {emp.role === "ADMIN"
                               ? t('employees.monthly_salary_format', { salary: emp.monthlySalary?.toFixed(2) })
                               : t('employees.hourly_rate_format', { rate: emp.hourlyRate, hours: emp.hoursPerMonth })}
                           </td>
@@ -206,8 +239,11 @@ export default function Employees() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMIN">{t('employees.role_ADMIN')}</SelectItem>
+                    <SelectItem value="ADMIN">{t('employees.role_admin')}</SelectItem>
                     <SelectItem value="CASHIER">{t('employees.role_cashier')}</SelectItem>
+                    <SelectItem value="CHEF">{t('employees.role_chef')}</SelectItem>
+                    <SelectItem value="RESPONSABLE">{t('employees.role_responsable')}</SelectItem>
+                    <SelectItem value="OTHER">{t('employees.role_other')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
