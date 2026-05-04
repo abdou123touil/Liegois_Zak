@@ -21,7 +21,8 @@ import {
   PackageOpen,
   ShoppingCart,
   Truck,
-  Umbrella
+  Umbrella,
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";

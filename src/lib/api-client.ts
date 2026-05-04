@@ -30,6 +30,7 @@ export type Employee = {
   id: number;
   name: string;
   username: string;
+  password?: string; // Ajoutez ce champ pour la création/mise à jour
   role: "admin" | "cashier" | "ADMIN" | "CASHIER" | "CHEF" | "RESPONSABLE" | "OTHER";
   poste?: string;           // ← ajoutez ce champ
   hourlyRate?: number;
@@ -138,7 +139,7 @@ export interface DemandeAchat {
   produit: string;
   quantite: number;
   uniteMesure: string;
-  fournisseurSuggere?: Fournisseur;
+  fournisseurSuggere?: Fournisseur["id"];
   urgence: boolean;
   statut: "EN_ATTENTE" | "VALIDEE" | "REJETEE";
   demandePar?: Employee;
@@ -181,12 +182,15 @@ export interface FichePaie {
   mois: number;
   annee: number;
   salaireBrut: number;
+  salaireBase?: number;           // ajout
   heuresNormales: number;
   heuresSupplementaires: number;
   tauxHoraire: number;
   indemnites: number;
   deductions: number;
   salaireNet: number;
+  joursCongePayes?: number;       // ajout
+  joursCongeNonPayes?: number;    // ajout
   dateGeneration: string;
 }
 // Demandes d'achat
@@ -195,7 +199,7 @@ export interface DemandeAchat {
   produit: string;
   quantite: number;
   uniteMesure: string;
-  fournisseurSuggere?: Fournisseur;
+  fournisseurSuggere?: Fournisseur["id"];
   urgence: boolean;
   statut: "EN_ATTENTE" | "VALIDEE" | "REJETEE";
   demandePar?: Employee;
@@ -212,6 +216,47 @@ export interface StockJournalier {
   quantiteInvendue?: number;
   quantitePerdue?: number;
 }
+export interface ParametresPaie {
+  id: number;
+  indemniteTransport: number;
+  tauxCotisationsSociales: number;
+  majorationHeuresSup: number;
+  notes?: string;
+}
+export interface GeneratePaieRequest {
+  employeeId: number;
+  mois: number;
+  annee: number;
+  indemniteTransport?: number;
+  tauxCotisationsSociales?: number;
+  majorationHeuresSup?: number;
+}
+
+export function useGetParametresPaie() {
+  return useQuery({
+    queryKey: ["parametres-paie"],
+    queryFn: async () => {
+      const response = await apiRequest("/parametres-paie");
+      return response.json() as Promise<ParametresPaie>;
+    },
+  });
+}
+
+export function useUpdateParametresPaie() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<ParametresPaie>) => {
+      const response = await apiRequest("/parametres-paie", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      return response.json() as Promise<ParametresPaie>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["parametres-paie"] }),
+  });
+}
+
+
 // Gestion du token
 export function getToken(): string | null {
     return localStorage.getItem("jwt_token");
@@ -887,10 +932,10 @@ export function useCreatePointageArrivee() {
   });
 }
 
-export function useUpdatePointageDepart(id: number) {
+export function useUpdatePointageDepart() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (heureDepart: string) => {
+    mutationFn: async ({ id, heureDepart }: { id: number; heureDepart: string }) => {
       const response = await apiRequest(`/pointages/${id}/depart?heureDepart=${heureDepart}`, {
         method: "PUT",
       });
@@ -904,9 +949,10 @@ export function useUpdatePointageDepart(id: number) {
 export function useGenerateFichePaie() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ employeeId, mois, annee }: { employeeId: number; mois: number; annee: number }) => {
-      const response = await apiRequest(`/paie/generate/employee/${employeeId}?mois=${mois}&annee=${annee}`, {
+    mutationFn: async (data: GeneratePaieRequest) => {
+      const response = await apiRequest("/paie/generate", {
         method: "POST",
+        body: JSON.stringify(data),
       });
       return response.json() as Promise<FichePaie>;
     },
@@ -973,10 +1019,18 @@ export function useApproveDemandeAchat() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, valide }: { id: number; valide: boolean }) => {
-      const response = await apiRequest(`/demandes-achat/${id}/approve?valide=${valide}`, {
-        method: "PUT",
-      });
-      return response.json() as Promise<DemandeAchat>;
+      let url: string;
+      if (valide) {
+        url = `/demandes-achat/${id}/valider`;
+        const response = await apiRequest(url, { method: "PUT" });
+        return response.json() as Promise<DemandeAchat>;
+      } else {
+        // Ajouter un motif de rejet par défaut (le backend l'exige)
+        const motif = "Rejeté par l'administrateur";
+        url = `/demandes-achat/${id}/rejeter?motif=${encodeURIComponent(motif)}`;
+        const response = await apiRequest(url, { method: "PUT" });
+        return response.json() as Promise<DemandeAchat>;
+      }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["demandes-achat"] }),
   });

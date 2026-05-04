@@ -69,7 +69,18 @@
     "success": "Succès",
     "cancel": "Annuler",
     "save": "Enregistrer",
-    "create": "Créer"
+    "create": "Créer",
+    "none": "Aucun",
+    "select": "Sélectionner",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "back": "Retour",
+    "actions": "Actions",
+    "active": "Actif",
+    "inactive": "Inactif"
   },
   "categories": {
     "title": "Catégories",
@@ -107,7 +118,7 @@
     "hours_per_month_label": "Heures par mois",
     "monthly_salary_format": "Mensuel : {{salary}} DTN",
     "hourly_rate_format": "{{rate}} DTN/h × {{hours}}h",
-    "validation_name_username_required": "Le nom et le nom d'utilisateur sont requis.",
+    "validation_name_username_password_required": "Le nom, le nom d'utilisateur et le mot de passe sont requis.",
     "create_success": "Employé créé avec succès.",
     "update_success": "Employé mis à jour avec succès.",
     "delete_success": "Employé supprimé avec succès.",
@@ -117,6 +128,7 @@
     "role_chef": "Chef",
     "role_responsable": "Responsable",
     "role_other": "Employé",
+    "password_label": "Mot de passe",
     "table": {
       "name": "Nom",
       "username": "Nom d'utilisateur",
@@ -291,6 +303,8 @@
     "subtitle": "Gestion des achats de matières premières et fournitures",
     "add_button": "Nouvel achat",
     "list_title": "Historique des achats",
+    "select_matiere": "Choisir une matière première",
+
     "table": {
       "product": "Produit",
       "quantity": "Quantité",
@@ -372,7 +386,11 @@
     "save_error": "Erreur lors de la création",
     "approved": "Demande validée",
     "rejected": "Demande rejetée",
-    "approve_error": "Erreur lors du traitement"
+    "approve_error": "Erreur lors du traitement",
+    "reject_error": "Erreur lors du rejet",
+    "status_pending": "En attente",
+    "status_approved": "Validée",
+    "status_rejected": "Rejetée"
   },
   "conges": {
     "title": "Congés",
@@ -449,7 +467,12 @@
       "gross": "Salaire brut",
       "deductions": "Déductions",
       "net": "Salaire net",
-      "actions": "Actions"
+      "actions": "Actions",
+      "base_salary": "Salaire de base",
+      "overtime": "Heures sup.",
+      "conge_payes": "Congés payés",
+      "conge_non_payes": "Congés non payés",
+        "indemnities": "Indemnités"
     },
     "empty": "Aucune fiche de paie générée pour cet employé",
     "select_employee_error": "Veuillez sélectionner un employé",
@@ -507,13 +530,51 @@
     "demandesAchat": {
     "title": "Demandes d'achat",
     "list_title": "Demandes en attente",
-    "empty": "Aucune demande en attente"
+    "empty": "Aucune demande en attente",
+    "product": "Produit",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "supplier": "Fournisseur suggéré",
+    "urgent": "Urgence",
+    "status": "Statut",
+    "actions": "Actions",
+    "approve": "Valider",
+    "reject": "Rejeter",
+    "requested_by": "Demandé par",
+    "no_pending_requests": "Aucune demande en attente à afficher",
+    "status_pending": "En attente",
+    "status_approved": "Validée",
+    "status_rejected": "Rejetée",
+    "show_all": "Voir tout",
+    "show_pending": "Voir en attente"
   },
   "matieresPremieres": {
     "title": "Matières premières",
     "list_title": "Liste des matières",
     "empty": "Aucune matière première"
-  }
+  },
+    "pointages": {
+      "title": "Mes pointages",
+      "subtitle": "Pointer vos heures de travail",
+      "clock_in": "Pointer arrivée",
+      "clock_out": "Pointer départ",
+      "already_done_today": "Vous avez déjà pointé aujourd’hui",
+      "days_worked_this_month": "Jours travaillés ce mois",
+      "out_of_month": "sur {{total}} jours",
+      "total_hours": "Total heures",
+      "hours_this_month": "heures ce mois",
+      "recent_attendance": "Historique récent",
+      "date": "Date",
+      "arrival": "Arrivée",
+      "departure": "Départ",
+      "hours": "Heures",
+      "no_attendance": "Aucun pointage enregistré",
+      "arrival_time": "Heure d'arrivée",
+      "departure_time": "Heure de départ",
+      "arrival_success": "Arrivée enregistrée",
+      "depart_success": "Départ enregistré",
+      "save_error": "Erreur lors de l'enregistrement"
+    }
   },
   "responsable": {
     "dashboard": {
@@ -547,6 +608,36 @@
       "empty": "Aucune demande trouvée",
       "edit_title": "Modifier la production",
       "update_success": "Production mise à jour"
+    },
+    "demandesAchat": {
+    "title": "Demandes d'achat",
+    "list_title": "Demandes en attente",
+    "empty": "Aucune demande en attente",
+    "add_button": "Nouvelle demande",
+    "show_all": "Voir tout",
+    "show_pending": "Voir en attente"
+  },
+    "pointages": {
+      "title": "Mes pointages",
+      "subtitle": "Pointer vos heures de travail",
+      "clock_in": "Pointer arrivée",
+      "clock_out": "Pointer départ",
+      "already_done_today": "Vous avez déjà pointé aujourd’hui",
+      "days_worked_this_month": "Jours travaillés ce mois",
+      "out_of_month": "sur {{total}} jours",
+      "total_hours": "Total heures",
+      "hours_this_month": "heures ce mois",
+      "recent_attendance": "Historique récent",
+      "date": "Date",
+      "arrival": "Arrivée",
+      "departure": "Départ",
+      "hours": "Heures",
+      "no_attendance": "Aucun pointage enregistré",
+      "arrival_time": "Heure d'arrivée",
+      "departure_time": "Heure de départ",
+      "arrival_success": "Arrivée enregistrée",
+      "depart_success": "Départ enregistré",
+      "save_error": "Erreur lors de l'enregistrement"
     }
   },
   "other": {

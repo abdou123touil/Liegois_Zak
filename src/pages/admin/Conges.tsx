@@ -177,10 +177,10 @@ export default function Conges() {
               <div className="grid gap-2">
                 <Label>{t('conges.employee')}</Label>
                 <Select value={employeeId} onValueChange={setEmployeeId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-card">
                     <SelectValue placeholder={t('conges.select_employee')} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card">
                     {employees.map(e => (
                       <SelectItem key={e.id} value={e.id.toString()}>{e.name}</SelectItem>
                     ))}
@@ -200,10 +200,10 @@ export default function Conges() {
               <div className="grid gap-2">
                 <Label>{t('conges.type')}</Label>
                 <Select value={type} onValueChange={setType}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-card">
                     <SelectValue placeholder={t('conges.select_type')} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card">
                     <SelectItem value="CONGES_PAYES">{t('conges.type_paid')}</SelectItem>
                     <SelectItem value="MALADIE">{t('conges.type_sick')}</SelectItem>
                     <SelectItem value="SANS_SOLDE">{t('conges.type_unpaid')}</SelectItem>

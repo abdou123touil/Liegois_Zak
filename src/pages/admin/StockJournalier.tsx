@@ -136,10 +136,10 @@ export default function StockJournalier() {
               <div className="grid gap-2">
                 <Label>{t('stockJournalier.product')}</Label>
                 <Select value={productId} onValueChange={setProductId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-card" >
                     <SelectValue placeholder={t('stockJournalier.select_product')} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card">
                     {products.map(p => (
                       <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>
                     ))}

@@ -28,13 +28,14 @@ import AnimatedPage from "@/components/ui/AnimatedPage";
 // Nouveaux composants pour les rôles
 import ChefDashboard from "./pages/chef/dashboard";
 import ResponsableDashboard from "./pages/responsable/dashboard";
-import ResponsableDemandesAchat from "./pages/responsable/demandes-achat";
 import ResponsableStockJournalier from "./pages/responsable/stock-journalier";
 import OtherDashboard from "./pages/other/dashboard";
 import OtherConges from "./pages/other/conges";
 import OtherPointages from "./pages/other/pointages";
 import ChefDemandesAchat from "./pages/chef/demandes-achat";
 import ChefMatieresPremieres from "./pages/chef/matieres-premieres";
+import ResponsablePointages from "./pages/responsable/pointages";
+import ChefPointages from "./pages/chef/pointages";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +100,7 @@ function AppRouter() {
               <Route path="/chef" component={ChefDashboard} />
               <Route path="/chef/demandes-achat" component={ChefDemandesAchat} />
               <Route path="/chef/matieres-premieres" component={ChefMatieresPremieres} />
+              <Route path="/chef/pointages" component={ChefPointages} />
             </>
           )}
 
@@ -106,7 +108,7 @@ function AppRouter() {
           {role === "responsable" && (
             <>
               <Route path="/responsable" component={ResponsableDashboard} />
-              <Route path="/responsable/demandes-achat" component={ResponsableDemandesAchat} />
+              <Route path="/responsable/pointages" component={ResponsablePointages} />
               <Route path="/responsable/stock-journalier" component={ResponsableStockJournalier} />
 
             </>

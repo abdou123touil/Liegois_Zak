@@ -32,14 +32,10 @@ export default function Pointages() {
   const { data: pointages = [], isLoading } = useListPointages();
   const { data: employees = [] } = useListEmployees();
   const createArrivee = useCreatePointageArrivee();
-  const updateDepart = useUpdatePointageDepart();
+  const updateDepart = useUpdatePointageDepart(); // ← plus d'argument
+  
 
-  const openArrivalModal = () => {
-    setEmployeeId("");
-    setDate(new Date().toISOString().split('T')[0]);
-    setHeureArrivee(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
-    setIsArrivalModalOpen(true);
-  };
+ 
 
   const handleArrivalSave = async () => {
     if (!employeeId || !date || !heureArrivee) {
@@ -68,22 +64,24 @@ export default function Pointages() {
   };
 
   const handleDepartSave = async () => {
-    if (!selectedPointageId || !departTime) {
-      toast({ title: t('common.error'), description: t('pointages.validation_depart'), variant: "destructive" });
-      return;
-    }
+  if (!selectedPointageId || !departTime) {
+    toast({ title: t('common.error'), description: t('pointages.validation_depart'), variant: "destructive" });
+    return;
+  }
 
-    try {
-      await updateDepart(selectedPointageId).mutateAsync(departTime);
-      toast({ title: t('common.success'), description: t('pointages.depart_success') });
-      queryClient.invalidateQueries({ queryKey: ["pointages"] });
-      setIsDepartModalOpen(false);
-      setSelectedPointageId(null);
-      setDepartTime("");
-    } catch {
-      toast({ title: t('common.error'), description: t('pointages.save_error'), variant: "destructive" });
-    }
-  };
+  const fullDepartTime = `${departTime}:00`;
+
+  try {
+    await updateDepart.mutateAsync({ id: selectedPointageId, heureDepart: fullDepartTime });
+    toast({ title: t('common.success'), description: t('pointages.depart_success') });
+    queryClient.invalidateQueries({ queryKey: ["pointages"] });
+    setIsDepartModalOpen(false);
+    setSelectedPointageId(null);
+    setDepartTime("");
+  } catch {
+    toast({ title: t('common.error'), description: t('pointages.save_error'), variant: "destructive" });
+  }
+};
 
   return (
     <ADMINLayout>
@@ -95,9 +93,7 @@ export default function Pointages() {
             </h1>
             <p className="text-primary/60 text-sm mt-1">{t('pointages.subtitle')}</p>
           </div>
-          <Button onClick={openArrivalModal} className="gap-2 shadow-md">
-            <Plus className="h-4 w-4" /> {t('pointages.arrival_button')}
-          </Button>
+        
         </div>
 
         <Card className="border-primary/10 shadow-md rounded-2xl overflow-hidden">
@@ -169,10 +165,10 @@ export default function Pointages() {
               <div className="grid gap-2">
                 <Label>{t('pointages.employee')}</Label>
                 <Select value={employeeId} onValueChange={setEmployeeId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-card">
                     <SelectValue placeholder={t('pointages.select_employee')} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card">
                     {employees.map(e => (
                       <SelectItem key={e.id} value={e.id.toString()}>{e.name}</SelectItem>
                     ))}

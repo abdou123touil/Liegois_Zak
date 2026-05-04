@@ -23,7 +23,7 @@ export default function Employees() {
   const [hourlyRate, setHourlyRate] = useState("");
   const [hoursPerMonth, setHoursPerMonth] = useState("");
   const [monthlySalary, setMonthlySalary] = useState("");
-
+  const [password, setPassword] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -36,6 +36,7 @@ export default function Employees() {
     setEditingEmployee(null);
     setName("");
     setUsername("");
+    setPassword("");
     setRole("CASHIER");
     setHourlyRate("");
     setHoursPerMonth("");
@@ -48,6 +49,7 @@ export default function Employees() {
     setName(emp.name);
     setUsername(emp.username);
     setRole(emp.role as any);
+    
     setHourlyRate(emp.hourlyRate?.toString() || "");
     setHoursPerMonth(emp.hoursPerMonth?.toString() || "");
     setMonthlySalary(emp.monthlySalary?.toString() || "");
@@ -55,14 +57,15 @@ export default function Employees() {
   };
 
   const handleSave = async () => {
-    if (!name || !username) {
-      toast({ title: t('common.error'), description: t('employees.validation_name_username_required'), variant: "destructive" });
+    if (!name || !username || !password) {
+      toast({ title: t('common.error'), description: t('employees.validation_name_username_password_required'), variant: "destructive" });
       return;
     }
 
     const employeeData: any = {
       name,
       username,
+      password,
       role,
       isActive: true,
     };
@@ -232,13 +235,23 @@ export default function Employees() {
                 <Label htmlFor="username">{t('employees.username_label')}</Label>
                 <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
               </div>
+              
+                  <div className="grid gap-2">
+                <Label htmlFor="password">{t('employees.password_label')}</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              </div>
+
+
+
+
+
               <div className="grid gap-2">
                 <Label htmlFor="role">{t('employees.role_label')}</Label>
                 <Select value={role} onValueChange={(v: any) => setRole(v)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-card">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card">
                     <SelectItem value="ADMIN">{t('employees.role_admin')}</SelectItem>
                     <SelectItem value="CASHIER">{t('employees.role_cashier')}</SelectItem>
                     <SelectItem value="CHEF">{t('employees.role_chef')}</SelectItem>
