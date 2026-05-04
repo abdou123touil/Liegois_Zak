@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE_URL = "http://localhost:8081/api";
+const API_BASE_URL = "http://switchyard.proxy.rlwy.net:37844/api" || "http://localhost:8081/api";
 
 let token: string | null = null;
 export type SalesByDay = {
