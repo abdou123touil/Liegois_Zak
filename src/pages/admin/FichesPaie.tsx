@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useListEmployees, useListFichesPaieByEmployee, useDownloadFichePaie, useGenerateFichePaie, useGetParametresPaie } from "@/lib/api-client";
-import ADMINLayout from "@/components/layout/ADMINLayout";
+import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

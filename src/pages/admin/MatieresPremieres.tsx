@@ -9,7 +9,7 @@ import {
     MatierePremiere,
     useUpdateStockMatiere
 } from "@/lib/api-client";
-import ADMINLayout from "@/components/layout/ADMINLayout";
+import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
