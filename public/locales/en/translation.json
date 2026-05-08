@@ -1,8 +1,8 @@
 {
   "app": {
-    "short_name": "Leigois",
     "name": "Boulangerie Leigois",
-    "pos": "Point of Sale"
+    "pos": "Point of Sale",
+    "short_name": "Leigois"
   },
   "login": {
     "title": "Sign In",
@@ -16,7 +16,7 @@
     "invalid_credentials": "Invalid credentials.",
     "please_enter": "Please enter username and password"
   },
-    "dashboard": {
+  "dashboard": {
     "overview": "Dashboard Overview",
     "today_snapshot": "Today's snapshot and monthly performance.",
     "today_sales": "Today's Sales",
@@ -29,7 +29,8 @@
     "estimated_profit": "Estimated Profit",
     "from_orders": "From {{count}} orders",
     "revenue_minus_expenses": "Revenue minus expenses",
-     "no_data": "No data to display",
+    "profit_margin": "Profit margin",
+    "no_data": "No data to display",
     "view_details": "View Details",
     "sales_trends": "Sales Trends",
     "home": "Home",
@@ -37,8 +38,13 @@
     "raw_materials": "Raw Materials",
     "daily_stock": "Daily Stock",
     "employees": "Employees",
-    "attendance":"Attendance",
-    "leaves":"Leaves"
+    "attendance": "Attendance",
+    "leaves": "Leaves",
+    "sales_last_7_days": "Sales last 7 days",
+    "top_products": "Top products",
+    "orders_by_employee": "Orders by employee",
+    "financial_summary": "Financial summary",
+    "total_earnings_today": "Total earnings today"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -56,7 +62,8 @@
     "leaves": "Leaves",
     "time_tracking": "Time Tracking",
     "pay_slips": "Pay Slips",
-    "attendance": "Attendance"
+    "attendance": "Attendance",
+    "payroll": "Payroll"
   },
   "actions": {
     "logout": "Logout"
@@ -97,10 +104,8 @@
     "save_error": "Failed to save category.",
     "delete_error": "Failed to delete category.",
     "confirm_delete": "Are you sure you want to delete this category?"
-  }, "employees": {
-    "role_chef": "Chef",
-"role_responsable": "Responsable",
-"role_other": "Other",
+  },
+  "employees": {
     "title": "Employees",
     "subtitle": "Manage your staff and their roles",
     "add_button": "Add Employee",
@@ -113,11 +118,11 @@
     "role_label": "Role",
     "role_admin": "Admin",
     "role_cashier": "Cashier",
-    "monthly_salary_label": "Monthly Salary (DTN)",
-    "hourly_rate_label": "Hourly Rate (DTN)",
+    "monthly_salary_label": "Monthly Salary (TND)",
+    "hourly_rate_label": "Hourly Rate (TND)",
     "hours_per_month_label": "Hours per Month",
-    "monthly_salary_format": "Monthly: {{salary}} DTN",
-    "hourly_rate_format": "{{rate}} DTN/h × {{hours}}h",
+    "monthly_salary_format": "Monthly: {{salary}} TND",
+    "hourly_rate_format": "{{rate}} TND/h × {{hours}}h",
     "validation_name_username_required": "Name and username are required.",
     "create_success": "Employee created successfully.",
     "update_success": "Employee updated successfully.",
@@ -125,6 +130,9 @@
     "save_error": "Failed to save employee.",
     "delete_error": "Failed to delete employee.",
     "confirm_delete": "Are you sure you want to delete this employee?",
+    "role_chef": "Chef",
+    "role_responsable": "Manager",
+    "role_other": "Other",
     "password_label": "Password",
     "table": {
       "name": "Name",
@@ -142,7 +150,7 @@
     "empty": "No expenses recorded.",
     "add_title": "Add Expense",
     "label_label": "Label",
-    "amount_label": "Amount (DTN)",
+    "amount_label": "Amount (TND)",
     "category_label": "Category",
     "date_label": "Date",
     "notes_label": "Notes (optional)",
@@ -171,7 +179,7 @@
       "other": "Other"
     }
   },
-   "orders": {
+  "orders": {
     "title": "Orders",
     "subtitle": "View all customer orders",
     "history_title": "Order History",
@@ -224,7 +232,7 @@
       "actions": "Actions"
     }
   },
-    "stats": {
+  "stats": {
     "title": "Analytics",
     "subtitle": "Sales trends and performance metrics",
     "daily_sales_title": "Daily Sales (Last {{days}} days)",
@@ -237,7 +245,7 @@
       "salary": "Salary"
     }
   },
-   "pos": {
+  "pos": {
     "all_products": "All Products",
     "current_order": "Current Order",
     "items": "items",
@@ -261,9 +269,9 @@
     "ready_next": "Ready for the next customer.",
     "insufficient_funds": "Amount entered is less than total.",
     "payment_error": "An error occurred while processing the order.",
-    "no_products": "No products found"
+    "no_products": "No products found",
+    "payment_title": "Payment"
   },
-  
   "fournisseurs": {
     "title": "Suppliers",
     "subtitle": "Manage raw material suppliers",
@@ -295,14 +303,13 @@
     "delay_label": "Delivery delay (days)",
     "notes_label": "Notes",
     "actif_label": "Active"
-  }
-  ,
-  
+  },
   "achats": {
     "title": "Purchases",
     "subtitle": "Management of raw material and supply purchases",
     "add_button": "New purchase",
     "list_title": "Purchase history",
+    "select_matiere": "Select a raw material",
     "table": {
       "product": "Product",
       "quantity": "Quantity",
@@ -321,12 +328,12 @@
     "unit_price": "Unit price (TND)",
     "date": "Date",
     "invoice_ref": "Invoice ref.",
-    "selected_product": "Selected product",
-    "select_matiere": "Select a raw material",
     "notes": "Notes",
     "validation_required": "Please fill in all required fields",
     "create_success": "Purchase recorded successfully",
-    "save_error": "Error while saving"
+    "save_error": "Error while saving",
+    "matiere": "Raw material",
+    "selected_product": "Selected product"
   },
   "matieresPremieres": {
     "title": "Raw Materials",
@@ -358,9 +365,7 @@
     "delete_error": "Error while deleting",
     "confirm_delete": "Delete this material?",
     "stock_alert": "Low stock!"
-  }
-,
-
+  },
   "demandesAchat": {
     "title": "Purchase Requests",
     "subtitle": "Submit and manage restocking requests",
@@ -388,9 +393,12 @@
     "save_error": "Error while creating",
     "approved": "Request approved",
     "rejected": "Request rejected",
-    "approve_error": "Error while processing"
+    "approve_error": "Error while processing",
+    "reject_error": "Error while rejecting",
+    "status_pending": "Pending",
+    "status_approved": "Approved",
+    "status_rejected": "Rejected"
   },
-  
   "conges": {
     "title": "Leave Requests",
     "subtitle": "Manage employee leave requests",
@@ -423,9 +431,7 @@
     "rejected": "Rejected",
     "pending": "Pending",
     "approve_error": "Error while processing"
-  }
-,
-
+  },
   "pointages": {
     "title": "Attendance",
     "subtitle": "Work schedule management",
@@ -453,7 +459,6 @@
     "depart_success": "Departure recorded",
     "save_error": "Error while saving"
   },
-  
   "fichesPaie": {
     "title": "Payslips",
     "subtitle": "Generation and consultation of salary slips",
@@ -469,7 +474,12 @@
       "gross": "Gross salary",
       "deductions": "Deductions",
       "net": "Net salary",
-      "actions": "Actions"
+      "actions": "Actions",
+      "base_salary": "Base salary",
+      "overtime": "Overtime",
+      "conges_payes": "Paid leave",
+      "conges_non_payes": "Unpaid leave",
+      "indemnities": "Allowances"
     },
     "empty": "No payslips generated for this employee",
     "select_employee_error": "Please select an employee",
@@ -477,8 +487,7 @@
     "generate_error": "Error during generation",
     "download_success": "Download started",
     "download_error": "Error during download"
-  }
-,
+  },
   "stockJournalier": {
     "title": "Daily stock",
     "subtitle": "Track daily production and unsold items",
@@ -501,12 +510,13 @@
     "lost": "Quantity lost",
     "validation_required": "Please select a product and enter the quantity produced",
     "create_success": "Production recorded",
-    "save_error": "Error saving record"
+    "save_error": "Error saving record",
+    "edit_title": "Edit production",
+    "update_success": "Production updated"
   },
-  
   "chef": {
     "dashboard": {
-      "title": "Dashboard – Manager",
+      "title": "Dashboard – Chef",
       "subtitle": "Monitoring requests and inventory",
       "pending_requests": "Pending requests",
       "low_stock_alerts": "Low stock alerts",
@@ -527,36 +537,57 @@
       "no_low_stock": "No items below threshold"
     },
     "demandesAchat": {
-    "title": "Purchase Requests",
-    "list_title": "Pending Requests",
-    "empty": "No pending requests",
-    "product": "Product",
-    "quantity": "Quantity",
-    "unit": "Unit",
-    "supplier": "Suggested supplier",
-    "urgent": "Urgency",
-    "status": "Status",
-    "actions": "Actions",
-    "approve": "Approve",
-    "reject": "Reject",
-    "requested_by": "Requested by",
-    "no_pending_requests": "No pending requests to display",
-    "status_pending": "Pending",
-    "status_approved": "Approved",
-    "status_rejected": "Rejected",
-    "show_all": "Show all",
-    "show_pending": "Show pending"
+      "title": "Purchase Requests",
+      "list_title": "Pending Requests",
+      "empty": "No pending requests",
+      "product": "Product",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "supplier": "Suggested supplier",
+      "urgent": "Urgent",
+      "status": "Status",
+      "actions": "Actions",
+      "approve": "Approve",
+      "reject": "Reject",
+      "requested_by": "Requested by",
+      "no_pending_requests": "No pending requests to display",
+      "status_pending": "Pending",
+      "status_approved": "Approved",
+      "status_rejected": "Rejected",
+      "show_all": "Show all",
+      "show_pending": "Show pending"
+    },
+    "matieresPremieres": {
+      "title": "Raw Materials",
+      "list_title": "Material List",
+      "empty": "No raw materials"
+    },
+    "pointages": {
+      "title": "My Attendance",
+      "subtitle": "Track your working hours",
+      "clock_in": "Clock in",
+      "clock_out": "Clock out",
+      "already_done_today": "You have already clocked in today",
+      "days_worked_this_month": "Days worked this month",
+      "out_of_month": "out of {{total}} days",
+      "total_hours": "Total hours",
+      "hours_this_month": "hours this month",
+      "recent_attendance": "Recent history",
+      "date": "Date",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "hours": "Hours",
+      "no_attendance": "No attendance recorded",
+      "arrival_time": "Arrival time",
+      "departure_time": "Departure time",
+      "arrival_success": "Arrival recorded",
+      "depart_success": "Departure recorded",
+      "save_error": "Error while saving"
+    }
   },
-  "matieresPremieres": {
-    "title": "Raw Materials",
-    "list_title": "Material List",
-    "empty": "No raw materials"
-  }
-  },
-  
   "responsable": {
     "dashboard": {
-      "title": "Dashboard – Supervisor",
+      "title": "Dashboard – Manager",
       "subtitle": "Production and request management",
       "pending_requests": "Pending requests",
       "need_validation": "Awaiting validation",
@@ -577,17 +608,47 @@
       "sold": "Sold",
       "unsold": "Unsold",
       "no_productions": "No production recorded",
-        "status": "Status",
-  
+      "status": "Status",
       "show_all": "Show all",
       "show_pending": "Show pending",
       "empty": "No requests found",
       "status_pending": "Pending",
       "status_approved": "Approved",
-      "status_rejected": "Rejected"
+      "status_rejected": "Rejected",
+      "edit_title": "Edit production",
+      "update_success": "Production updated"
+    },
+    "demandesAchat": {
+      "title": "Purchase Requests",
+      "list_title": "Pending Requests",
+      "empty": "No pending requests",
+      "add_button": "New request",
+      "show_all": "Show all",
+      "show_pending": "Show pending"
+    },
+    "pointages": {
+      "title": "My Attendance",
+      "subtitle": "Track your working hours",
+      "clock_in": "Clock in",
+      "clock_out": "Clock out",
+      "already_done_today": "You have already clocked in today",
+      "days_worked_this_month": "Days worked this month",
+      "out_of_month": "out of {{total}} days",
+      "total_hours": "Total hours",
+      "hours_this_month": "hours this month",
+      "recent_attendance": "Recent history",
+      "date": "Date",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "hours": "Hours",
+      "no_attendance": "No attendance recorded",
+      "arrival_time": "Arrival time",
+      "departure_time": "Departure time",
+      "arrival_success": "Arrival recorded",
+      "depart_success": "Departure recorded",
+      "save_error": "Error while saving"
     }
   },
-  
   "other": {
     "dashboard": {
       "welcome": "Hello {{name}}",
@@ -613,7 +674,7 @@
       "clock_in_out": "Clock in / out",
       "request_leave": "Request leave"
     },
-       "conges": {
+    "conges": {
       "title": "My Leaves",
       "subtitle": "View and request leave",
       "request_button": "Request leave",
@@ -637,7 +698,7 @@
       "approved": "Approved",
       "pending": "Pending"
     },
-       "pointages": {
+    "pointages": {
       "title": "My Attendance",
       "subtitle": "Track your working hours",
       "clock_in": "Clock in",
@@ -660,6 +721,4 @@
       "save_error": "Error while saving"
     }
   }
-
 }
-  

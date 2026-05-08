@@ -1,7 +1,7 @@
 {
   "app": {
     "short_name": "ليجوا",
-    "name": "Boulangerie Leigois",
+    "name": "مخبزة ليجوا",
     "pos": "نقطة البيع"
   },
   "login": {
@@ -29,6 +29,7 @@
     "estimated_profit": "الربح المقدر",
     "from_orders": "من {{count}} طلبات",
     "revenue_minus_expenses": "الإيرادات ناقص المصروفات",
+    "profit_margin": "هامش الربح",
     "no_data": "لا توجد بيانات لعرضها",
     "view_details": "عرض التفاصيل",
     "sales_trends": "اتجاهات المبيعات",
@@ -38,7 +39,12 @@
     "daily_stock": "المخزون اليومي",
     "employees": "الموظفون",
     "attendance": "الحضور",
-    "leaves": "الإجازات"
+    "leaves": "الإجازات",
+    "sales_last_7_days": "مبيعات آخر 7 أيام",
+    "top_products": "أفضل المنتجات",
+    "orders_by_employee": "الطلبات حسب الموظف",
+    "financial_summary": "الملخص المالي",
+    "total_earnings_today": "إجمالي الأرباح اليوم"
   },
   "nav": {
     "dashboard": "لوحة القيادة",
@@ -126,11 +132,11 @@
     "role_label": "الدور",
     "role_admin": "مدير",
     "role_cashier": "صراف",
-    "monthly_salary_label": "الراتب الشهري (DTN)",
-    "hourly_rate_label": "الأجر بالساعة (DTN)",
+    "monthly_salary_label": "الراتب الشهري (د.ت)",
+    "hourly_rate_label": "الأجر بالساعة (د.ت)",
     "hours_per_month_label": "ساعات العمل شهرياً",
-    "monthly_salary_format": "شهرياً: {{salary}} DTN",
-    "hourly_rate_format": "{{rate}} DTN/ساعة × {{hours}} ساعة",
+    "monthly_salary_format": "شهرياً: {{salary}} د.ت",
+    "hourly_rate_format": "{{rate}} د.ت/ساعة × {{hours}} ساعة",
     "validation_name_username_required": "الاسم واسم المستخدم مطلوبان.",
     "create_success": "تم إنشاء الموظف بنجاح.",
     "update_success": "تم تحديث الموظف بنجاح.",
@@ -155,7 +161,7 @@
     "empty": "لا توجد مصروفات مسجلة.",
     "add_title": "إضافة مصروف",
     "label_label": "الوصف",
-    "amount_label": "المبلغ (DTN)",
+    "amount_label": "المبلغ (د.ت)",
     "category_label": "الفئة",
     "date_label": "التاريخ",
     "notes_label": "ملاحظات (اختياري)",
@@ -274,7 +280,8 @@
     "ready_next": "جاهز للزبون التالي.",
     "insufficient_funds": "المبلغ المدخل أقل من الإجمالي.",
     "payment_error": "حدث خطأ أثناء معالجة الطلب.",
-    "no_products": "لم يتم العثور على منتجات"
+    "no_products": "لم يتم العثور على منتجات",
+    "payment_title": "الدفع"
   },
   "fournisseurs": {
     "title": "الموردون",
@@ -313,6 +320,7 @@
     "subtitle": "إدارة مشتريات المواد الأولية والمستلزمات",
     "add_button": "عملية شراء جديدة",
     "list_title": "سجل المشتريات",
+    "select_matiere": "اختر مادة أولية",
     "table": {
       "product": "المنتج",
       "quantity": "الكمية",
@@ -328,11 +336,12 @@
     "product_name": "اسم المنتج",
     "quantity": "الكمية",
     "unit": "الوحدة",
-    "unit_price": "سعر الوحدة (دينار تونسي)",
+    "unit_price": "سعر الوحدة (د.ت)",
     "date": "التاريخ",
     "invoice_ref": "مرجع الفاتورة",
-    "select_matiere": "اختر مادة أولية",
     "notes": "ملاحظات",
+    "matiere": "المادة الأولية",
+    "selected_product": "المنتج المختار",
     "validation_required": "يرجى ملء جميع الحقول الإلزامية",
     "create_success": "تم تسجيل عملية الشراء بنجاح",
     "save_error": "حدث خطأ أثناء الحفظ"
@@ -395,7 +404,11 @@
     "save_error": "حدث خطأ أثناء الإنشاء",
     "approved": "تمت الموافقة على الطلب",
     "rejected": "تم رفض الطلب",
-    "approve_error": "حدث خطأ أثناء المعالجة"
+    "approve_error": "حدث خطأ أثناء المعالجة",
+    "reject_error": "حدث خطأ أثناء الرفض",
+    "status_pending": "قيد الانتظار",
+    "status_approved": "تمت الموافقة",
+    "status_rejected": "مرفوضة"
   },
   "conges": {
     "title": "الإجازات",
@@ -472,7 +485,12 @@
       "gross": "الراتب الإجمالي",
       "deductions": "الاستقطاعات",
       "net": "الراتب الصافي",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "base_salary": "الراتب الأساسي",
+      "overtime": "ساعات إضافية",
+      "conges_payes": "إجازات مدفوعة",
+      "conges_non_payes": "إجازات غير مدفوعة",
+      "indemnities": "التعويضات"
     },
     "empty": "لا توجد كشوف رواتب لهذا الموظف",
     "select_employee_error": "يرجى اختيار موظف",
@@ -496,6 +514,7 @@
     },
     "empty": "لا توجد سجلات إنتاج",
     "add_title": "تسجيل إنتاج",
+    "edit_title": "تعديل الإنتاج",
     "product": "المنتج",
     "select_product": "اختر منتجاً",
     "date": "التاريخ",
@@ -503,11 +522,12 @@
     "lost": "الكمية التالفة",
     "validation_required": "يرجى اختيار منتج وإدخال الكمية المنتجة",
     "create_success": "تم تسجيل الإنتاج",
+    "update_success": "تم تحديث الإنتاج",
     "save_error": "خطأ في التسجيل"
   },
   "chef": {
     "dashboard": {
-      "title": "لوحة التحكم – المدير",
+      "title": "لوحة التحكم – الطباخ",
       "subtitle": "متابعة الطلبات والمخزون",
       "pending_requests": "الطلبات قيد الانتظار",
       "low_stock_alerts": "تنبيهات نقص المخزون",
@@ -529,29 +549,51 @@
     },
     "demandesAchat": {
       "title": "طلبات الشراء",
-    "list_title": "قائمة الطلبات",
-    "empty": "لا توجد طلبات",
-    "product": "المنتج",
-    "quantity": "الكمية",
-    "unit": "الوحدة",
-    "supplier": "المورد المقترح",
-    "urgent": "العاجل",
-    "status": "الحالة",
-    "actions": "الإجراءات",
-    "approve": "الموافقة",
-    "reject": "رفض",
-    "requested_by": "مطلوب من طرف",
-    "no_pending_requests": "لا توجد طلبات قيد الانتظار للعرض",
-    "status_pending": "قيد الانتظار",
-    "status_approved": "تمت الموافقة",
-    "status_rejected": "مرفوضة",
-    "show_all": "عرض الكل",
-    "show_pending": "عرض قيد الانتظار"
+      "list_title": "قائمة الطلبات",
+      "empty": "لا توجد طلبات",
+      "product": "المنتج",
+      "quantity": "الكمية",
+      "unit": "الوحدة",
+      "supplier": "المورد المقترح",
+      "urgent": "عاجل",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "approve": "الموافقة",
+      "reject": "رفض",
+      "requested_by": "مطلوب من طرف",
+      "no_pending_requests": "لا توجد طلبات قيد الانتظار للعرض",
+      "status_pending": "قيد الانتظار",
+      "status_approved": "تمت الموافقة",
+      "status_rejected": "مرفوضة",
+      "show_all": "عرض الكل",
+      "show_pending": "عرض قيد الانتظار"
     },
     "matieresPremieres": {
       "title": "المواد الأولية",
       "list_title": "قائمة المواد",
       "empty": "لا توجد مواد أولية"
+    },
+    "pointages": {
+      "title": "حضوري",
+      "subtitle": "تتبع ساعات العمل الخاصة بي",
+      "clock_in": "تسجيل الحضور",
+      "clock_out": "تسجيل الانصراف",
+      "already_done_today": "لقد قمت بالتسجيل اليوم بالفعل",
+      "days_worked_this_month": "أيام العمل هذا الشهر",
+      "out_of_month": "من أصل {{total}} يوم",
+      "total_hours": "إجمالي الساعات",
+      "hours_this_month": "ساعات هذا الشهر",
+      "recent_attendance": "السجل الأخير",
+      "date": "التاريخ",
+      "arrival": "الحضور",
+      "departure": "الانصراف",
+      "hours": "الساعات",
+      "no_attendance": "لا توجد سجلات حضور",
+      "arrival_time": "وقت الحضور",
+      "departure_time": "وقت الانصراف",
+      "arrival_success": "تم تسجيل الحضور",
+      "depart_success": "تم تسجيل الانصراف",
+      "save_error": "حدث خطأ أثناء الحفظ"
     }
   },
   "responsable": {
@@ -583,12 +625,44 @@
       "empty": "لا توجد طلبات",
       "status_pending": "قيد الانتظار",
       "status_approved": "تمت الموافقة",
-      "status_rejected": "مرفوضة"
+      "status_rejected": "مرفوضة",
+      "edit_title": "تعديل الإنتاج",
+      "update_success": "تم تحديث الإنتاج"
+    },
+    "demandesAchat": {
+      "title": "طلبات الشراء",
+      "list_title": "الطلبات قيد الانتظار",
+      "empty": "لا توجد طلبات قيد الانتظار",
+      "add_button": "طلب جديد",
+      "show_all": "عرض الكل",
+      "show_pending": "عرض قيد الانتظار"
+    },
+    "pointages": {
+      "title": "حضوري",
+      "subtitle": "تتبع ساعات العمل الخاصة بي",
+      "clock_in": "تسجيل الحضور",
+      "clock_out": "تسجيل الانصراف",
+      "already_done_today": "لقد قمت بالتسجيل اليوم بالفعل",
+      "days_worked_this_month": "أيام العمل هذا الشهر",
+      "out_of_month": "من أصل {{total}} يوم",
+      "total_hours": "إجمالي الساعات",
+      "hours_this_month": "ساعات هذا الشهر",
+      "recent_attendance": "السجل الأخير",
+      "date": "التاريخ",
+      "arrival": "الحضور",
+      "departure": "الانصراف",
+      "hours": "الساعات",
+      "no_attendance": "لا توجد سجلات حضور",
+      "arrival_time": "وقت الحضور",
+      "departure_time": "وقت الانصراف",
+      "arrival_success": "تم تسجيل الحضور",
+      "depart_success": "تم تسجيل الانصراف",
+      "save_error": "حدث خطأ أثناء الحفظ"
     }
   },
   "other": {
     "dashboard": {
-      "welcome": "مرحبا {{name}}",
+      "welcome": "مرحباً {{name}}",
       "employee": "الموظف",
       "days_worked_this_month": "أيام العمل هذا الشهر",
       "out_of_month": "من أصل {{total}} يوم",
@@ -637,7 +711,7 @@
     },
     "pointages": {
       "title": "حضوري",
-      "subtitle": "تتبع ساعات العمل الخاصة بك",
+      "subtitle": "تتبع ساعات العمل الخاصة بي",
       "clock_in": "تسجيل الحضور",
       "clock_out": "تسجيل الانصراف",
       "already_done_today": "لقد قمت بالتسجيل اليوم بالفعل",

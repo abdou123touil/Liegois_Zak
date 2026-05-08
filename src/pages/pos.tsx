@@ -120,7 +120,7 @@ const generateTicketHtml = (
     <body>
       <div class="header">
         <div class="title">BOULANGERIE LEIGOIS</div>
-        <div>123  Hay Ennassim 2 (près de la clinique Elmozen), Medenine</div>
+        <div> Hay Ennassim 2 (près de la clinique Elmozen), Medenine</div>
         <div>Tel: +216 52 228 383</div>
       </div>
       <div class="info">
@@ -147,7 +147,7 @@ const generateTicketHtml = (
         ${discountAmount > 0 ? `<div><span>Réduction :</span><span>- ${formatCurrency(discountAmount)}</span></div>` : ''}
         <div><span>TOTAL :</span><span>${formatCurrency(total)}</span></div>
         <div><span>Payé :</span><span>${formatCurrency(amountPaid)}</span></div>
-        <div><span>Monnaie :</span><span>${formatCurrency(change)}</span></div>
+        <div><span>Rendu :</span><span>${formatCurrency(change)}</span></div>
         <div><span>Moyen :</span><span>${paymentMethod.toUpperCase()}</span></div>
       </div>
       ${qrCodeUrl ? `<div class="qr-code"><img src="${qrCodeUrl}" alt="QR Code" /></div>` : ''}
