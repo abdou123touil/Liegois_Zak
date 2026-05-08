@@ -93,12 +93,12 @@ export default function Pos() {
   const handleQuickAmount = (val: number) => {
     setAmountEntered(val.toString());
   };
+
   useEffect(() => {
     if (user) {
       setUserId(user.id as number);
     }
   }, [user]);
-
 
   const processPayment = async () => {
     if (cart.length === 0) return;
@@ -109,9 +109,6 @@ export default function Pos() {
     }
 
     try {
-      
-      console.log("user id:", user!.id);
-      console.log("user id seteststshdiuh:", userId);
       await createOrderMutation.mutateAsync({
         data: {
           employeeId: userId!,
@@ -173,6 +170,7 @@ export default function Pos() {
             </div>
           </header>
 
+          {/* Barre des catégories défilable horizontalement */}
           <div className="bg-card/50 backdrop-blur-sm border-b border-primary/10 shrink-0 pt-2 px-2">
             <Tabs
               defaultValue="all"
@@ -180,7 +178,7 @@ export default function Pos() {
               onValueChange={(v) => setActiveCategory(v === "all" ? undefined : parseInt(v))}
             >
               <ScrollArea className="w-full whitespace-nowrap pb-2">
-                <TabsList className="w-full justify-start h-auto p-1 bg-transparent gap-2">
+                <TabsList className="inline-flex h-auto p-1 bg-transparent gap-2">
                   <TabsTrigger
                     value="all"
                     className="px-6 py-3 text-base rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-none transition-all"
@@ -201,6 +199,7 @@ export default function Pos() {
             </Tabs>
           </div>
 
+          {/* Grille des produits */}
           <ScrollArea className="flex-1 p-4 sm:p-6">
             {isLoadingProducts ? (
               <div className="flex items-center justify-center h-full">
@@ -255,8 +254,8 @@ export default function Pos() {
           </ScrollArea>
         </div>
 
-        {/* Cart panel */}
-        <div className="w-[400px] shrink-0 flex flex-col bg-card border-l border-primary/10 h-full shadow-[-4px_0_20px_-5px_rgba(0,0,0,0.05)]">
+        {/* Panier - largeur réduite à 320px (w-80) */}
+        <div className="w-80 shrink-0 flex flex-col bg-card border-l border-primary/10 h-full shadow-[-4px_0_20px_-5px_rgba(0,0,0,0.05)]">
           <div className="h-16 flex items-center px-5 border-b border-primary/10 bg-card shrink-0">
             <h2 className="text-lg font-serif font-bold text-primary flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" /> {t('pos.current_order')}
@@ -352,7 +351,7 @@ export default function Pos() {
           </div>
         </div>
 
-        {/* Payment Modal */}
+        {/* Payment Modal (inchangé) */}
         <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
           <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden rounded-2xl bg-card border border-primary/20 shadow-2xl">
             <DialogHeader>
@@ -445,7 +444,7 @@ export default function Pos() {
           </DialogContent>
         </Dialog>
 
-        {/* Success Modal */}
+        {/* Success Modal (inchangé) */}
         <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
           <DialogContent className="sm:max-w-[400px] border-none bg-transparent shadow-none [&>button]:hidden">
             <DialogHeader>
