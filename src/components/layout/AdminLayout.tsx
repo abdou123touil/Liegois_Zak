@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { useLogout } from "@/lib/api-client";
+import { useLogout, useGetAlertesStockBas } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LanguageSwitcher } from "../LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -40,6 +42,33 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const logoutMutation = useLogout();
+  const { toast } = useToast();
+
+  // Récupération des alertes stock bas (rafraîchit toutes les 30 secondes)
+  const { data: alertes } = useGetAlertesStockBas();
+  const previousAlertesRef = useRef<string[]>([]);
+
+  // Affichage des alertes quand de nouvelles matières premières deviennent critiques
+  useEffect(() => {
+    if (!alertes?.length) return;
+
+    const currentIds = alertes.map((a) => a.matiereId.toString());
+
+    const newAlertes = alertes.filter(
+      (a) =>
+        !previousAlertesRef.current.includes(a.matiereId.toString())
+    );
+
+    if (newAlertes.length > 0) {
+      toast.warning("⚠️ Stock faible détecté", {
+        description: newAlertes
+          .map((a) => `${a.nom} (${a.quantiteRestante})`)
+          .join(", "),
+      });
+    }
+
+    previousAlertesRef.current = currentIds;
+  }, [alertes]);
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();

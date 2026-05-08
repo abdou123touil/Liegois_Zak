@@ -39,7 +39,11 @@
     "daily_stock": "Stock journalier",
     "employees": "Employés",
     "attendance": "Présence",
-    "leaves": "Congés"
+    "leaves": "Congés",
+    "sales_last_7_days": "Ventes des 7 derniers jours",
+    "top_products": "Top produits",
+    "orders_by_employee": "Commandes par employé",
+    "financial_summary": "Récapitulatif financier"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -304,7 +308,6 @@
     "add_button": "Nouvel achat",
     "list_title": "Historique des achats",
     "select_matiere": "Choisir une matière première",
-
     "table": {
       "product": "Produit",
       "quantity": "Quantité",
@@ -470,9 +473,9 @@
       "actions": "Actions",
       "base_salary": "Salaire de base",
       "overtime": "Heures sup.",
-      "conge_payes": "Congés payés",
-      "conge_non_payes": "Congés non payés",
-        "indemnities": "Indemnités"
+      "conges_payes": "Congés payés",
+      "conges_non_payes": "Congés non payés",
+      "indemnities": "Indemnités"
     },
     "empty": "Aucune fiche de paie générée pour cet employé",
     "select_employee_error": "Veuillez sélectionner un employé",
@@ -528,31 +531,31 @@
       "no_low_stock": "Aucun article en dessous du seuil"
     },
     "demandesAchat": {
-    "title": "Demandes d'achat",
-    "list_title": "Demandes en attente",
-    "empty": "Aucune demande en attente",
-    "product": "Produit",
-    "quantity": "Quantité",
-    "unit": "Unité",
-    "supplier": "Fournisseur suggéré",
-    "urgent": "Urgence",
-    "status": "Statut",
-    "actions": "Actions",
-    "approve": "Valider",
-    "reject": "Rejeter",
-    "requested_by": "Demandé par",
-    "no_pending_requests": "Aucune demande en attente à afficher",
-    "status_pending": "En attente",
-    "status_approved": "Validée",
-    "status_rejected": "Rejetée",
-    "show_all": "Voir tout",
-    "show_pending": "Voir en attente"
-  },
-  "matieresPremieres": {
-    "title": "Matières premières",
-    "list_title": "Liste des matières",
-    "empty": "Aucune matière première"
-  },
+      "title": "Demandes d'achat",
+      "list_title": "Demandes en attente",
+      "empty": "Aucune demande en attente",
+      "product": "Produit",
+      "quantity": "Quantité",
+      "unit": "Unité",
+      "supplier": "Fournisseur suggéré",
+      "urgent": "Urgence",
+      "status": "Statut",
+      "actions": "Actions",
+      "approve": "Valider",
+      "reject": "Rejeter",
+      "requested_by": "Demandé par",
+      "no_pending_requests": "Aucune demande en attente à afficher",
+      "status_pending": "En attente",
+      "status_approved": "Validée",
+      "status_rejected": "Rejetée",
+      "show_all": "Voir tout",
+      "show_pending": "Voir en attente"
+    },
+    "matieresPremieres": {
+      "title": "Matières premières",
+      "list_title": "Liste des matières",
+      "empty": "Aucune matière première"
+    },
     "pointages": {
       "title": "Mes pointages",
       "subtitle": "Pointer vos heures de travail",
@@ -610,13 +613,13 @@
       "update_success": "Production mise à jour"
     },
     "demandesAchat": {
-    "title": "Demandes d'achat",
-    "list_title": "Demandes en attente",
-    "empty": "Aucune demande en attente",
-    "add_button": "Nouvelle demande",
-    "show_all": "Voir tout",
-    "show_pending": "Voir en attente"
-  },
+      "title": "Demandes d'achat",
+      "list_title": "Demandes en attente",
+      "empty": "Aucune demande en attente",
+      "add_button": "Nouvelle demande",
+      "show_all": "Voir tout",
+      "show_pending": "Voir en attente"
+    },
     "pointages": {
       "title": "Mes pointages",
       "subtitle": "Pointer vos heures de travail",

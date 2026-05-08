@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
-
+import { Label } from "@/components/ui/label";
 interface CartItem {
   productId: number;
   name: string;
@@ -43,6 +43,11 @@ export default function Pos() {
   const { data: categories } = useListCategories();
   const { data: products, isLoading: isLoadingProducts } = useListProducts({ categoryId: activeCategory ?? null });
   const createOrderMutation = useCreateOrder();
+  const [discountType, setDiscountType] = useState<"fixed" | "percentage">("fixed");
+  const [discountValue, setDiscountValue] = useState("");
+  const [discountReason, setDiscountReason] = useState("");
+
+
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
@@ -74,7 +79,17 @@ export default function Pos() {
   };
 
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + item.price * item.quantity, 0), [cart]);
-
+  const discountedTotal = useMemo(() => {
+    let total = cartTotal;
+    if (discountValue && parseFloat(discountValue) > 0) {
+      if (discountType === "fixed") {
+        total = Math.max(0, total - parseFloat(discountValue));
+      } else if (discountType === "percentage") {
+        total = total * (1 - parseFloat(discountValue) / 100);
+      }
+    }
+    return total;
+  }, [cartTotal, discountType, discountValue]);
   const handleNumpad = (val: string) => {
     if (val === "C") {
       setAmountEntered("0");
@@ -106,7 +121,7 @@ export default function Pos() {
   const processPayment = async () => {
     if (cart.length === 0) return;
     const amountPaid = parseFloat(amountEntered);
-    if (paymentMethod === "cash" && amountPaid < cartTotal) {
+    if (paymentMethod === "cash" && amountPaid < discountedTotal) {
       toast({ title: t('common.error'), description: t('pos.insufficient_funds'), variant: "destructive" });
       return;
     }
@@ -115,9 +130,12 @@ export default function Pos() {
       await createOrderMutation.mutateAsync({
         data: {
           employeeId: userId!,
-          amountPaid: paymentMethod === "cash" ? amountPaid : cartTotal,
+          amountPaid: paymentMethod === "cash" ? amountPaid : discountedTotal,
           paymentMethod,
           items: cart.map(item => ({ productId: item.productId, quantity: item.quantity })),
+          reductionMontant: discountType === "fixed" && discountValue ? parseFloat(discountValue) : null,
+          reductionPourcentage: discountType === "percentage" && discountValue ? parseFloat(discountValue) : null,
+          motifReduction: discountReason || "",
         },
       });
       setPaymentModalOpen(false);
@@ -353,6 +371,31 @@ export default function Pos() {
                   </AnimatePresence>
                 </ScrollArea>
                 <div className="shrink-0 border-t border-primary/10 bg-card p-5 space-y-4">
+                  <div className="space-y-2 border-t border-primary/10 pt-4">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-primary/70 whitespace-nowrap">Réduction</Label>
+                      <Select value={discountType} onValueChange={(v: any) => setDiscountType(v)}>
+                        <SelectTrigger className="w-28"><SelectValue placeholder="Type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fixed">Montant</SelectItem>
+                          <SelectItem value="percentage">Pourcentage</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="number"
+                        placeholder={discountType === "fixed" ? "TND" : "%"}
+                        value={discountValue}
+                        onChange={(e) => setDiscountValue(e.target.value)}
+                        className="w-24"
+                      />
+                      <Input
+                        placeholder="Motif"
+                        value={discountReason}
+                        onChange={(e) => setDiscountReason(e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-primary/70 text-sm">
                       <span>{t('pos.subtotal')}</span>

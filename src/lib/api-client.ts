@@ -231,6 +231,13 @@ export interface GeneratePaieRequest {
   tauxCotisationsSociales?: number;
   majorationHeuresSup?: number;
 }
+export interface AlerteStock {
+  matiereId: number;
+  nom: string;
+  stockActuel: number;
+  seuilAlerte: number;
+  uniteMesure: string;
+}
 
 export function useGetParametresPaie() {
   return useQuery({
@@ -422,7 +429,7 @@ export function useListProducts({ categoryId }: { categoryId?: number }) {
 // 🔹 useCreateOrder Hook (handles order creation)
 export function useCreateOrder() {
     return useMutation({
-        mutationFn: async ({ data }: { data: {employeeId:number ; amountPaid: number; paymentMethod: string; items: any[] } }) => {
+        mutationFn: async ({ data }: { data: {employeeId:number ;reductionMontant: number | null; reductionPourcentage: number | null; motifReduction: string; amountPaid: number; paymentMethod: string; items: any[] } }) => {
             const response = await apiRequest("/orders", {
                 method: "POST",
                 body: JSON.stringify(data),
@@ -1061,7 +1068,16 @@ export function useCreateStockJournalier() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock-journalier"] }),
   });
 }
-
+export function useGetAlertesStockBas() {
+  return useQuery({
+    queryKey: ["alertes-stock-bas"],
+    queryFn: async () => {
+      const response = await apiRequest("/alertes/stock-bas");
+      return response.json() as Promise<AlerteStock[]>;
+    },
+    refetchInterval: 30000, // toutes les 30 secondes
+  });
+}
 export function useUpdateStockJournalier() {
   const queryClient = useQueryClient();
   return useMutation({
