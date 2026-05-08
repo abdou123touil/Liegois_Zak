@@ -5,11 +5,12 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Plus, Minus, CreditCard, Banknote, HelpCircle, ShoppingCart, Loader2, Croissant, Package, Menu, X } from "lucide-react";
+import { LogOut, Plus, Minus, CreditCard, Banknote, HelpCircle, ShoppingCart, Loader2, Croissant, Package, X } from "lucide-react";
 import { useLogout } from "@/lib/api-client";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,12 +18,147 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
+
 interface CartItem {
   productId: number;
   name: string;
   price: number;
   quantity: number;
 }
+
+// Génération d'un QR code via Google Charts (pas de librairie externe)
+const generateQrCodeUrl = (data: string, size = 150) => {
+  return `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(data)}&choe=UTF-8`;
+};
+
+const generateTicketHtml = (
+  orderId: number,
+  date: Date,
+  items: CartItem[],
+  subtotal: number,
+  discountAmount: number,
+  total: number,
+  amountPaid: number,
+  change: number,
+  paymentMethod: string,
+  qrCodeUrl?: string
+) => {
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND' }).format(val);
+  };
+  const formatDate = (d: Date) => {
+    return d.toLocaleString('fr-TN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Ticket de caisse</title>
+      <style>
+        body {
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          width: 300px;
+          margin: 0 auto;
+          padding: 20px;
+          background: white;
+        }
+        .header {
+          text-align: center;
+          border-bottom: 1px dashed #000;
+          padding-bottom: 10px;
+          margin-bottom: 10px;
+        }
+        .title {
+          font-size: 18px;
+          font-weight: bold;
+        }
+        .info {
+          text-align: center;
+          margin-bottom: 15px;
+        }
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        .items-table th, .items-table td {
+          text-align: left;
+          padding: 4px 0;
+        }
+        .items-table td:last-child, .items-table th:last-child {
+          text-align: right;
+        }
+        .totals {
+          margin-top: 15px;
+          border-top: 1px dashed #000;
+          padding-top: 10px;
+        }
+        .totals div {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 5px;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 20px;
+          font-size: 10px;
+          border-top: 1px dashed #000;
+          padding-top: 10px;
+        }
+        .qr-code {
+          text-align: center;
+          margin-top: 15px;
+        }
+        .qr-code img {
+          width: 80px;
+          height: 80px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="title">BOULANGERIE LEIGOIS</div>
+        <div>123 Rue de la Boulangerie, Tunis</div>
+        <div>Tel: +216 12 345 678</div>
+      </div>
+      <div class="info">
+        <div>Ticket N° ${orderId}</div>
+        <div>${formatDate(date)}</div>
+      </div>
+      <table class="items-table">
+        <thead>
+          <tr><th>Article</th><th>Qté</th><th>Prix</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          ${items.map(item => `
+            <tr>
+              <td>${item.name}</td>
+              <td>${item.quantity}</td>
+              <td>${formatCurrency(item.price)}</td>
+              <td>${formatCurrency(item.price * item.quantity)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <div class="totals">
+        <div><span>Sous-total :</span><span>${formatCurrency(subtotal)}</span></div>
+        ${discountAmount > 0 ? `<div><span>Réduction :</span><span>- ${formatCurrency(discountAmount)}</span></div>` : ''}
+        <div><span>TOTAL :</span><span>${formatCurrency(total)}</span></div>
+        <div><span>Payé :</span><span>${formatCurrency(amountPaid)}</span></div>
+        <div><span>Monnaie :</span><span>${formatCurrency(change)}</span></div>
+        <div><span>Moyen :</span><span>${paymentMethod.toUpperCase()}</span></div>
+      </div>
+      ${qrCodeUrl ? `<div class="qr-code"><img src="${qrCodeUrl}" alt="QR Code" /></div>` : ''}
+      <div class="footer">
+        Merci de votre visite !<br>
+        À bientôt
+      </div>
+    </body>
+    </html>
+  `;
+};
 
 export default function Pos() {
   const { t } = useTranslation();
@@ -46,8 +182,6 @@ export default function Pos() {
   const [discountType, setDiscountType] = useState<"fixed" | "percentage">("fixed");
   const [discountValue, setDiscountValue] = useState("");
   const [discountReason, setDiscountReason] = useState("");
-
-
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
@@ -90,6 +224,7 @@ export default function Pos() {
     }
     return total;
   }, [cartTotal, discountType, discountValue]);
+
   const handleNumpad = (val: string) => {
     if (val === "C") {
       setAmountEntered("0");
@@ -127,7 +262,7 @@ export default function Pos() {
     }
 
     try {
-      await createOrderMutation.mutateAsync({
+      const response = await createOrderMutation.mutateAsync({
         data: {
           employeeId: userId!,
           amountPaid: paymentMethod === "cash" ? amountPaid : discountedTotal,
@@ -138,10 +273,40 @@ export default function Pos() {
           motifReduction: discountReason || "",
         },
       });
+
+      // Contenu du QR code (personnalisable)
+      const qrData = `Commande #${response.id}\nTotal: ${formatCurrency(discountedTotal)}\nDate: ${new Date().toLocaleString()}`;
+      const qrCodeUrl = generateQrCodeUrl(qrData, 100);
+
+      const discountAmount = discountType === "fixed" ? (parseFloat(discountValue) || 0) : (cartTotal * (parseFloat(discountValue) || 0) / 100);
+      const ticketHtml = generateTicketHtml(
+        response.id,
+        new Date(),
+        cart,
+        cartTotal,
+        discountAmount,
+        discountedTotal,
+        paymentMethod === "cash" ? amountPaid : discountedTotal,
+        paymentMethod === "cash" ? amountPaid - discountedTotal : 0,
+        paymentMethod,
+        qrCodeUrl
+      );
+
+      const printWindow = window.open('', '_blank', 'width=400,height=600');
+      if (printWindow) {
+        printWindow.document.write(ticketHtml);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.onafterprint = () => printWindow.close();
+      }
+
       setPaymentModalOpen(false);
       setSuccessModalOpen(true);
       setCart([]);
       setAmountEntered("0");
+      setDiscountValue("");
+      setDiscountReason("");
       queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
       setTimeout(() => setSuccessModalOpen(false), 3000);
     } catch (error) {
@@ -407,7 +572,7 @@ export default function Pos() {
                     </div>
                     <div className="flex justify-between text-primary font-bold text-2xl pt-2 border-t border-dashed border-primary/20">
                       <span>{t('pos.total')}</span>
-                      <span className="text-primary">{formatCurrency(cartTotal)}</span>
+                      <span className="text-primary">{formatCurrency(discountedTotal)}</span>
                     </div>
                   </div>
                   <Button
@@ -415,11 +580,11 @@ export default function Pos() {
                     disabled={cart.length === 0}
                     onClick={() => {
                       setPaymentMethod("cash");
-                      setAmountEntered(cartTotal.toString());
+                      setAmountEntered(discountedTotal.toString());
                       setPaymentModalOpen(true);
                     }}
                   >
-                    {t('pos.pay')} {formatCurrency(cartTotal)}
+                    {t('pos.pay')} {formatCurrency(discountedTotal)}
                   </Button>
                 </div>
               </motion.div>
@@ -427,26 +592,24 @@ export default function Pos() {
           )}
         </AnimatePresence>
 
-        {/* Modal de paiement repensé (compact, avec Select) */}
+        {/* Modal de paiement repensé */}
         <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
           <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-primary/20 shadow-2xl p-0">
             <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle>{t('pos.payment_title')}</DialogTitle>
             </DialogHeader>
             <div className="px-6 pb-6 space-y-5">
-              {/* Montant total dû */}
               <div className="flex justify-between items-center bg-primary/5 p-4 rounded-xl">
                 <span className="text-lg font-semibold text-primary/80">{t('pos.total_due')}</span>
-                <span className="text-2xl font-bold text-primary">{formatCurrency(cartTotal)}</span>
+                <span className="text-2xl font-bold text-primary">{formatCurrency(discountedTotal)}</span>
               </div>
 
-              {/* Sélecteur de méthode de paiement (dropdown) */}
               <div>
                 <label className="text-sm font-medium text-primary/70 mb-1 block">{t('pos.payment_method')}</label>
                 <Select value={paymentMethod} onValueChange={(val: any) => {
                   setPaymentMethod(val);
                   if (val !== "cash") {
-                    setAmountEntered(cartTotal.toString());
+                    setAmountEntered(discountedTotal.toString());
                   }
                 }}>
                   <SelectTrigger className="w-full bg-card">
@@ -466,7 +629,6 @@ export default function Pos() {
                 </Select>
               </div>
 
-              {/* Zone de saisie pour espèces */}
               {paymentMethod === "cash" && (
                 <>
                   <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-right text-3xl font-mono tracking-wider shadow-inner text-primary">
@@ -490,16 +652,15 @@ export default function Pos() {
                       </Button>
                     ))}
                   </div>
-                  {parseFloat(amountEntered) > cartTotal && (
+                  {parseFloat(amountEntered) > discountedTotal && (
                     <div className="flex justify-between items-center bg-green-50 p-3 rounded-xl text-green-700">
                       <span className="font-medium">{t('pos.change')}</span>
-                      <span className="text-xl font-bold">{formatCurrency(parseFloat(amountEntered) - cartTotal)}</span>
+                      <span className="text-xl font-bold">{formatCurrency(parseFloat(amountEntered) - discountedTotal)}</span>
                     </div>
                   )}
                 </>
               )}
 
-              {/* Message pour les autres méthodes */}
               {paymentMethod !== "cash" && (
                 <div className="flex flex-col items-center justify-center text-center py-6 space-y-3 bg-primary/5 rounded-xl">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
@@ -509,10 +670,9 @@ export default function Pos() {
                 </div>
               )}
 
-              {/* Bouton de confirmation */}
               <Button
                 className="w-full h-12 text-base rounded-xl shadow-md bg-primary hover:bg-primary/90 disabled:opacity-50"
-                disabled={(paymentMethod === "cash" && parseFloat(amountEntered) < cartTotal) || createOrderMutation.isPending}
+                disabled={(paymentMethod === "cash" && parseFloat(amountEntered) < discountedTotal) || createOrderMutation.isPending}
                 onClick={processPayment}
               >
                 {createOrderMutation.isPending ? <Loader2 className="animate-spin h-5 w-5" /> : t('pos.complete_order')}
@@ -529,7 +689,7 @@ export default function Pos() {
               animate={{ scale: 1, opacity: 1 }}
               className="bg-card rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-2xl border border-primary/20"
             >
-              <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
+              <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6">
                 <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <motion.path
                     initial={{ pathLength: 0 }}

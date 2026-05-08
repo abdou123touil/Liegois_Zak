@@ -43,7 +43,8 @@
     "sales_last_7_days": "Ventes des 7 derniers jours",
     "top_products": "Top produits",
     "orders_by_employee": "Commandes par employé",
-    "financial_summary": "Récapitulatif financier"
+    "financial_summary": "Récapitulatif financier",
+    "total_earnings_today": "Gains totaux aujourd'hui"
   },
   "nav": {
     "dashboard": "Tableau de bord",
