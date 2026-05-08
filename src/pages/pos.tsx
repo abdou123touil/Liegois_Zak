@@ -120,8 +120,8 @@ const generateTicketHtml = (
     <body>
       <div class="header">
         <div class="title">BOULANGERIE LEIGOIS</div>
-        <div>123 Rue de la Boulangerie, Tunis</div>
-        <div>Tel: +216 12 345 678</div>
+        <div>123  Hay Ennassim 2 (près de la clinique Elmozen), Medenine</div>
+        <div>Tel: +216 52 228 383</div>
       </div>
       <div class="info">
         <div>Ticket N° ${orderId}</div>
