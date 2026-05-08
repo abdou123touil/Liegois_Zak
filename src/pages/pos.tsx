@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Plus, Minus, CreditCard, Banknote, HelpCircle, ShoppingCart, Loader2, Croissant, Package } from "lucide-react";
+import { LogOut, Plus, Minus, CreditCard, Banknote, HelpCircle, ShoppingCart, Loader2, Croissant, Package, Menu, X } from "lucide-react";
 import { useLogout } from "@/lib/api-client";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,7 @@ export default function Pos() {
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "other">("cash");
   const [amountEntered, setAmountEntered] = useState("0");
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
   const { user, setUser } = useAuth();
   const logoutMutation = useLogout();
@@ -58,6 +59,8 @@ export default function Pos() {
       }
       return [...prev, { productId: product.id, name: product.name, price: product.price, quantity: 1 }];
     });
+    // Ouvrir automatiquement le panier si fermé (optionnel)
+    if (!isCartOpen) setIsCartOpen(true);
   };
 
   const updateQuantity = (productId: number, delta: number) => {
@@ -252,104 +255,142 @@ export default function Pos() {
               </div>
             )}
           </ScrollArea>
-        </div>
 
-        {/* Panier - largeur réduite à 320px (w-80) */}
-        <div className="w-80 shrink-0 flex flex-col bg-card border-l border-primary/10 h-full shadow-[-4px_0_20px_-5px_rgba(0,0,0,0.05)]">
-          <div className="h-16 flex items-center px-5 border-b border-primary/10 bg-card shrink-0">
-            <h2 className="text-lg font-serif font-bold text-primary flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" /> {t('pos.current_order')}
-            </h2>
-            {cart.length > 0 && (
-              <span className="ml-auto bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-bold">
-                {cart.reduce((sum, item) => sum + item.quantity, 0)} {t('pos.items')}
-              </span>
-            )}
-          </div>
-
-          <ScrollArea className="flex-1 p-3">
-            <AnimatePresence initial={false}>
-              {cart.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-col items-center justify-center h-64 text-primary/50"
-                >
-                  <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mb-4">
-                    <ShoppingCart className="h-8 w-8 opacity-40" />
-                  </div>
-                  <p className="font-medium">{t('pos.cart_empty')}</p>
-                  <p className="text-sm text-center mt-1 px-8">{t('pos.cart_hint')}</p>
-                </motion.div>
-              ) : (
-                <div className="space-y-3">
-                  {cart.map((item) => (
-                    <motion.div
-                      key={item.productId}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex items-center gap-3 bg-primary/5 border border-primary/10 p-3 rounded-xl"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-primary/90 truncate">{item.name}</div>
-                        <div className="text-sm text-primary font-semibold mt-1">{formatCurrency(item.price * item.quantity)}</div>
-                      </div>
-                      <div className="flex items-center gap-1 bg-card rounded-lg p-1 shadow-sm">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-md hover:bg-primary/10"
-                          onClick={() => updateQuantity(item.productId, -1)}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="w-6 text-center text-sm font-bold text-primary">{item.quantity}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-md hover:bg-primary/10"
-                          onClick={() => updateQuantity(item.productId, 1)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </AnimatePresence>
-          </ScrollArea>
-
-          <div className="shrink-0 border-t border-primary/10 bg-card p-5 space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-primary/70 text-sm">
-                <span>{t('pos.subtotal')}</span>
-                <span>{formatCurrency(cartTotal)}</span>
-              </div>
-              <div className="flex justify-between text-primary/70 text-sm">
-                <span>{t('pos.tax')}</span>
-                <span>{formatCurrency(0)}</span>
-              </div>
-              <div className="flex justify-between text-primary font-bold text-2xl pt-2 border-t border-dashed border-primary/20">
-                <span>{t('pos.total')}</span>
-                <span className="text-primary">{formatCurrency(cartTotal)}</span>
-              </div>
-            </div>
+          {/* Bouton flottant pour ouvrir le panier (mobile/tablet) */}
+          {!isCartOpen && cart.length > 0 && (
             <Button
-              className="w-full h-14 text-lg rounded-xl shadow-md hover:shadow-lg transition-all bg-primary hover:bg-primary/90"
-              disabled={cart.length === 0}
-              onClick={() => {
-                setPaymentMethod("cash");
-                setAmountEntered(cartTotal.toString());
-                setPaymentModalOpen(true);
-              }}
+              onClick={() => setIsCartOpen(true)}
+              className="fixed bottom-6 right-6 z-50 rounded-full w-14 h-14 shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2 lg:hidden"
             >
-              {t('pos.pay')} {formatCurrency(cartTotal)}
+              <ShoppingCart className="h-6 w-6" />
+              <span className="absolute -top-2 -right-2 bg-destructive text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cart.reduce((sum, item) => sum + item.quantity, 0)}
+              </span>
             </Button>
-          </div>
+          )}
         </div>
+
+        {/* Sidebar du panier */}
+        <AnimatePresence>
+          {isCartOpen && (
+            <>
+              {/* Overlay pour fermer le panier (visible sur mobile) */}
+              <div
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                onClick={() => setIsCartOpen(false)}
+              />
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed right-0 top-0 h-full w-80 z-50 bg-card border-l border-primary/10 shadow-xl flex flex-col lg:relative lg:translate-x-0"
+              >
+                {/* En-tête du panier */}
+                <div className="h-16 flex items-center justify-between px-5 border-b border-primary/10 bg-card shrink-0">
+                  <h2 className="text-lg font-serif font-bold text-primary flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5" /> {t('pos.current_order')}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    {cart.length > 0 && (
+                      <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-bold">
+                        {cart.reduce((sum, item) => sum + item.quantity, 0)} {t('pos.items')}
+                      </span>
+                    )}
+                    <Button variant="ghost" size="icon" onClick={() => setIsCartOpen(false)} className="lg:hidden">
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Contenu du panier */}
+                <ScrollArea className="flex-1 p-3">
+                  <AnimatePresence initial={false}>
+                    {cart.length === 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex flex-col items-center justify-center h-64 text-primary/50"
+                      >
+                        <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mb-4">
+                          <ShoppingCart className="h-8 w-8 opacity-40" />
+                        </div>
+                        <p className="font-medium">{t('pos.cart_empty')}</p>
+                        <p className="text-sm text-center mt-1 px-8">{t('pos.cart_hint')}</p>
+                      </motion.div>
+                    ) : (
+                      <div className="space-y-3">
+                        {cart.map((item) => (
+                          <motion.div
+                            key={item.productId}
+                            layout
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="flex items-center gap-3 bg-primary/5 border border-primary/10 p-3 rounded-xl"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-primary/90 truncate">{item.name}</div>
+                              <div className="text-sm text-primary font-semibold mt-1">{formatCurrency(item.price * item.quantity)}</div>
+                            </div>
+                            <div className="flex items-center gap-1 bg-card rounded-lg p-1 shadow-sm">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-md hover:bg-primary/10"
+                                onClick={() => updateQuantity(item.productId, -1)}
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <span className="w-6 text-center text-sm font-bold text-primary">{item.quantity}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-md hover:bg-primary/10"
+                                onClick={() => updateQuantity(item.productId, 1)}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </ScrollArea>
+
+                {/* Pied du panier */}
+                <div className="shrink-0 border-t border-primary/10 bg-card p-5 space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-primary/70 text-sm">
+                      <span>{t('pos.subtotal')}</span>
+                      <span>{formatCurrency(cartTotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-primary/70 text-sm">
+                      <span>{t('pos.tax')}</span>
+                      <span>{formatCurrency(0)}</span>
+                    </div>
+                    <div className="flex justify-between text-primary font-bold text-2xl pt-2 border-t border-dashed border-primary/20">
+                      <span>{t('pos.total')}</span>
+                      <span className="text-primary">{formatCurrency(cartTotal)}</span>
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full h-14 text-lg rounded-xl shadow-md hover:shadow-lg transition-all bg-primary hover:bg-primary/90"
+                    disabled={cart.length === 0}
+                    onClick={() => {
+                      setPaymentMethod("cash");
+                      setAmountEntered(cartTotal.toString());
+                      setPaymentModalOpen(true);
+                    }}
+                  >
+                    {t('pos.pay')} {formatCurrency(cartTotal)}
+                  </Button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Payment Modal (inchangé) */}
         <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
