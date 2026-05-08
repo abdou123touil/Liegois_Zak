@@ -49,26 +49,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const previousAlertesRef = useRef<string[]>([]);
 
   // Affichage des alertes quand de nouvelles matières premières deviennent critiques
-  useEffect(() => {
-    if (!alertes?.length) return;
+useEffect(() => {
+  if (!alertes?.length) return;
 
-    const currentIds = alertes.map((a) => a.matiereId.toString());
+  const currentIds = alertes.map((a) => a.matiereId.toString());
+  const newAlertes = alertes.filter(
+    (a) => !previousAlertesRef.current.includes(a.matiereId.toString())
+  );
 
-    const newAlertes = alertes.filter(
-      (a) =>
-        !previousAlertesRef.current.includes(a.matiereId.toString())
-    );
+  if (newAlertes.length > 0) {
+    toast({
+      title: "⚠️ Stock faible détecté",
+      description: newAlertes
+        .map((a) => `${a.nom} : ${a.quantiteRestante} ${a.uniteMesure} (seuil ${a.seuilAlerte})`)
+        .join(", "),
+      variant: "destructive",
+    });
+  }
 
-    if (newAlertes.length > 0) {
-      toast.warning("⚠️ Stock faible détecté", {
-        description: newAlertes
-          .map((a) => `${a.nom} (${a.quantiteRestante})`)
-          .join(", "),
-      });
-    }
-
-    previousAlertesRef.current = currentIds;
-  }, [alertes]);
+  previousAlertesRef.current = currentIds;
+}, [alertes, toast]);
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
