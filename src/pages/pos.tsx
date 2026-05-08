@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Plus, Minus, CreditCard, Banknote, HelpCircle, ShoppingCart, Loader2, Croissant, Package, Menu, X } from "lucide-react";
 import { useLogout } from "@/lib/api-client";
@@ -59,7 +60,6 @@ export default function Pos() {
       }
       return [...prev, { productId: product.id, name: product.name, price: product.price, quantity: 1 }];
     });
-    // Ouvrir automatiquement le panier si fermé (optionnel)
     if (!isCartOpen) setIsCartOpen(true);
   };
 
@@ -173,32 +173,30 @@ export default function Pos() {
             </div>
           </header>
 
-          {/* Barre des catégories défilable horizontalement */}
-          <div className="bg-card/50 backdrop-blur-sm border-b border-primary/10 shrink-0 pt-2 px-2">
+          {/* Barre des catégories avec défilement horizontal */}
+          <div className="bg-card/50 backdrop-blur-sm border-b border-primary/10 shrink-0 pt-2 px-2 overflow-x-auto">
             <Tabs
               defaultValue="all"
               className="w-full"
               onValueChange={(v) => setActiveCategory(v === "all" ? undefined : parseInt(v))}
             >
-              <ScrollArea className="w-full whitespace-nowrap pb-2">
-                <TabsList className="inline-flex h-auto p-1 bg-transparent gap-2">
+              <TabsList className="inline-flex h-auto p-1 bg-transparent gap-2">
+                <TabsTrigger
+                  value="all"
+                  className="px-6 py-3 text-base rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-none transition-all whitespace-nowrap"
+                >
+                  {t('pos.all_products')}
+                </TabsTrigger>
+                {categories?.map((cat) => (
                   <TabsTrigger
-                    value="all"
-                    className="px-6 py-3 text-base rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-none transition-all"
+                    key={cat.id}
+                    value={cat.id.toString()}
+                    className="px-6 py-3 text-base rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-none transition-all whitespace-nowrap"
                   >
-                    {t('pos.all_products')}
+                    <span className="mr-2">{cat.icon}</span> {cat.name}
                   </TabsTrigger>
-                  {categories?.map((cat) => (
-                    <TabsTrigger
-                      key={cat.id}
-                      value={cat.id.toString()}
-                      className="px-6 py-3 text-base rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-none transition-all"
-                    >
-                      <span className="mr-2">{cat.icon}</span> {cat.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </ScrollArea>
+                ))}
+              </TabsList>
             </Tabs>
           </div>
 
@@ -274,7 +272,6 @@ export default function Pos() {
         <AnimatePresence>
           {isCartOpen && (
             <>
-              {/* Overlay pour fermer le panier (visible sur mobile) */}
               <div
                 className="fixed inset-0 bg-black/50 z-40 lg:hidden"
                 onClick={() => setIsCartOpen(false)}
@@ -286,7 +283,6 @@ export default function Pos() {
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
                 className="fixed right-0 top-0 h-full w-80 z-50 bg-card border-l border-primary/10 shadow-xl flex flex-col lg:relative lg:translate-x-0"
               >
-                {/* En-tête du panier */}
                 <div className="h-16 flex items-center justify-between px-5 border-b border-primary/10 bg-card shrink-0">
                   <h2 className="text-lg font-serif font-bold text-primary flex items-center gap-2">
                     <ShoppingCart className="h-5 w-5" /> {t('pos.current_order')}
@@ -302,8 +298,6 @@ export default function Pos() {
                     </Button>
                   </div>
                 </div>
-
-                {/* Contenu du panier */}
                 <ScrollArea className="flex-1 p-3">
                   <AnimatePresence initial={false}>
                     {cart.length === 0 ? (
@@ -358,8 +352,6 @@ export default function Pos() {
                     )}
                   </AnimatePresence>
                 </ScrollArea>
-
-                {/* Pied du panier */}
                 <div className="shrink-0 border-t border-primary/10 bg-card p-5 space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between text-primary/70 text-sm">
@@ -392,105 +384,103 @@ export default function Pos() {
           )}
         </AnimatePresence>
 
-        {/* Payment Modal (inchangé) */}
+        {/* Modal de paiement repensé (compact, avec Select) */}
         <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
-          <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden rounded-2xl bg-card border border-primary/20 shadow-2xl">
-            <DialogHeader>
-              <DialogTitle>Methode de paiment</DialogTitle>
+          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-primary/20 shadow-2xl p-0">
+            <DialogHeader className="px-6 pt-6 pb-2">
+              <DialogTitle>{t('pos.payment_title')}</DialogTitle>
             </DialogHeader>
-            <div className="flex h-[520px]">
-              <div className="w-1/3 bg-primary/5 border-r border-primary/10 p-5 space-y-3">
-                <h3 className="font-serif font-bold text-primary mb-4 px-2">{t('pos.payment_method')}</h3>
-                <Button
-                  variant={paymentMethod === "cash" ? "default" : "outline"}
-                  className="w-full justify-start h-12 text-base rounded-xl"
-                  onClick={() => setPaymentMethod("cash")}
-                >
-                  <Banknote className="mr-3 h-5 w-5" /> {t('pos.cash')}
-                </Button>
-                <Button
-                  variant={paymentMethod === "card" ? "default" : "outline"}
-                  className="w-full justify-start h-12 text-base rounded-xl"
-                  onClick={() => { setPaymentMethod("card"); setAmountEntered(cartTotal.toString()); }}
-                >
-                  <CreditCard className="mr-3 h-5 w-5" /> {t('pos.card')}
-                </Button>
-                <Button
-                  variant={paymentMethod === "other" ? "default" : "outline"}
-                  className="w-full justify-start h-12 text-base rounded-xl"
-                  onClick={() => { setPaymentMethod("other"); setAmountEntered(cartTotal.toString()); }}
-                >
-                  <HelpCircle className="mr-3 h-5 w-5" /> {t('pos.other')}
-                </Button>
+            <div className="px-6 pb-6 space-y-5">
+              {/* Montant total dû */}
+              <div className="flex justify-between items-center bg-primary/5 p-4 rounded-xl">
+                <span className="text-lg font-semibold text-primary/80">{t('pos.total_due')}</span>
+                <span className="text-2xl font-bold text-primary">{formatCurrency(cartTotal)}</span>
               </div>
-              <div className="w-2/3 p-6 flex flex-col">
-                <div className="flex justify-between items-end mb-6">
-                  <div>
-                    <div className="text-sm text-primary/60 font-medium">{t('pos.total_due')}</div>
-                    <div className="text-3xl font-bold text-primary">{formatCurrency(cartTotal)}</div>
+
+              {/* Sélecteur de méthode de paiement (dropdown) */}
+              <div>
+                <label className="text-sm font-medium text-primary/70 mb-1 block">{t('pos.payment_method')}</label>
+                <Select value={paymentMethod} onValueChange={(val: any) => {
+                  setPaymentMethod(val);
+                  if (val !== "cash") {
+                    setAmountEntered(cartTotal.toString());
+                  }
+                }}>
+                  <SelectTrigger className="w-full bg-card">
+                    <SelectValue placeholder={t('pos.select_payment_method')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cash">
+                      <div className="flex items-center gap-2"><Banknote className="h-4 w-4" /> {t('pos.cash')}</div>
+                    </SelectItem>
+                    <SelectItem value="card">
+                      <div className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> {t('pos.card')}</div>
+                    </SelectItem>
+                    <SelectItem value="other">
+                      <div className="flex items-center gap-2"><HelpCircle className="h-4 w-4" /> {t('pos.other')}</div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Zone de saisie pour espèces */}
+              {paymentMethod === "cash" && (
+                <>
+                  <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-right text-3xl font-mono tracking-wider shadow-inner text-primary">
+                    {formatCurrency(parseFloat(amountEntered || "0"))}
                   </div>
-                  {paymentMethod === "cash" && parseFloat(amountEntered) > cartTotal && (
-                    <div className="text-right">
-                      <div className="text-sm text-primary/60 font-medium">{t('pos.change')}</div>
-                      <div className="text-2xl font-bold text-green-600">{formatCurrency(parseFloat(amountEntered) - cartTotal)}</div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {["7", "8", "9", "+10", "4", "5", "6", "+20", "1", "2", "3", "+50", "C", "0", ".", "+100"].map((key, i) => (
+                      <Button
+                        key={i}
+                        variant={key === "C" ? "destructive" : key.startsWith("+") ? "secondary" : "outline"}
+                        className="h-14 text-xl font-medium rounded-xl"
+                        onClick={() => {
+                          if (key.startsWith("+")) {
+                            handleQuickAmount(parseFloat(amountEntered || "0") + parseInt(key.substring(1)));
+                          } else {
+                            handleNumpad(key);
+                          }
+                        }}
+                      >
+                        {key}
+                      </Button>
+                    ))}
+                  </div>
+                  {parseFloat(amountEntered) > cartTotal && (
+                    <div className="flex justify-between items-center bg-green-50 p-3 rounded-xl text-green-700">
+                      <span className="font-medium">{t('pos.change')}</span>
+                      <span className="text-xl font-bold">{formatCurrency(parseFloat(amountEntered) - cartTotal)}</span>
                     </div>
                   )}
-                </div>
-                {paymentMethod === "cash" ? (
-                  <>
-                    <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-4 text-right text-3xl font-mono tracking-wider shadow-inner text-primary">
-                      {formatCurrency(parseFloat(amountEntered || "0"))}
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 flex-1">
-                      {["7", "8", "9", "+10", "4", "5", "6", "+20", "1", "2", "3", "+50", "C", "0", ".", "+100"].map((key, i) => (
-                        <Button
-                          key={i}
-                          variant={key === "C" ? "destructive" : key.startsWith("+") ? "secondary" : "outline"}
-                          className="h-14 text-xl font-medium rounded-xl"
-                          onClick={() => {
-                            if (key.startsWith("+")) {
-                              handleQuickAmount(parseFloat(amountEntered || "0") + parseInt(key.substring(1)));
-                            } else {
-                              handleNumpad(key);
-                            }
-                          }}
-                        >
-                          {key}
-                        </Button>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                      {paymentMethod === "card" ? <CreditCard className="h-10 w-10 text-primary" /> : <HelpCircle className="h-10 w-10 text-primary" />}
-                    </div>
-                    <h3 className="text-xl font-bold text-primary mb-2">
-                      {paymentMethod === "card" ? t('pos.ready_for_card') : t('pos.alternative_payment')}
-                    </h3>
-                    <p className="text-primary/70">{t('pos.payment_instruction')}</p>
+                </>
+              )}
+
+              {/* Message pour les autres méthodes */}
+              {paymentMethod !== "cash" && (
+                <div className="flex flex-col items-center justify-center text-center py-6 space-y-3 bg-primary/5 rounded-xl">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                    {paymentMethod === "card" ? <CreditCard className="h-8 w-8 text-primary" /> : <HelpCircle className="h-8 w-8 text-primary" />}
                   </div>
-                )}
-                <div className="mt-6">
-                  <Button
-                    className="w-full h-14 text-lg rounded-xl shadow-md bg-primary hover:bg-primary/90"
-                    disabled={(paymentMethod === "cash" && parseFloat(amountEntered) < cartTotal) || createOrderMutation.isPending}
-                    onClick={processPayment}
-                  >
-                    {createOrderMutation.isPending ? <Loader2 className="animate-spin h-6 w-6" /> : t('pos.complete_order')}
-                  </Button>
+                  <p className="text-sm text-primary/70">{t('pos.payment_instruction')}</p>
                 </div>
-              </div>
+              )}
+
+              {/* Bouton de confirmation */}
+              <Button
+                className="w-full h-12 text-base rounded-xl shadow-md bg-primary hover:bg-primary/90 disabled:opacity-50"
+                disabled={(paymentMethod === "cash" && parseFloat(amountEntered) < cartTotal) || createOrderMutation.isPending}
+                onClick={processPayment}
+              >
+                {createOrderMutation.isPending ? <Loader2 className="animate-spin h-5 w-5" /> : t('pos.complete_order')}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Success Modal (inchangé) */}
+        {/* Success Modal */}
         <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
           <DialogContent className="sm:max-w-[400px] border-none bg-transparent shadow-none [&>button]:hidden">
-            <DialogHeader>
-              <DialogTitle>Success</DialogTitle>
-            </DialogHeader>
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
