@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useListConges, useCreateConge, useApproveConge, useListEmployees, Conge } from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Plus, CheckCircle, XCircle, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { Employee } from "@/lib/api-client";
 
 export default function Conges() {
   const { t } = useTranslation();
@@ -22,7 +23,9 @@ export default function Conges() {
   const [dateFin, setDateFin] = useState("");
   const [type, setType] = useState("");
   const [motif, setMotif] = useState("");
-
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [congesRestants, setCongesRestants] = useState(0);
+  const [joursDemandes, setJoursDemandes] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,10 +87,28 @@ export default function Conges() {
   };
 
   const getStatutBadge = (valide: boolean) => {
-    return valide 
+    return valide
       ? <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{t('conges.approved')}</span>
       : <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{t('conges.pending')}</span>;
   };
+  useEffect(() => {
+    const emp = employees.find(e => e.id.toString() === employeeId);
+    setSelectedEmployee(emp || null);
+    setCongesRestants(emp?.joursCongeRestants ?? 0);
+  }, [employeeId, employees]);
+
+  // Calcul des jours demandés quand dateDebut ou dateFin change
+  useEffect(() => {
+    if (dateDebut && dateFin) {
+      const start = new Date(dateDebut);
+      const end = new Date(dateFin);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      setJoursDemandes(diffDays);
+    } else {
+      setJoursDemandes(0);
+    }
+  }, [dateDebut, dateFin]);
 
   return (
     <ADMINLayout>
@@ -195,6 +216,16 @@ export default function Conges() {
                 <div className="grid gap-2">
                   <Label>{t('conges.end_date')}</Label>
                   <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Congés restants</Label>
+                  <Input value={congesRestants} disabled className="bg-muted" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Jours demandés</Label>
+                  <Input value={joursDemandes} disabled className="bg-muted" />
                 </div>
               </div>
               <div className="grid gap-2">
