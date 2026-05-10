@@ -37,6 +37,9 @@ export type Employee = {
   hoursPerMonth?: number;
   monthlySalary?: number;
   isActive: boolean;
+   dateEmbauche?: string;
+  congesParAn?: number;
+  joursCongeRestants?: number;
 };
 export type Category = {
     id: number;

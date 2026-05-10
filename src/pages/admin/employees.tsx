@@ -26,7 +26,8 @@ export default function Employees() {
   const [password, setPassword] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
+  const [dateEmbauche, setDateEmbauche] = useState("");
+  const [congesParAn, setCongesParAn] = useState("20");
   const { data: employees, isLoading } = useListEmployees();
   const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee();
@@ -41,7 +42,10 @@ export default function Employees() {
     setHourlyRate("");
     setHoursPerMonth("");
     setMonthlySalary("");
+    setDateEmbauche(new Date().toISOString().split('T')[0]);
+    setCongesParAn("20");
     setIsModalOpen(true);
+
   };
 
   const openEditModal = (emp: Employee) => {
@@ -49,7 +53,8 @@ export default function Employees() {
     setName(emp.name);
     setUsername(emp.username);
     setRole(emp.role as any);
-    
+    setDateEmbauche(emp.dateEmbauche || new Date().toISOString().split('T')[0]);
+    setCongesParAn(emp.congesParAn?.toString() || "20");
     setHourlyRate(emp.hourlyRate?.toString() || "");
     setHoursPerMonth(emp.hoursPerMonth?.toString() || "");
     setMonthlySalary(emp.monthlySalary?.toString() || "");
@@ -79,6 +84,8 @@ export default function Employees() {
       employeeData.hourlyRate = hourlyRate ? parseFloat(hourlyRate) : null;
       employeeData.hoursPerMonth = hoursPerMonth ? parseInt(hoursPerMonth) : null;
       employeeData.monthlySalary = null;
+      employeeData.dateEmbauche = dateEmbauche;
+      employeeData.congesParAn = parseInt(congesParAn);
     }
 
     try {
@@ -170,7 +177,9 @@ export default function Employees() {
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.username')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.role')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.rate_salary')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.soldes_conges')}</th>
                     <th className="text-right p-4 text-sm font-medium text-primary/70">{t('employees.table.actions')}</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -200,6 +209,7 @@ export default function Employees() {
                               ? t('employees.monthly_salary_format', { salary: emp.monthlySalary?.toFixed(2) })
                               : t('employees.hourly_rate_format', { rate: emp.hourlyRate, hours: emp.hoursPerMonth })}
                           </td>
+                          <td className="p-4">{emp.joursCongeRestants ?? 0} jours</td>
                           <td className="p-4 text-right space-x-2">
                             <Button variant="ghost" size="icon" onClick={() => openEditModal(emp)} className="hover:bg-primary/10">
                               <Edit className="h-4 w-4 text-primary" />
@@ -208,6 +218,8 @@ export default function Employees() {
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </td>
+
+
                         </motion.tr>
                       ))}
                     </AnimatePresence>
@@ -235,8 +247,8 @@ export default function Employees() {
                 <Label htmlFor="username">{t('employees.username_label')}</Label>
                 <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
               </div>
-              
-                  <div className="grid gap-2">
+
+              <div className="grid gap-2">
                 <Label htmlFor="password">{t('employees.password_label')}</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
@@ -259,6 +271,14 @@ export default function Employees() {
                     <SelectItem value="OTHER">{t('employees.role_other')}</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="dateEmbauche">Date d'embauche</Label>
+                <Input id="dateEmbauche" type="date" value={dateEmbauche} onChange={(e) => setDateEmbauche(e.target.value)} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="congesParAn">Congés par an (jours)</Label>
+                <Input id="congesParAn" type="number" min="0" value={congesParAn} onChange={(e) => setCongesParAn(e.target.value)} />
               </div>
               {role === "ADMIN" ? (
                 <div className="grid gap-2">
