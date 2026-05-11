@@ -86,11 +86,16 @@ export default function Conges() {
     }
   };
 
-  const getStatutBadge = (valide: boolean) => {
-    return valide
-      ? <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{t('conges.approved')}</span>
-      : <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{t('conges.pending')}</span>;
-  };
+ const getStatutBadge = (statut: string) => {
+  switch (statut) {
+    case "APPROUVE":
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{t('conges.approved')}</span>;
+    case "REJETE":
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">{t('conges.rejected')}</span>;
+    default:
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{t('conges.pending')}</span>;
+  }
+};
   useEffect(() => {
     const emp = employees.find(e => e.id.toString() === employeeId);
     setSelectedEmployee(emp || null);

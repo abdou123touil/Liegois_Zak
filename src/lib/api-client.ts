@@ -162,6 +162,7 @@ export interface Conge {
   motif?: string;
   demandeLe: string;
   reponseLe?: string;
+  statue: "EN_ATTENTE" | "ACCEPTE" | "REFUSE";
 }
 
 // ==================== POINTAGES ====================
