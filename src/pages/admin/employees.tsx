@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useListEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee, Employee } from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -31,10 +31,28 @@ export default function Employees() {
   const queryClient = useQueryClient();
   const [dateEmbauche, setDateEmbauche] = useState("");
   const [congesParAn, setCongesParAn] = useState("20");
+  const [monthlyFixedSalary, setMonthlyFixedSalary] = useState(""); // Frontend only !
+
   const { data: employees, isLoading } = useListEmployees();
   const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee();
   const deleteMutation = useDeleteEmployee();
+
+  // Calcul automatique du taux horaire à partir du salaire mensuel fixe et des heures par mois
+  useEffect(() => {
+    if (role !== "ADMIN" && monthlyFixedSalary && hoursPerMonth) {
+      const monthly = parseFloat(monthlyFixedSalary);
+      const hours = parseInt(hoursPerMonth);
+      if (!isNaN(monthly) && !isNaN(hours) && hours > 0) {
+        const rate = monthly / hours;
+        setHourlyRate(rate.toFixed(3));
+      } else {
+        setHourlyRate("");
+      }
+    } else if (role === "ADMIN") {
+      setHourlyRate("");
+    }
+  }, [monthlyFixedSalary, hoursPerMonth, role]);
 
   const openNewModal = () => {
     setEditingEmployee(null);
@@ -46,6 +64,7 @@ export default function Employees() {
     setHourlyRate("");
     setHoursPerMonth("");
     setMonthlySalary("");
+    setMonthlyFixedSalary("");
     setDateEmbauche(new Date().toISOString().split('T')[0]);
     setCongesParAn("20");
     setIsModalOpen(true);
@@ -58,9 +77,17 @@ export default function Employees() {
     setRole(emp.role as any);
     setDateEmbauche(emp.dateEmbauche || new Date().toISOString().split('T')[0]);
     setCongesParAn(emp.congesParAn?.toString() || "20");
-    setHourlyRate(emp.hourlyRate?.toString() || "");
     setHoursPerMonth(emp.hoursPerMonth?.toString() || "");
     setMonthlySalary(emp.monthlySalary?.toString() || "");
+    // Pré-remplir le salaire mensuel fixe à partir du taux horaire et heures par mois
+    if (emp.hourlyRate && emp.hoursPerMonth) {
+      const fixed = emp.hourlyRate * emp.hoursPerMonth;
+      setMonthlyFixedSalary(fixed.toFixed(3));
+      setHourlyRate(emp.hourlyRate.toString());
+    } else {
+      setMonthlyFixedSalary("");
+      setHourlyRate("");
+    }
     setPassword("");
     setChangePassword(false);
     setIsModalOpen(true);
@@ -115,6 +142,7 @@ export default function Employees() {
       employeeData.hourlyRate = null;
       employeeData.hoursPerMonth = null;
     } else {
+      // On envoie le taux horaire calculé (ou saisi manuellement)
       employeeData.hourlyRate = hourlyRate ? parseFloat(hourlyRate) : null;
       employeeData.hoursPerMonth = hoursPerMonth ? parseInt(hoursPerMonth) : null;
       employeeData.monthlySalary = null;
@@ -239,14 +267,39 @@ export default function Employees() {
               </div>
               <div><Label>Date d'embauche</Label><Input type="date" value={dateEmbauche} onChange={e => setDateEmbauche(e.target.value)} /></div>
               <div><Label>Congés par an (jours)</Label><Input type="number" min="0" value={congesParAn} onChange={e => setCongesParAn(e.target.value)} /></div>
+
               {role === "ADMIN" ? (
                 <div><Label>{t('employees.monthly_salary_label')}</Label><Input type="number" step="0.01" value={monthlySalary} onChange={e => setMonthlySalary(e.target.value)} /></div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div><Label>{t('employees.hourly_rate_label')}</Label><Input type="number" step="0.01" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} /></div>
-                  <div><Label>{t('employees.hours_per_month_label')}</Label><Input type="number" value={hoursPerMonth} onChange={e => setHoursPerMonth(e.target.value)} /></div>
-                </div>
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Salaire mensuel fixe (TND)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={monthlyFixedSalary}
+                        onChange={e => setMonthlyFixedSalary(e.target.value)}
+                        placeholder="Ex: 1500"
+                      />
+                    </div>
+                    <div>
+                      <Label>{t('employees.hours_per_month_label')}</Label>
+                      <Input
+                        type="number"
+                        value={hoursPerMonth}
+                        onChange={e => setHoursPerMonth(e.target.value)}
+                        placeholder="Ex: 160"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>{t('employees.hourly_rate_label')} (calculé)</Label>
+                    <Input type="number" step="0.001" value={hourlyRate} disabled className="bg-muted" />
+                  </div>
+                </>
               )}
+
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="changePassword" checked={changePassword} onChange={e => setChangePassword(e.target.checked)} />
                 <Label htmlFor="changePassword">Changer le mot de passe</Label>
