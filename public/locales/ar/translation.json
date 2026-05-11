@@ -150,7 +150,8 @@
       "username": "اسم المستخدم",
       "role": "الدور",
       "rate_salary": "الأجر/الراتب",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "soldes_conges": "رصيد الإجازات"
     }
   },
   "expenses": {

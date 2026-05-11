@@ -139,7 +139,8 @@
       "username": "Nom d'utilisateur",
       "role": "Rôle",
       "rate_salary": "Taux/Salaire",
-      "actions": "Actions"
+      "actions": "Actions",
+      "soldes_conges": "Soldes de congés"
     }
   },
   "expenses": {

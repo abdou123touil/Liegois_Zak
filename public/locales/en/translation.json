@@ -139,7 +139,8 @@
       "username": "Username",
       "role": "Role",
       "rate_salary": "Rate/Salary",
-      "actions": "Actions"
+      "actions": "Actions",
+      "soldes_conges": "Leave balance"
     }
   },
   "expenses": {
