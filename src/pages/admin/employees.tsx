@@ -300,10 +300,12 @@ export default function Employees() {
                 </>
               )}
 
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="changePassword" checked={changePassword} onChange={e => setChangePassword(e.target.checked)} />
-                <Label htmlFor="changePassword">Changer le mot de passe</Label>
-              </div>
+              {editingEmployee && (
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="changePassword" checked={changePassword} onChange={e => setChangePassword(e.target.checked)} />
+                  <Label htmlFor="changePassword">Changer le mot de passe</Label>
+                </div>
+              )}
               {changePassword && (
                 <div><Label>{t('employees.password_label')}</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
               )}
