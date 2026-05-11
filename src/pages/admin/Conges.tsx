@@ -170,7 +170,7 @@ export default function Conges() {
                           <td className="p-4 text-primary/70">{new Date(conge.dateDebut).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{new Date(conge.dateFin).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{getTypeLabel(conge.type)}</td>
-                          <td className="p-4">{getStatutBadge(conge.valide)}</td>
+                          <td className="p-4">{getStatutBadge(conge.statue)}</td>
                           <td className="p-4 text-right space-x-2">
                             {!conge.valide && (
                               <>
