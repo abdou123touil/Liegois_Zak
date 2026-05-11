@@ -26,6 +26,7 @@ export default function Conges() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [congesRestants, setCongesRestants] = useState(0);
   const [joursDemandes, setJoursDemandes] = useState(0);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -46,6 +47,12 @@ export default function Conges() {
   const handleSave = async () => {
     if (!employeeId || !dateDebut || !dateFin || !type) {
       toast({ title: t('common.error'), description: t('conges.validation_required'), variant: "destructive" });
+      return;
+    }
+
+    // Vérification du solde pour les congés payés
+    if (type === "CONGES_PAYES" && joursDemandes > congesRestants) {
+      toast({ title: t('common.error'), description: "Jours de congé insuffisants", variant: "destructive" });
       return;
     }
 
@@ -86,25 +93,23 @@ export default function Conges() {
     }
   };
 
- const getStatutBadge = (statut: string) => {
-   console.log("Statut du congé :", statut);
-  switch (statut) {
-    case "APPROUVE":
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{t('conges.approved')}</span>;
-    case "REJETE":
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">{t('conges.rejected')}</span>;
-    default:
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{t('conges.pending')}</span>;
-  }
-  
-};
+  const getStatutBadge = (statut: string) => {
+    switch (statut) {
+      case "APPROUVE":
+        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{t('conges.approved')}</span>;
+      case "REJETE":
+        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">{t('conges.rejected')}</span>;
+      default:
+        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{t('conges.pending')}</span>;
+    }
+  };
+
   useEffect(() => {
     const emp = employees.find(e => e.id.toString() === employeeId);
     setSelectedEmployee(emp || null);
     setCongesRestants(emp?.joursCongeRestants ?? 0);
   }, [employeeId, employees]);
 
-  // Calcul des jours demandés quand dateDebut ou dateFin change
   useEffect(() => {
     if (dateDebut && dateFin) {
       const start = new Date(dateDebut);
@@ -170,9 +175,9 @@ export default function Conges() {
                           <td className="p-4 text-primary/70">{new Date(conge.dateDebut).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{new Date(conge.dateFin).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{getTypeLabel(conge.type)}</td>
-                          <td className="p-4">{getStatutBadge(conge.statue)}</td>
+                          <td className="p-4">{getStatutBadge(conge.statut)}</td> {/* ✅ corrigé */}
                           <td className="p-4 text-right space-x-2">
-                            {!conge.valide && (
+                            {conge.statut === "EN_ATTENTE" && (   // ✅ corrigé
                               <>
                                 <Button variant="ghost" size="icon" onClick={() => handleApprove(conge.id, true)} className="hover:bg-green-100">
                                   <CheckCircle className="h-4 w-4 text-green-600" />
