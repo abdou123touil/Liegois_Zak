@@ -273,33 +273,19 @@ export default function Employees() {
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Salaire mensuel fixe (TND)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={monthlyFixedSalary}
-                        onChange={e => setMonthlyFixedSalary(e.target.value)}
-                        placeholder="Ex: 1500"
-                      />
-                    </div>
-                    <div>
-                      <Label>{t('employees.hours_per_month_label')}</Label>
-                      <Input
-                        type="number"
-                        value={hoursPerMonth}
-                        onChange={e => setHoursPerMonth(e.target.value)}
-                        placeholder="Ex: 160"
-                      />
-                    </div>
+                    <div><Label>Salaire mensuel fixe (TND)</Label><Input type="number" step="0.01" value={monthlyFixedSalary} onChange={e => setMonthlyFixedSalary(e.target.value)} placeholder="Ex: 1500" /></div>
+                    <div><Label>{t('employees.hours_per_month_label')}</Label><Input type="number" value={hoursPerMonth} onChange={e => setHoursPerMonth(e.target.value)} placeholder="Ex: 160" /></div>
                   </div>
-                  <div>
-                    <Label>{t('employees.hourly_rate_label')} (calculé)</Label>
-                    <Input type="number" step="0.001" value={hourlyRate} disabled className="bg-muted" />
-                  </div>
+                  <div><Label>{t('employees.hourly_rate_label')} (calculé)</Label><Input type="number" step="0.001" value={hourlyRate} disabled className="bg-muted" /></div>
                 </>
               )}
 
+              {/* Mot de passe obligatoire en création */}
+              {!editingEmployee && (
+                <div><Label>{t('employees.password_label')}</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
+              )}
+
+              {/* Changer le mot de passe en édition */}
               {editingEmployee && (
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id="changePassword" checked={changePassword} onChange={e => setChangePassword(e.target.checked)} />
