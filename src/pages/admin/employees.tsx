@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 export default function Employees() {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -24,6 +26,7 @@ export default function Employees() {
   const [hoursPerMonth, setHoursPerMonth] = useState("");
   const [monthlySalary, setMonthlySalary] = useState("");
   const [password, setPassword] = useState("");
+  const [changePassword, setChangePassword] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [dateEmbauche, setDateEmbauche] = useState("");
@@ -38,6 +41,7 @@ export default function Employees() {
     setName("");
     setUsername("");
     setPassword("");
+    setChangePassword(false);
     setRole("CASHIER");
     setHourlyRate("");
     setHoursPerMonth("");
@@ -45,7 +49,6 @@ export default function Employees() {
     setDateEmbauche(new Date().toISOString().split('T')[0]);
     setCongesParAn("20");
     setIsModalOpen(true);
-
   };
 
   const openEditModal = (emp: Employee) => {
@@ -58,24 +61,55 @@ export default function Employees() {
     setHourlyRate(emp.hourlyRate?.toString() || "");
     setHoursPerMonth(emp.hoursPerMonth?.toString() || "");
     setMonthlySalary(emp.monthlySalary?.toString() || "");
+    setPassword("");
+    setChangePassword(false);
     setIsModalOpen(true);
   };
 
+  const handleDeleteClick = (emp: Employee) => {
+    setEmployeeToDelete(emp);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!employeeToDelete) return;
+    try {
+      await deleteMutation.mutateAsync({ id: employeeToDelete.id });
+      toast({ title: t('common.success'), description: t('employees.delete_success') });
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+    } catch {
+      toast({ title: t('common.error'), description: t('employees.delete_error'), variant: "destructive" });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+    }
+  };
+
   const handleSave = async () => {
-    if (!name || !username || !password) {
+    if (!name || !username) {
+      toast({ title: t('common.error'), description: t('employees.validation_name_username_required'), variant: "destructive" });
+      return;
+    }
+    if (!editingEmployee && !password) {
       toast({ title: t('common.error'), description: t('employees.validation_name_username_password_required'), variant: "destructive" });
+      return;
+    }
+    if (editingEmployee && changePassword && !password) {
+      toast({ title: t('common.error'), description: "Veuillez saisir le nouveau mot de passe", variant: "destructive" });
       return;
     }
 
     const employeeData: any = {
       name,
       username,
-      password,
       role,
       isActive: true,
     };
 
-    // ADMIN → mensuel ; tous les autres → horaire
+    if (!editingEmployee || (editingEmployee && changePassword)) {
+      employeeData.password = password;
+    }
+
     if (role === "ADMIN") {
       employeeData.monthlySalary = monthlySalary ? parseFloat(monthlySalary) : null;
       employeeData.hourlyRate = null;
@@ -84,9 +118,9 @@ export default function Employees() {
       employeeData.hourlyRate = hourlyRate ? parseFloat(hourlyRate) : null;
       employeeData.hoursPerMonth = hoursPerMonth ? parseInt(hoursPerMonth) : null;
       employeeData.monthlySalary = null;
-      employeeData.dateEmbauche = dateEmbauche;
-      employeeData.congesParAn = parseInt(congesParAn);
     }
+    employeeData.dateEmbauche = dateEmbauche;
+    employeeData.congesParAn = parseInt(congesParAn);
 
     try {
       if (editingEmployee) {
@@ -103,48 +137,17 @@ export default function Employees() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm(t('employees.confirm_delete'))) {
-      try {
-        await deleteMutation.mutateAsync({ id });
-        toast({ title: t('common.success'), description: t('employees.delete_success') });
-        queryClient.invalidateQueries({ queryKey: ["employees"] });
-      } catch (error) {
-        toast({ title: t('common.error'), description: t('employees.delete_error'), variant: "destructive" });
-      }
-    }
-  };
-
-  // Fonction pour afficher le badge de rôle avec les bonnes couleurs
   const getRoleBadge = (role: string) => {
     const roleLower = role.toLowerCase();
     let colorClass = "";
     let label = "";
-
     switch (roleLower) {
-      case "admin":
-        colorClass = "bg-primary/10 text-primary";
-        label = t('employees.role_admin');
-        break;
-      case "cashier":
-        colorClass = "bg-amber-100 text-amber-700";
-        label = t('employees.role_cashier');
-        break;
-      case "chef":
-        colorClass = "bg-blue-100 text-blue-700";
-        label = t('employees.role_chef');
-        break;
-      case "responsable":
-        colorClass = "bg-purple-100 text-purple-700";
-        label = t('employees.role_responsable');
-        break;
-      case "other":
-        colorClass = "bg-gray-100 text-gray-700";
-        label = t('employees.role_other');
-        break;
-      default:
-        colorClass = "bg-gray-100 text-gray-700";
-        label = role;
+      case "admin": colorClass = "bg-primary/10 text-primary"; label = t('employees.role_admin'); break;
+      case "cashier": colorClass = "bg-amber-100 text-amber-700"; label = t('employees.role_cashier'); break;
+      case "chef": colorClass = "bg-blue-100 text-blue-700"; label = t('employees.role_chef'); break;
+      case "responsable": colorClass = "bg-purple-100 text-purple-700"; label = t('employees.role_responsable'); break;
+      case "other": colorClass = "bg-gray-100 text-gray-700"; label = t('employees.role_other'); break;
+      default: colorClass = "bg-gray-100 text-gray-700"; label = role;
     }
     return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>{label}</span>;
   };
@@ -173,53 +176,36 @@ export default function Employees() {
               <table className="w-full">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.name')}</th>
-                    <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.username')}</th>
-                    <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.role')}</th>
-                    <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.rate_salary')}</th>
-                    <th className="text-left p-4 text-sm font-medium text-primary/70">{t('employees.table.soldes_conges')}</th>
-                    <th className="text-right p-4 text-sm font-medium text-primary/70">{t('employees.table.actions')}</th>
-
+                    <th className="p-4 text-left">{t('employees.table.name')}</th>
+                    <th className="p-4 text-left">{t('employees.table.username')}</th>
+                    <th className="p-4 text-left">{t('employees.table.role')}</th>
+                    <th className="p-4 text-left">{t('employees.table.rate_salary')}</th>
+                    <th className="p-4 text-left">Solde congés</th>
+                    <th className="p-4 text-right">{t('employees.table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={5} className="text-center py-12">{t('common.loading')}</td></tr>
+                    <tr><td colSpan={6} className="py-12 text-center">{t('common.loading')}</td></tr>
                   ) : employees?.length === 0 ? (
-                    <tr><td colSpan={5} className="text-center py-12">{t('employees.empty')}</td></tr>
+                    <tr><td colSpan={6} className="py-12 text-center">{t('employees.empty')}</td></tr>
                   ) : (
                     <AnimatePresence>
                       {employees?.map((emp, idx) => (
-                        <motion.tr
-                          key={emp.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.03 }}
-                          className="border-b border-primary/5 hover:bg-primary/5"
-                        >
-                          <td className="p-4 font-medium text-primary/90 flex items-center gap-2">
-                            <UserCircle className="h-5 w-5 text-primary" /> {emp.name}
-                          </td>
-                          <td className="p-4 text-primary/70">{emp.username}</td>
+                        <motion.tr key={emp.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="border-b hover:bg-primary/5">
+                          <td className="p-4 font-medium flex items-center gap-2"><UserCircle className="h-5 w-5 text-primary" /> {emp.name}</td>
+                          <td className="p-4">{emp.username}</td>
+                          <td className="p-4">{getRoleBadge(emp.role)}</td>
                           <td className="p-4">
-                            {getRoleBadge(emp.role)}
-                          </td>
-                          <td className="p-4 text-primary/70">
                             {emp.role === "ADMIN"
                               ? t('employees.monthly_salary_format', { salary: emp.monthlySalary?.toFixed(2) })
                               : t('employees.hourly_rate_format', { rate: emp.hourlyRate, hours: emp.hoursPerMonth })}
                           </td>
                           <td className="p-4">{emp.joursCongeRestants ?? 0} jours</td>
                           <td className="p-4 text-right space-x-2">
-                            <Button variant="ghost" size="icon" onClick={() => openEditModal(emp)} className="hover:bg-primary/10">
-                              <Edit className="h-4 w-4 text-primary" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(emp.id)} className="hover:bg-destructive/10">
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => openEditModal(emp)} className="hover:bg-primary/10"><Edit className="h-4 w-4 text-primary" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(emp)} className="hover:bg-destructive/10"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                           </td>
-
-
                         </motion.tr>
                       ))}
                     </AnimatePresence>
@@ -230,40 +216,19 @@ export default function Employees() {
           </CardContent>
         </Card>
 
+        {/* Modal d'édition / création */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent
-            className="sm:max-w-[500px] rounded-2xl border border-border shadow-2xl"
-            style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
-          >
+          <DialogContent className="sm:max-w-[500px] rounded-2xl border border-border shadow-2xl bg-card">
             <DialogHeader>
               <DialogTitle className="text-primary">{editingEmployee ? t('employees.edit_title') : t('employees.add_title')}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">{t('employees.name_label')}</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="username">{t('employees.username_label')}</Label>
-                <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="password">{t('employees.password_label')}</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-              </div>
-
-
-
-
-
-              <div className="grid gap-2">
-                <Label htmlFor="role">{t('employees.role_label')}</Label>
+              <div><Label>{t('employees.name_label')}</Label><Input value={name} onChange={e => setName(e.target.value)} /></div>
+              <div><Label>{t('employees.username_label')}</Label><Input value={username} onChange={e => setUsername(e.target.value)} /></div>
+              <div><Label>{t('employees.role_label')}</Label>
                 <Select value={role} onValueChange={(v: any) => setRole(v)}>
-                  <SelectTrigger className="bg-card">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
                     <SelectItem value="ADMIN">{t('employees.role_admin')}</SelectItem>
                     <SelectItem value="CASHIER">{t('employees.role_cashier')}</SelectItem>
                     <SelectItem value="CHEF">{t('employees.role_chef')}</SelectItem>
@@ -272,35 +237,41 @@ export default function Employees() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="dateEmbauche">Date d'embauche</Label>
-                <Input id="dateEmbauche" type="date" value={dateEmbauche} onChange={(e) => setDateEmbauche(e.target.value)} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="congesParAn">Congés par an (jours)</Label>
-                <Input id="congesParAn" type="number" min="0" value={congesParAn} onChange={(e) => setCongesParAn(e.target.value)} />
-              </div>
+              <div><Label>Date d'embauche</Label><Input type="date" value={dateEmbauche} onChange={e => setDateEmbauche(e.target.value)} /></div>
+              <div><Label>Congés par an (jours)</Label><Input type="number" min="0" value={congesParAn} onChange={e => setCongesParAn(e.target.value)} /></div>
               {role === "ADMIN" ? (
-                <div className="grid gap-2">
-                  <Label htmlFor="monthlySalary">{t('employees.monthly_salary_label')}</Label>
-                  <Input id="monthlySalary" type="number" step="0.01" value={monthlySalary} onChange={(e) => setMonthlySalary(e.target.value)} />
-                </div>
+                <div><Label>{t('employees.monthly_salary_label')}</Label><Input type="number" step="0.01" value={monthlySalary} onChange={e => setMonthlySalary(e.target.value)} /></div>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="hourlyRate">{t('employees.hourly_rate_label')}</Label>
-                    <Input id="hourlyRate" type="number" step="0.01" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="hoursPerMonth">{t('employees.hours_per_month_label')}</Label>
-                    <Input id="hoursPerMonth" type="number" value={hoursPerMonth} onChange={(e) => setHoursPerMonth(e.target.value)} />
-                  </div>
+                  <div><Label>{t('employees.hourly_rate_label')}</Label><Input type="number" step="0.01" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} /></div>
+                  <div><Label>{t('employees.hours_per_month_label')}</Label><Input type="number" value={hoursPerMonth} onChange={e => setHoursPerMonth(e.target.value)} /></div>
                 </div>
+              )}
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="changePassword" checked={changePassword} onChange={e => setChangePassword(e.target.checked)} />
+                <Label htmlFor="changePassword">Changer le mot de passe</Label>
+              </div>
+              {changePassword && (
+                <div><Label>{t('employees.password_label')}</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
               )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleSave}>{editingEmployee ? t('common.save') : t('common.create')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de confirmation suppression */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="sm:max-w-[400px] rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-destructive">Confirmer la suppression</DialogTitle>
+            </DialogHeader>
+            <p>Voulez-vous vraiment supprimer l'employé <strong>{employeeToDelete?.name}</strong> ? Cette action est irréversible.</p>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Annuler</Button>
+              <Button variant="destructive" onClick={confirmDelete}>Supprimer</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

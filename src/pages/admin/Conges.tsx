@@ -79,6 +79,7 @@ export default function Conges() {
       await approveMutation.mutateAsync({ id, valide });
       toast({ title: t('common.success'), description: valide ? t('conges.approved') : t('conges.rejected') });
       queryClient.invalidateQueries({ queryKey: ["conges"] });
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
     } catch {
       toast({ title: t('common.error'), description: t('conges.approve_error'), variant: "destructive" });
     }
