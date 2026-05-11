@@ -87,6 +87,7 @@ export default function Conges() {
   };
 
  const getStatutBadge = (statut: string) => {
+   console.log("Statut du congé :", statut);
   switch (statut) {
     case "APPROUVE":
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{t('conges.approved')}</span>;
@@ -95,6 +96,7 @@ export default function Conges() {
     default:
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{t('conges.pending')}</span>;
   }
+  
 };
   useEffect(() => {
     const emp = employees.find(e => e.id.toString() === employeeId);
