@@ -255,8 +255,10 @@ export default function Employees() {
               <div><Label>{t('employees.username_label')}</Label><Input value={username} onChange={e => setUsername(e.target.value)} /></div>
               <div><Label>{t('employees.role_label')}</Label>
                 <Select value={role} onValueChange={(v: any) => setRole(v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="bg-card">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card">
                     <SelectItem value="ADMIN">{t('employees.role_admin')}</SelectItem>
                     <SelectItem value="CASHIER">{t('employees.role_cashier')}</SelectItem>
                     <SelectItem value="CHEF">{t('employees.role_chef')}</SelectItem>

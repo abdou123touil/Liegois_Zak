@@ -210,10 +210,10 @@ const formatCurrency = (val: number) => {
                 <div className="grid gap-2">
                   <Label htmlFor="category">{t('products.category_label')}</Label>
                   <Select value={categoryId} onValueChange={setCategoryId}>
-                    <SelectTrigger className="rounded-lg border-primary/20">
+                    <SelectTrigger className="rounded-lg border-primary/20 bg-card" >
                       <SelectValue placeholder={t('products.select_category')} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-card">
                       {categories?.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id.toString()}>
                           {cat.name}
