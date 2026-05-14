@@ -182,12 +182,13 @@ export default function Pos() {
   const [discountType, setDiscountType] = useState<"fixed" | "percentage">("fixed");
   const [discountValue, setDiscountValue] = useState("");
   const [discountReason, setDiscountReason] = useState("");
-
+  
 const handleLogout = async () => {
   try {
     await logoutMutation.mutateAsync();
     setUser(null);
-    setLocation("/login"); // redirection immédiate
+    // Redirection forcée pour réinitialiser complètement l'état React
+    window.location.href = "/login";
   } catch (error) {
     console.error("Logout error", error);
   }
