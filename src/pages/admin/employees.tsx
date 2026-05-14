@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, UserCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Employees() {
   const { t } = useTranslation();
@@ -290,7 +291,7 @@ export default function Employees() {
               {/* Changer le mot de passe en édition */}
               {editingEmployee && (
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" id="changePassword" checked={changePassword} onChange={e => setChangePassword(e.target.checked)} />
+                  <Checkbox id="changePassword" checked={changePassword} onCheckedChange={(checked) => setChangePassword(!!checked)} />
                   <Label htmlFor="changePassword">Changer le mot de passe</Label>
                 </div>
               )}
