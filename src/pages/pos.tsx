@@ -557,12 +557,7 @@ export default function Pos() {
                         onChange={(e) => setDiscountValue(e.target.value)}
                         className="w-24"
                       />
-                      <Input
-                        placeholder="Motif"
-                        value={discountReason}
-                        onChange={(e) => setDiscountReason(e.target.value)}
-                        className="flex-1"
-                      />
+                   
                     </div>
                   </div>
                   <div className="space-y-2">
