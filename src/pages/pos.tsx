@@ -183,11 +183,11 @@ export default function Pos() {
   const [discountValue, setDiscountValue] = useState("");
   const [discountReason, setDiscountReason] = useState("");
 
- const handleLogout = async () => {
+const handleLogout = async () => {
   try {
     await logoutMutation.mutateAsync();
     setUser(null);
-    // Ne pas appeler setLocation ici, laissez AppRouter gérer la redirection
+    setLocation("/login"); // redirection immédiate
   } catch (error) {
     console.error("Logout error", error);
   }
