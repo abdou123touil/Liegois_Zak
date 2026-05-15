@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useListExpenses, useCreateExpense, useDeleteExpense, Expense } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,6 @@ export default function Expenses() {
   const { data: expenses, isLoading } = useListExpenses();
   const createMutation = useCreateExpense();
   const deleteMutation = useDeleteExpense();
-
-  // Référence pour empêcher le défilement du fond (optionnel)
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const expenseCategories = [
     { value: "rent", label: t('expenses.categories.rent') },
@@ -161,33 +158,25 @@ export default function Expenses() {
         </Card>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          {/* On ajoute `modal={true}` et on ajuste la hauteur */}
-          <DialogContent 
-            className="sm:max-w-[500px] w-[95vw] rounded-2xl border border-border shadow-2xl bg-card p-0 overflow-hidden"
-            style={{ maxHeight: "80vh", display: "flex", flexDirection: "column" }}
-          >
-            <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogContent className="sm:max-w-[500px] rounded-2xl border border-border shadow-2xl bg-card">
+            <DialogHeader>
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto px-6 py-2 space-y-4">
+            <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="label">{t('expenses.label_label')}</Label>
-                <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} autoFocus={false} />
+                <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="amount">{t('expenses.amount_label')}</Label>
                   <Input
                     id="amount"
-                    type="text"
+                    type="number"
+                    step="0.01"
                     inputMode="decimal"
-                    pattern="[0-9]*\.?[0-9]*"
                     value={amount}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (/^\d*\.?\d*$/.test(val)) setAmount(val);
-                    }}
-                    autoFocus={false}
+                    onChange={(e) => setAmount(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -215,7 +204,7 @@ export default function Expenses() {
                 <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
               </div>
             </div>
-            <DialogFooter className="px-6 pb-6 pt-2">
+            <DialogFooter>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleSave} disabled={createMutation.isPending}>{t('common.save')}</Button>
             </DialogFooter>
@@ -223,6 +212,5 @@ export default function Expenses() {
         </Dialog>
       </div>
     </AdminLayout>
-
   );
 }
