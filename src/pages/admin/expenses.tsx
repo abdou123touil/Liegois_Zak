@@ -162,40 +162,13 @@ export default function Expenses() {
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           {/* On ajoute `modal={true}` et on ajuste la hauteur */}
-          <DialogContent
-            className="
-    sm:max-w-[500px]
-    w-[95vw]
-    rounded-2xl
-    border
-    border-border
-    shadow-2xl
-    bg-card
-    p-0
-    overflow-hidden
-    fixed
-    top-[50%]
-    left-[50%]
-    translate-x-[-50%]
-    translate-y-[-50%]
-  "
-            style={{
-              height: "auto",
-              maxHeight: "90dvh",
-            }}
-          >
+         <DialogContent
+  onOpenAutoFocus={(e) => e.preventDefault()}  className="sm:max-w-[500px] w-[95vw] rounded-2xl border border-border shadow-2xl bg-card p-0 overflow-hidden fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]" style={{maxHeight: "90dvh",}}>
             <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
             <div
-              className="
-    flex-1
-    overflow-y-auto
-    px-6
-    py-2
-    space-y-4
-    overscroll-contain
-  "
+              className="flex-1 overflow-y-auto px-6 py-2 space-y-4 overscroll-contain " onClick={() => inputRef.current?.focus()}
             >
               <div className="grid gap-2">
                 <Label htmlFor="label">{t('expenses.label_label')}</Label>
@@ -220,10 +193,10 @@ export default function Expenses() {
                 <div className="grid gap-2">
                   <Label htmlFor="category">{t('expenses.category_label')}</Label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full bg-card">
                       <SelectValue placeholder={t('expenses.select_category')} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-card">
                       {expenseCategories.map((cat) => (
                         <SelectItem key={cat.value} value={cat.value}>
                           {cat.label}
