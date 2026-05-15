@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Receipt } from "lucide-react";
@@ -85,12 +86,9 @@ export default function Expenses() {
     setDate(new Date().toISOString().slice(0, 10));
   };
 
-const formatCurrency = (val: number) => {
-  return new Intl.NumberFormat('fr-TN', { 
-    style: 'currency', 
-    currency: 'TND' 
-  }).format(val);
-};
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND' }).format(val);
+  };
 
   return (
     <AdminLayout>
@@ -160,10 +158,7 @@ const formatCurrency = (val: number) => {
         </Card>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent
-            className="sm:max-w-[500px] rounded-2xl border border-border shadow-2xl"
-            style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
-          >
+          <DialogContent className="sm:max-w-[500px] rounded-2xl border border-border shadow-2xl bg-card">
             <DialogHeader>
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
@@ -175,21 +170,29 @@ const formatCurrency = (val: number) => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="amount">{t('expenses.amount_label')}</Label>
-                  <Input id="amount" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="category">{t('expenses.category_label')}</Label>
-                  <select
-                    id="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="">{t('expenses.select_category')}</option>
-                    {expenseCategories.map(cat => (
-                      <option key={cat.value} value={cat.value}>{cat.label}</option>
-                    ))}
-                  </select>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('expenses.select_category')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {expenseCategories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid gap-2">
