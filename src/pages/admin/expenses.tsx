@@ -1,16 +1,15 @@
-import { useState } from "react";
-import { useListExpenses, useCreateExpense, useDeleteExpense, Expense } from "@/lib/api-client";
+import { useState, useEffect } from "react";
+import { useListExpenses, useCreateExpense, useDeleteExpense } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Receipt } from "lucide-react";
+import { Plus, Trash2, Receipt, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -41,6 +40,24 @@ export default function Expenses() {
     { value: "other", label: t('expenses.categories.other') },
   ];
 
+  // Empêcher le défilement du body quand le panneau est ouvert
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    };
+  }, [isModalOpen]);
+
   const handleSave = async () => {
     if (!label || !amount || !category) {
       toast({ title: t('common.error'), description: t('expenses.validation_required'), variant: "destructive" });
@@ -61,7 +78,7 @@ export default function Expenses() {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       setIsModalOpen(false);
       resetForm();
-    } catch (error) {
+    } catch {
       toast({ title: t('common.error'), description: t('expenses.save_error'), variant: "destructive" });
     }
   };
@@ -72,7 +89,7 @@ export default function Expenses() {
         await deleteMutation.mutateAsync({ id });
         toast({ title: t('common.success'), description: t('expenses.delete_success') });
         queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      } catch (error) {
+      } catch {
         toast({ title: t('common.error'), description: t('expenses.delete_error'), variant: "destructive" });
       }
     }
@@ -157,59 +174,89 @@ export default function Expenses() {
           </CardContent>
         </Card>
 
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="sm:max-w-[500px] rounded-2xl border border-border shadow-2xl bg-card">
-            <DialogHeader>
-              <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="label">{t('expenses.label_label')}</Label>
-                <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="amount">{t('expenses.amount_label')}</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
+        {/* Panneau fixe personnalisé (remplace le Dialog) */}
+        <AnimatePresence>
+          {isModalOpen && (
+            <>
+              {/* Overlay */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-black/50"
+                onClick={() => setIsModalOpen(false)}
+              />
+              {/* Panneau */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.2 }}
+                className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-[500px] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl"
+              >
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
+                  <h2 className="text-xl font-semibold text-primary">{t('expenses.add_title')}</h2>
+                  <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="category">{t('expenses.category_label')}</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('expenses.select_category')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {expenseCategories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-4 px-6 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="label">{t('expenses.label_label')}</Label>
+                    <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="amount">{t('expenses.amount_label')}</Label>
+                      <Input
+                        id="amount"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*\.?[0-9]*"
+                        value={amount}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (/^\d*\.?\d*$/.test(val)) setAmount(val);
+                        }}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="category">{t('expenses.category_label')}</Label>
+                      <Select value={category} onValueChange={setCategory}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={t('expenses.select_category')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {expenseCategories.map((cat) => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="date">{t('expenses.date_label')}</Label>
+                    <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="notes">{t('expenses.notes_label')}</Label>
+                    <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+                  </div>
                 </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="date">{t('expenses.date_label')}</Label>
-                <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="notes">{t('expenses.notes_label')}</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
-              <Button onClick={handleSave} disabled={createMutation.isPending}>{t('common.save')}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                <div className="sticky bottom-0 flex justify-end gap-2 border-t border-border bg-card px-6 py-4">
+                  <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button onClick={handleSave} disabled={createMutation.isPending}>
+                    {t('common.save')}
+                  </Button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </AdminLayout>
   );
