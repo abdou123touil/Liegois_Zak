@@ -192,9 +192,9 @@ export default function Expenses() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.2 }}
-                className="fixed left-1/2 top-4 z-50 w-[95vw] max-w-[500px] max-h-[85vh] -translate-x-1/2  overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl"
+                className="fixed  z-50 w-[95vw] max-w-[500px] max-h-[85vh] -translate-x-1/2  overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl"
               >
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
+                <div className="sticky  z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
                   <h2 className="text-xl font-semibold text-primary">{t('expenses.add_title')}</h2>
                   <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)}>
                     <X className="h-5 w-5" />
