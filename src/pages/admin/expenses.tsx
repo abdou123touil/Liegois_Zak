@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useListExpenses, useCreateExpense, useDeleteExpense, Expense } from "@/lib/api-client";
+import { useState } from "react";
+import { useListExpenses, useCreateExpense, useDeleteExpense } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,9 +29,6 @@ export default function Expenses() {
   const { data: expenses, isLoading } = useListExpenses();
   const createMutation = useCreateExpense();
   const deleteMutation = useDeleteExpense();
-
-  // Référence pour empêcher le défilement du fond (optionnel)
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const expenseCategories = [
     { value: "rent", label: t('expenses.categories.rent') },
@@ -96,7 +93,7 @@ export default function Expenses() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex-1overflow-y-autopx-6py-2space-y-4overscroll-containtouch-pan-y">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-serif font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               {t('expenses.title')}
@@ -161,13 +158,15 @@ export default function Expenses() {
         </Card>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          {/* On ajoute `modal={true}` et on ajuste la hauteur */}
-     <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className=" sm:max-w-[500px] w-[95vw] rounded-2xl border border-border shadow-2xl bg-card p-0 overflow-hidden fixed left-1/2 top-4 -translate-x-1/2 " style={{ maxHeight: "85dvh", }} >       <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogContent
+            className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] max-w-[500px] max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-card p-0 shadow-2xl"
+            style={{ position: 'fixed' }}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
-            <div
-              className="flex-1 overflow-y-auto px-6 py-2 space-y-4 overscroll-contain " onClick={() => inputRef.current?.focus()}
-            >
+            <div className="flex-1 px-6 py-2 space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="label">{t('expenses.label_label')}</Label>
                 <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} autoFocus={false} />
@@ -221,6 +220,5 @@ export default function Expenses() {
         </Dialog>
       </div>
     </AdminLayout>
-
   );
 }
