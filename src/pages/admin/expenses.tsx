@@ -174,7 +174,7 @@ export default function Expenses() {
         </Card>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="fixed inset-0 m-auto w-[95vw] max-w-[500px] h-[80vh] max-h-[600px] rounded-2xl border border-border bg-card p-0 shadow-2xl overflow-y-auto" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogContent className="fixed inset-0 m-auto w-[95vw] max-w-[500px] h-[80vh] max-h-[600px] rounded-2xl border border-border bg-card p-0 shadow-2xl overflow-y-auto" style={{ position: "fixed", transform: "translate(-50%, -50%)" }} onOpenAutoFocus={(e) => e.preventDefault()}>
             <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>

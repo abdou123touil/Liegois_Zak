@@ -10,32 +10,68 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
 
+      includeAssets: [
+        "icon-192.png",
+        "icon-512.png",
+      ],
+
       manifest: {
         name: "Boulangerie Liegeois",
         short_name: "POS",
 
+        description: "Application POS Boulangerie Liegeois",
+
         start_url: "/",
+
+        scope: "/",
 
         display: "fullscreen",
 
-        background_color: "#ffffff",
-        theme_color: "#ffffff",
+        display_override: [
+          "window-controls-overlay",
+          "standalone",
+          "fullscreen"
+        ],
 
         orientation: "landscape",
+
+        background_color: "#ffffff",
+
+        theme_color: "#ffffff",
+
+        lang: "fr",
 
         icons: [
           {
             src: "/icon-192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any maskable"
           },
 
           {
             src: "/icon-512.png",
             sizes: "512x512",
             type: "image/png",
-          },
+            purpose: "any maskable"
+          }
         ],
+      },
+
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,png,svg,ico}"],
+
+        navigateFallback: "/index.html",
+
+        cleanupOutdatedCaches: true,
+
+        clientsClaim: true,
+
+        skipWaiting: true,
+      },
+
+      devOptions: {
+        enabled: true,
       },
     }),
   ],
@@ -44,5 +80,10 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
+  },
+
+  server: {
+    host: true,
+    port: 5173,
   },
 });
