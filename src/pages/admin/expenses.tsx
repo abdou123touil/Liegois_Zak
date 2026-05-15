@@ -96,7 +96,7 @@ export default function Expenses() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex-1overflow-y-autopx-6py-2space-y-4overscroll-containtouch-pan-y">
           <div>
             <h1 className="text-3xl font-serif font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               {t('expenses.title')}
@@ -162,9 +162,7 @@ export default function Expenses() {
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           {/* On ajoute `modal={true}` et on ajuste la hauteur */}
-         <DialogContent
-  onOpenAutoFocus={(e) => e.preventDefault()}  className="sm:max-w-[500px] w-[95vw] rounded-2xl border border-border shadow-2xl bg-card p-0 overflow-hidden fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]" style={{maxHeight: "90dvh",}}>
-            <DialogHeader className="px-6 pt-6 pb-2">
+     <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className=" sm:max-w-[500px] w-[95vw] rounded-2xl border border-border shadow-2xl bg-card p-0 overflow-hidden fixed left-1/2 top-4 -translate-x-1/2 " style={{ maxHeight: "85dvh", }} >       <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
             <div
