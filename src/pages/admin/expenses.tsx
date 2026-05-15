@@ -223,10 +223,10 @@ export default function Expenses() {
                     <div className="grid gap-2">
                       <Label htmlFor="category">{t('expenses.category_label')}</Label>
                       <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full bg-card">
                           <SelectValue placeholder={t('expenses.select_category')} />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-card">
                           {expenseCategories.map((cat) => (
                             <SelectItem key={cat.value} value={cat.value}>
                               {cat.label}
