@@ -162,14 +162,41 @@ export default function Expenses() {
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           {/* On ajoute `modal={true}` et on ajuste la hauteur */}
-          <DialogContent 
-            className="sm:max-w-[500px] w-[95vw] rounded-2xl border border-border shadow-2xl bg-card p-0 overflow-hidden"
-            style={{ maxHeight: "80vh", display: "flex", flexDirection: "column" }}
+          <DialogContent
+            className="
+    sm:max-w-[500px]
+    w-[95vw]
+    rounded-2xl
+    border
+    border-border
+    shadow-2xl
+    bg-card
+    p-0
+    overflow-hidden
+    fixed
+    top-[50%]
+    left-[50%]
+    translate-x-[-50%]
+    translate-y-[-50%]
+  "
+            style={{
+              height: "auto",
+              maxHeight: "90dvh",
+            }}
           >
             <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto px-6 py-2 space-y-4">
+            <div
+              className="
+    flex-1
+    overflow-y-auto
+    px-6
+    py-2
+    space-y-4
+    overscroll-contain
+  "
+            >
               <div className="grid gap-2">
                 <Label htmlFor="label">{t('expenses.label_label')}</Label>
                 <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} autoFocus={false} />
