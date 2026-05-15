@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useListExpenses, useCreateExpense, useDeleteExpense } from "@/lib/api-client";
+import { useState, useRef } from "react";
+import { useListExpenses, useCreateExpense, useDeleteExpense, Expense } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +29,9 @@ export default function Expenses() {
   const { data: expenses, isLoading } = useListExpenses();
   const createMutation = useCreateExpense();
   const deleteMutation = useDeleteExpense();
+
+  // Référence pour empêcher le défilement du fond (optionnel)
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const expenseCategories = [
     { value: "rent", label: t('expenses.categories.rent') },
@@ -65,22 +68,6 @@ export default function Expenses() {
       toast({ title: t('common.error'), description: t('expenses.save_error'), variant: "destructive" });
     }
   };
-   useEffect(() => {
-    if (isModalOpen) {
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-    };
-  }, [isModalOpen]);
 
   const handleDelete = async (id: number) => {
     if (confirm(t('expenses.confirm_delete'))) {
@@ -174,11 +161,15 @@ export default function Expenses() {
         </Card>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="fixed inset-0 m-auto  rounded-2xl border border-border bg-card p-0 shadow-2xl overflow-y-auto" onOpenAutoFocus={(e) => e.preventDefault()}>
+          {/* On ajoute `modal={true}` et on ajuste la hauteur */}
+          <DialogContent 
+            className="sm:max-w-[500px] w-[95vw] rounded-2xl border border-border shadow-2xl bg-card p-0 overflow-hidden"
+            style={{ maxHeight: "80vh", display: "flex", flexDirection: "column" }}
+          >
             <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
-            <div className="flex-1 px-6 py-2 space-y-4">
+            <div className="flex-1 overflow-y-auto px-6 py-2 space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="label">{t('expenses.label_label')}</Label>
                 <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} autoFocus={false} />
@@ -202,10 +193,10 @@ export default function Expenses() {
                 <div className="grid gap-2">
                   <Label htmlFor="category">{t('expenses.category_label')}</Label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full bg-card">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder={t('expenses.select_category')} />
                     </SelectTrigger>
-                    <SelectContent className="bg-card">
+                    <SelectContent>
                       {expenseCategories.map((cat) => (
                         <SelectItem key={cat.value} value={cat.value}>
                           {cat.label}
@@ -232,5 +223,6 @@ export default function Expenses() {
         </Dialog>
       </div>
     </AdminLayout>
+
   );
 }
