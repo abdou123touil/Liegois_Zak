@@ -128,7 +128,7 @@ export default function Expenses() {
                   {isLoading ? (
                     <tr><td colSpan={5} className="text-center py-12">{t('common.loading')}</td></tr>
                   ) : expenses?.length === 0 ? (
-                    <td><td colSpan={5} className="text-center py-12">{t('expenses.empty')}</td></tr>
+                    <tr><td colSpan={5} className="text-center py-12">{t('expenses.empty')}</td></tr>
                   ) : (
                     <AnimatePresence>
                       {expenses?.map((exp, idx) => (
@@ -223,5 +223,6 @@ export default function Expenses() {
         </Dialog>
       </div>
     </AdminLayout>
+
   );
 }
