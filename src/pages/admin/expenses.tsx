@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useListExpenses, useCreateExpense, useDeleteExpense } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,22 @@ export default function Expenses() {
       toast({ title: t('common.error'), description: t('expenses.save_error'), variant: "destructive" });
     }
   };
+   useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    };
+  }, [isModalOpen]);
 
   const handleDelete = async (id: number) => {
     if (confirm(t('expenses.confirm_delete'))) {
@@ -158,11 +174,7 @@ export default function Expenses() {
         </Card>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent
-            className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] max-w-[500px] max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-card p-0 shadow-2xl"
-            style={{ position: 'fixed' }}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-          >
+          <DialogContent className="fixed inset-0 m-auto w-[95vw] max-w-[500px] h-[80vh] max-h-[600px] rounded-2xl border border-border bg-card p-0 shadow-2xl overflow-y-auto" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} onOpenAutoFocus={(e) => e.preventDefault()}>
             <DialogHeader className="px-6 pt-6 pb-2">
               <DialogTitle className="text-primary">{t('expenses.add_title')}</DialogTitle>
             </DialogHeader>
