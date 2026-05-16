@@ -807,7 +807,12 @@ export function useListMatieresPremieres() {
   return useQuery({
     queryKey: ["matieres-premieres"],
     queryFn: async () => {
-      const response = await apiRequest("/matieres-premieres");
+      const response = await apiRequest("/matieres-premieres/actifs");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch active matieres premieres");
+      }
+
       return response.json() as Promise<MatierePremiere[]>;
     },
   });
@@ -843,9 +848,18 @@ export function useUpdateMatierePremiere() {
 
 export function useDeleteMatierePremiere() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/matieres-premieres/${id}`, { method: "DELETE" });
+      const response = await apiRequest(`/matieres-premieres/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete matiere premiere.");
+      }
+
+      return true;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["matieres-premieres"] }),
   });

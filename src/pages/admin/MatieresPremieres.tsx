@@ -44,7 +44,8 @@ export default function MatieresPremieres() {
     const createMutation = useCreateMatierePremiere();
     const updateMutation = useUpdateMatierePremiere();
     const deleteMutation = useDeleteMatierePremiere();
-
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [matiereToDelete, setMatiereToDelete] = useState<MatierePremiere | null>(null);
     // Pour chaque matière, on peut récupérer son stock (mais attention à ne pas faire trop de requêtes)
     // On peut soit afficher le stock via un composant séparé, soit le récupérer dans la liste via un endpoint du backend.
     // Ici on ne récupère pas le stock dans la liste pour éviter N appels, mais on pourrait.
@@ -133,15 +134,23 @@ export default function MatieresPremieres() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (confirm(t('matieresPremieres.confirm_delete'))) {
-            try {
-                await deleteMutation.mutateAsync(id);
-                toast({ title: t('common.success'), description: t('matieresPremieres.delete_success') });
-                queryClient.invalidateQueries({ queryKey: ["matieres-premieres"] });
-            } catch (error) {
-                toast({ title: t('common.error'), description: t('matieresPremieres.delete_error'), variant: "destructive" });
-            }
+    const handleDeleteClick = (matiere: MatierePremiere) => {
+        setMatiereToDelete(matiere);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!matiereToDelete) return;
+
+        try {
+            await deleteMutation.mutateAsync(matiereToDelete.id);
+            toast({ title: t('common.success'), description: t('matieresPremieres.delete_success') });
+            await queryClient.invalidateQueries({ queryKey: ["matieres-premieres"] });
+        } catch (error) {
+            toast({ title: t('common.error'), description: t('matieresPremieres.delete_error'), variant: "destructive" });
+        } finally {
+            setIsDeleteDialogOpen(false);
+            setMatiereToDelete(null);
         }
     };
 
@@ -241,7 +250,7 @@ export default function MatieresPremieres() {
                                                         <Button variant="ghost" size="icon" onClick={() => openEditModal(item)} className="hover:bg-primary/10">
                                                             <Edit className="h-4 w-4 text-primary" />
                                                         </Button>
-                                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="hover:bg-destructive/10">
+                                                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(item)} className="hover:bg-destructive/10">
                                                             <Trash2 className="h-4 w-4 text-destructive" />
                                                         </Button>
                                                     </td>
@@ -327,6 +336,43 @@ export default function MatieresPremieres() {
                             </Button>
                             <Button onClick={handleUpdateStock} disabled={updateStockMutation.isPending}>
                                 {updateStockMutation.isPending ? "Mise à jour..." : "Enregistrer"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                    <DialogContent
+                        className="sm:max-w-[400px] rounded-2xl border border-border shadow-2xl"
+                        style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
+                    >
+                        <DialogHeader>
+                            <DialogTitle className="text-destructive">
+                                Confirmer la suppression
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        <p className="text-primary/80">
+                            Voulez-vous vraiment supprimer la matière première{" "}
+                            <strong>{matiereToDelete?.nom}</strong> ? Cette action est irréversible.
+                        </p>
+
+                        <DialogFooter className="mt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setIsDeleteDialogOpen(false);
+                                    setMatiereToDelete(null);
+                                }}
+                            >
+                                {t('common.cancel')}
+                            </Button>
+
+                            <Button
+                                variant="destructive"
+                                onClick={confirmDelete}
+                                disabled={deleteMutation.isPending}
+                            >
+                                {deleteMutation.isPending ? t('common.loading') : "Supprimer"}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
