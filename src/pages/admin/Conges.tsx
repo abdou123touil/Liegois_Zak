@@ -34,7 +34,19 @@ export default function Conges() {
   const { data: employees = [] } = useListEmployees();
   const createMutation = useCreateConge();
   const approveMutation = useApproveConge();
+  const parseLocalDate = (value: string) => {
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
 
+  const hasDateRangeError =
+    !!dateDebut && !!dateFin && parseLocalDate(dateFin) < parseLocalDate(dateDebut);
+
+  const isPaidLeaveOverBalance =
+    type === "CONGES_PAYES" && joursDemandes > congesRestants;
+
+  const isSaveDisabled =
+    !employeeId || !dateDebut || !dateFin || !type || hasDateRangeError || createMutation.isPending;
   const openNewModal = () => {
     setEmployeeId("");
     setDateDebut("");
@@ -51,8 +63,12 @@ export default function Conges() {
     }
 
     // Vérification du solde pour les congés payés
-    if (type === "CONGES_PAYES" && joursDemandes > congesRestants) {
-      toast({ title: t('common.error'), description: "Jours de congé insuffisants", variant: "destructive" });
+    if (hasDateRangeError) {
+      toast({
+        title: t("common.error"),
+        description: "La date de fin doit être après la date de début",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -79,7 +95,7 @@ export default function Conges() {
       await approveMutation.mutateAsync({ id, valide });
       toast({ title: t('common.success'), description: valide ? t('conges.approved') : t('conges.rejected') });
       queryClient.invalidateQueries({ queryKey: ["conges"] });
-      
+
     } catch {
       toast({ title: t('common.error'), description: t('conges.approve_error'), variant: "destructive" });
     }
@@ -113,10 +129,16 @@ export default function Conges() {
 
   useEffect(() => {
     if (dateDebut && dateFin) {
-      const start = new Date(dateDebut);
-      const end = new Date(dateFin);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      const start = parseLocalDate(dateDebut);
+      const end = parseLocalDate(dateFin);
+
+      if (end < start) {
+        setJoursDemandes(0);
+        return;
+      }
+
+      const diffTime = end.getTime() - start.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
       setJoursDemandes(diffDays);
     } else {
       setJoursDemandes(0);
@@ -228,8 +250,7 @@ export default function Conges() {
                 </div>
                 <div className="grid gap-2">
                   <Label>{t('conges.end_date')}</Label>
-                  <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
-                </div>
+                  <Input type="date" value={dateFin} min={dateDebut || undefined} onChange={(e) => setDateFin(e.target.value)} />                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -240,6 +261,18 @@ export default function Conges() {
                   <Label>Jours demandés</Label>
                   <Input value={joursDemandes} disabled className="bg-muted" />
                 </div>
+                {hasDateRangeError && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                    La date de fin doit être après la date de début.
+                  </div>
+                )}
+
+                {isPaidLeaveOverBalance && (
+                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                    Attention : l'employé demande {joursDemandes} jours, mais il lui reste seulement{" "}
+                    {congesRestants} jours de congé payé.
+                  </div>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label>{t('conges.type')}</Label>
@@ -261,7 +294,9 @@ export default function Conges() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
-              <Button onClick={handleSave}>{t('common.create')}</Button>
+              <Button onClick={handleSave} disabled={isSaveDisabled}>
+                {createMutation.isPending ? t("common.loading") : t("common.create")}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
