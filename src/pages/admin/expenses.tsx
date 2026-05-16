@@ -21,7 +21,8 @@ export default function Expenses() {
   const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -83,15 +84,22 @@ export default function Expenses() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm(t('expenses.confirm_delete'))) {
-      try {
-        await deleteMutation.mutateAsync({ id });
-        toast({ title: t('common.success'), description: t('expenses.delete_success') });
-        queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      } catch {
-        toast({ title: t('common.error'), description: t('expenses.delete_error'), variant: "destructive" });
-      }
+  const openDeleteModal = (id: number) => {
+    setExpenseToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!expenseToDelete) return;
+
+    try {
+      await deleteMutation.mutateAsync({ id: expenseToDelete });
+      toast({ title: t('common.success'), description: t('expenses.delete_success') });
+      await queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      setDeleteModalOpen(false);
+      setExpenseToDelete(null);
+    } catch {
+      toast({ title: t('common.error'), description: t('expenses.delete_error'), variant: "destructive" });
     }
   };
 
@@ -160,7 +168,7 @@ export default function Expenses() {
                           <td className="p-4 font-semibold text-destructive">{formatCurrency(exp.amount)}</td>
                           <td className="p-4 text-primary/70">{new Date(exp.date).toLocaleDateString()}</td>
                           <td className="p-4 text-right">
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(exp.id)} className="hover:bg-destructive/10">
+                            <Button variant="ghost" size="icon" onClick={() => openDeleteModal(exp.id)} className="hover:bg-destructive/10">
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </td>
@@ -265,6 +273,62 @@ export default function Expenses() {
                   </Button>
                   <Button onClick={handleSave} disabled={createMutation.isPending}>
                     {t('common.save')}
+                  </Button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {deleteModalOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-black/50"
+                onClick={() => setDeleteModalOpen(false)}
+              />
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
+                animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+                exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
+                transition={{ duration: 0.2 }}
+                className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md rounded-2xl border border-border bg-card shadow-xl"
+              >
+                <div className="flex items-center justify-between border-b border-border px-6 py-4">
+                  <h2 className="text-xl font-semibold text-primary">
+                    {t('expenses.confirm_delete_title') || "Supprimer la dépense"}
+                  </h2>
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteModalOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                <div className="px-6 py-5">
+                  <p className="text-primary/80">
+                    {t('expenses.confirm_delete') || "Voulez-vous vraiment supprimer cette dépense ?"}
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setDeleteModalOpen(false);
+                      setExpenseToDelete(null);
+                    }}
+                  >
+                    {t('common.cancel')}
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    onClick={confirmDelete}
+                    disabled={deleteMutation.isPending}
+                  >
+                    {deleteMutation.isPending ? t('common.loading') : t('common.delete') || "Supprimer"}
                   </Button>
                 </div>
               </motion.div>

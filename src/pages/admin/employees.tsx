@@ -33,7 +33,7 @@ export default function Employees() {
   const [dateEmbauche, setDateEmbauche] = useState("");
   const [congesParAn, setCongesParAn] = useState("20");
   const [monthlyFixedSalary, setMonthlyFixedSalary] = useState(""); // Frontend only !
-
+  
   const { data: employees, isLoading } = useListEmployees();
   const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee();
