@@ -381,6 +381,8 @@ export function useGetDashboardStats() {
       if (!response.ok) throw new Error("Failed to fetch dashboard stats");
       return response.json();
     },
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
   });
 }
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
@@ -677,16 +679,18 @@ export function getListOrdersQueryKey() {
 }
 
 export function useGetSalesByDay({ days }: { days: number }) {
-    return useQuery({
-        queryKey: ["salesByDay", days],
-        queryFn: async () => {
-            // Replace with actual API call
-            const response = await apiRequest(`/sales-by-day?days=${days}`);
-            const data = await response.json();
-            return data as SalesByDay[];
-        },
-    });
+  return useQuery({
+    queryKey: ["salesByDay", days],
+    queryFn: async () => {
+      const response = await apiRequest(`/sales-by-day?days=${days}`);
+      if (!response.ok) throw new Error("Failed to fetch sales by day");
+      return response.json() as Promise<SalesByDay[]>;
+    },
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
+  });
 }
+
 
 // 🔹 getGetSalesByDayQueryKey (returns the query key for sales by day)
 export function getGetSalesByDayQueryKey({ days }: { days: number }) {

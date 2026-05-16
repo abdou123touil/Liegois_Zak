@@ -22,7 +22,9 @@ import {
   ShoppingCart,
   Truck,
   Umbrella,
-  Settings
+  ArrowRightLeft,
+  Settings,
+  ArrowRightLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -81,7 +83,7 @@ useEffect(() => {
     { href: "/admin/products", icon: Package, label: t('nav.products') },
     { href: "/admin/categories", icon: Tags, label: t('nav.categories') },
     { href: "/admin/employees", icon: Users, label: t('nav.employees') },
-    { href: "/admin/echanges", icon: Croissant, label: t('nav.exchanges') },
+    { href: "/admin/echanges", icon: ArrowRightLeft, label: t('nav.exchanges') },
     { href: "/admin/expenses", icon: Receipt, label: t('nav.expenses') },
     { href: "/admin/stats", icon: BarChart3, label: t('nav.analytics') },
     { href: "/admin/fournisseurs", icon: Truck, label: t('nav.suppliers') },
