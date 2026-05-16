@@ -136,7 +136,7 @@ export default function Expenses() {
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('expenses.table.amount')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('expenses.table.date')}</th>
                     <th className="text-right p-4 text-sm font-medium text-primary/70">{t('expenses.table.actions')}</th>
-                  </td>
+                  </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
