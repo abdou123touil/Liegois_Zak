@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { useListPointages, useCreatePointageArrivee, useUpdatePointageDepart, useListEmployees, Pointage } from "@/lib/api-client";
+import {
+  useListPointages,
+  useCreatePointageArrivee,
+  useUpdatePointageDepart,
+  useListEmployees,
+} from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,33 +14,45 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Clock, LogOut } from "lucide-react";
+import {  Clock, LogOut, LogIn, CalendarCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 export default function Pointages() {
   const { t } = useTranslation();
+  const today = new Date().toISOString().split("T")[0];
+  const currentTime = () =>
+    new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
   const [isArrivalModalOpen, setIsArrivalModalOpen] = useState(false);
   const [isDepartModalOpen, setIsDepartModalOpen] = useState(false);
   const [selectedPointageId, setSelectedPointageId] = useState<number | null>(null);
-  const [departTime, setDepartTime] = useState("");
 
   const [employeeId, setEmployeeId] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [heureArrivee, setHeureArrivee] = useState(
-    new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-  );
+  const [date, setDate] = useState(today);
+  const [heureArrivee, setHeureArrivee] = useState(currentTime());
+  const [departTime, setDepartTime] = useState(currentTime());
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: pointages = [], isLoading } = useListPointages();
   const { data: employees = [] } = useListEmployees();
-  const createArrivee = useCreatePointageArrivee();
-  const updateDepart = useUpdatePointageDepart(); // ← plus d'argument
-  
 
- 
+  const createArrivee = useCreatePointageArrivee();
+  const updateDepart = useUpdatePointageDepart();
+
+  const pointagesAujourdhui = pointages.filter((p) => p.date === today);
+  const presents = pointagesAujourdhui.filter((p) => !p.heureDepart).length;
+  const termines = pointagesAujourdhui.filter((p) => !!p.heureDepart).length; // ← plus d'argument
+
+
+  const openArrivalModal = () => {
+    setEmployeeId("");
+    setDate(today);
+    setHeureArrivee(currentTime());
+    setIsArrivalModalOpen(true);
+  };
 
   const handleArrivalSave = async () => {
     if (!employeeId || !date || !heureArrivee) {
@@ -47,10 +64,10 @@ export default function Pointages() {
       await createArrivee.mutateAsync({
         employeeId: parseInt(employeeId),
         date,
-        heureArrivee,
+        heureArrivee: `${heureArrivee}:00`,
       });
       toast({ title: t('common.success'), description: t('pointages.arrival_success') });
-      queryClient.invalidateQueries({ queryKey: ["pointages"] });
+      await queryClient.invalidateQueries({ queryKey: ["pointages"] });
       setIsArrivalModalOpen(false);
     } catch {
       toast({ title: t('common.error'), description: t('pointages.save_error'), variant: "destructive" });
@@ -59,29 +76,29 @@ export default function Pointages() {
 
   const openDepartModal = (pointageId: number) => {
     setSelectedPointageId(pointageId);
-    setDepartTime("");
+    setDepartTime(currentTime());
     setIsDepartModalOpen(true);
   };
 
   const handleDepartSave = async () => {
-  if (!selectedPointageId || !departTime) {
-    toast({ title: t('common.error'), description: t('pointages.validation_depart'), variant: "destructive" });
-    return;
-  }
+    if (!selectedPointageId || !departTime) {
+      toast({ title: t('common.error'), description: t('pointages.validation_depart'), variant: "destructive" });
+      return;
+    }
 
-  const fullDepartTime = `${departTime}:00`;
+    const fullDepartTime = `${departTime}:00`;
 
-  try {
-    await updateDepart.mutateAsync({ id: selectedPointageId, heureDepart: fullDepartTime });
-    toast({ title: t('common.success'), description: t('pointages.depart_success') });
-    queryClient.invalidateQueries({ queryKey: ["pointages"] });
-    setIsDepartModalOpen(false);
-    setSelectedPointageId(null);
-    setDepartTime("");
-  } catch {
-    toast({ title: t('common.error'), description: t('pointages.save_error'), variant: "destructive" });
-  }
-};
+    try {
+      await updateDepart.mutateAsync({ id: selectedPointageId, heureDepart: fullDepartTime });
+      toast({ title: t('common.success'), description: t('pointages.depart_success') });
+      queryClient.invalidateQueries({ queryKey: ["pointages"] });
+      setIsDepartModalOpen(false);
+      setSelectedPointageId(null);
+      setDepartTime("");
+    } catch {
+      toast({ title: t('common.error'), description: t('pointages.save_error'), variant: "destructive" });
+    }
+  };
 
   return (
     <ADMINLayout>
@@ -89,11 +106,39 @@ export default function Pointages() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-serif font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              {t('pointages.title')}
+              {t("pointages.title")}
             </h1>
-            <p className="text-primary/60 text-sm mt-1">{t('pointages.subtitle')}</p>
+            <p className="text-primary/60 text-sm mt-1">{t("pointages.subtitle")}</p>
           </div>
-        
+
+          <Button onClick={openArrivalModal} className="gap-2 shadow-md">
+            <LogIn className="h-4 w-4" />
+            Enregistrer une arrivée
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="rounded-2xl border border-primary/10 bg-card px-5 py-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-primary/10 p-2">
+                <CalendarCheck className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-primary/60">Pointages aujourd’hui</p>
+                <p className="text-2xl font-semibold text-primary">{pointagesAujourdhui.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-primary/10 bg-card px-5 py-4 shadow-sm">
+            <p className="text-sm text-primary/60">Présents</p>
+            <p className="text-2xl font-semibold text-green-600">{presents}</p>
+          </div>
+
+          <div className="rounded-2xl border border-primary/10 bg-card px-5 py-4 shadow-sm">
+            <p className="text-sm text-primary/60">Départs enregistrés</p>
+            <p className="text-2xl font-semibold text-primary">{termines}</p>
+          </div>
         </div>
 
         <Card className="border-primary/10 shadow-md rounded-2xl overflow-hidden">
@@ -137,8 +182,14 @@ export default function Pointages() {
                           <td className="p-4 text-primary/70">{pointage.heuresTravaillees ?? '-'}</td>
                           <td className="p-4 text-right">
                             {!pointage.heureDepart && (
-                              <Button variant="ghost" size="icon" onClick={() => openDepartModal(pointage.id)} className="hover:bg-primary/10">
-                                <LogOut className="h-4 w-4 text-primary" />
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openDepartModal(pointage.id)}
+                                className="gap-2"
+                              >
+                                <LogOut className="h-4 w-4" />
+                                Départ
                               </Button>
                             )}
                           </td>
