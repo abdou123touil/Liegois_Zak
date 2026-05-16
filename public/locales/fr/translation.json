@@ -63,7 +63,8 @@
     "time_tracking": "Suivi du temps",
     "pay_slips": "Fiches de paie",
     "attendance": "Présence",
-    "payroll": "Paie"
+    "payroll": "Paie",
+    "exchanges": "Échanges"
   },
   "actions": {
     "logout": "Déconnexion"

@@ -36,6 +36,7 @@ import ChefDemandesAchat from "./pages/chef/demandes-achat";
 import ChefMatieresPremieres from "./pages/chef/matieres-premieres";
 import ResponsablePointages from "./pages/responsable/pointages";
 import ChefPointages from "./pages/chef/pointages";
+import Echanges from "./pages/admin/Echanges";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ function AppRouter() {
           <Route path="/admin/stats" component={Stats} />
           <Route path="/admin/fournisseurs" component={Fournisseurs} />
           <Route path="/admin/achats" component={Achats} />
+          <Route path="/admin/echanges" component={Echanges} />
           <Route path="/admin/matieres-premieres" component={MatieresPremieres} />
           <Route path="/admin/stock-journalier" component={StockJournalier} />
           <Route path="/admin/demandes-achat" component={DemandesAchat} />

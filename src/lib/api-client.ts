@@ -1170,3 +1170,43 @@ export function useUpdateStockJournalier() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock-journalier"] }),
   });
 }
+export interface Echange {
+  id: number;
+  date: string;
+  type: "ACHAT" | "VENTE";
+  montant: number;
+  description?: string;
+  expenseId?: number;
+}
+
+export function useListEchanges() {
+  return useQuery({
+    queryKey: ["echanges"],
+    queryFn: async () => {
+      const response = await apiRequest("/echanges");
+      if (!response.ok) throw new Error("Failed to fetch echanges");
+      return response.json() as Promise<Echange[]>;
+    },
+  });
+}
+
+export function useCreateEchange() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Partial<Echange>) => {
+      const response = await apiRequest("/echanges", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to create echange");
+
+      return response.json() as Promise<Echange>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["echanges"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+    },
+  });
+}
