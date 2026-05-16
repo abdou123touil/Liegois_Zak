@@ -42,19 +42,22 @@ export default function Conges() {
   const hasDateRangeError =
     !!dateDebut && !!dateFin && parseLocalDate(dateFin) < parseLocalDate(dateDebut);
 
-  const isPaidLeaveOverBalance =
-    type === "CONGES_PAYES" && joursDemandes > congesRestants;
+  const isLeaveOverBalance =
+    !!employeeId && joursDemandes > 0 && joursDemandes > congesRestants;
 
   const isSaveDisabled =
     !employeeId || !dateDebut || !dateFin || !type || hasDateRangeError || createMutation.isPending;
-  const openNewModal = () => {
-    setEmployeeId("");
-    setDateDebut("");
-    setDateFin("");
-    setType("");
-    setMotif("");
-    setIsModalOpen(true);
-  };
+const openNewModal = () => {
+  setEmployeeId("");
+  setDateDebut("");
+  setDateFin("");
+  setType("");
+  setMotif("");
+  setCongesRestants(0);
+  setJoursDemandes(0);
+  setSelectedEmployee(null);
+  setIsModalOpen(true);
+};
 
   const handleSave = async () => {
     if (!employeeId || !dateDebut || !dateFin || !type) {
@@ -262,15 +265,14 @@ export default function Conges() {
                   <Input value={joursDemandes} disabled className="bg-muted" />
                 </div>
                 {hasDateRangeError && (
-                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  <div className="col-span-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     La date de fin doit être après la date de début.
                   </div>
                 )}
-
-                {isPaidLeaveOverBalance && (
-                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                {isLeaveOverBalance && (
+                  <div className="col-span-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-700">
                     Attention : l'employé demande {joursDemandes} jours, mais il lui reste seulement{" "}
-                    {congesRestants} jours de congé payé.
+                    {congesRestants} jours de congé.
                   </div>
                 )}
               </div>
