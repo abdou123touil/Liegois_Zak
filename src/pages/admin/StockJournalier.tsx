@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -20,7 +20,10 @@ export default function StockJournalier() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [quantiteProduite, setQuantiteProduite] = useState("");
   const [quantitePerdue, setQuantitePerdue] = useState("0");
-
+  const [stockRows, setStockRows] = useState<Array<{
+    productId: string;
+    quantiteProduite: string;
+  }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,33 +32,64 @@ export default function StockJournalier() {
   const createMutation = useCreateStockJournalier();
 
   const openNewModal = () => {
-    setProductId("");
-    setDate(new Date().toISOString().split('T')[0]);
-    setQuantiteProduite("");
-    setQuantitePerdue("0");
+    setDate(new Date().toISOString().split("T")[0]);
+
+    const latestRows = stocks.length > 0
+      ? stocks.map((stock) => ({
+        productId: stock.product?.id?.toString() || "",
+        quantiteProduite: stock.quantiteProduite?.toString() || "",
+      }))
+      : [{ productId: "", quantiteProduite: "" }];
+
+    setStockRows(latestRows);
     setIsModalOpen(true);
   };
 
+  const addRow = () => {
+    setStockRows([...stockRows, { productId: "", quantiteProduite: "" }]);
+  };
+
+  const removeRow = (index: number) => {
+    setStockRows(stockRows.filter((_, i) => i !== index));
+  };
+
+  const updateRow = (index: number, field: "productId" | "quantiteProduite", value: string) => {
+    setStockRows(rows =>
+      rows.map((row, i) => i === index ? { ...row, [field]: value } : row)
+    );
+  };
   const handleSave = async () => {
-    if (!productId || !quantiteProduite) {
-      toast({ title: t('common.error'), description: t('stockJournalier.validation_required'), variant: "destructive" });
+    const validRows = stockRows.filter(row => row.productId && row.quantiteProduite);
+
+    if (validRows.length === 0) {
+      toast({
+        title: t("common.error"),
+        description: t("stockJournalier.validation_required"),
+        variant: "destructive",
+      });
       return;
     }
 
-    const data = {
-      product: { id: parseInt(productId) },
-      date,
-      quantiteProduite: parseInt(quantiteProduite),
-      quantitePerdue: quantitePerdue ? parseInt(quantitePerdue) : 0,
-    };
-
     try {
-      await createMutation.mutateAsync(data);
-      toast({ title: t('common.success'), description: t('stockJournalier.create_success') });
-      queryClient.invalidateQueries({ queryKey: ["stock-journalier"] });
+      await Promise.all(
+        validRows.map(row =>
+          createMutation.mutateAsync({
+            productId: parseInt(row.productId),
+            date,
+            quantiteProduite: parseInt(row.quantiteProduite),
+          })
+        )
+      );
+
+      toast({ title: t("common.success"), description: t("stockJournalier.create_success") });
+      await queryClient.invalidateQueries({ queryKey: ["stock-journalier"] });
       setIsModalOpen(false);
-    } catch (error) {
-      toast({ title: t('common.error'), description: t('stockJournalier.save_error'), variant: "destructive" });
+    } catch {
+      toast({
+        title: t("common.error"),
+        description: t("stockJournalier.save_error"),
+        variant: "destructive",
+      });
     }
   };
 
@@ -108,7 +142,7 @@ export default function StockJournalier() {
                         >
                           <td className="p-4 font-medium text-primary/90 flex items-center gap-2">
                             <Package className="h-5 w-5 text-primary" /> {stock.product?.name}
-                           </td>
+                          </td>
                           <td className="p-4 text-primary/70">{new Date(stock.date).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{stock.quantiteProduite}</td>
                           <td className="p-4 text-primary/70">{stock.quantiteVendue ?? 0}</td>
@@ -119,7 +153,7 @@ export default function StockJournalier() {
                     </AnimatePresence>
                   )}
                 </tbody>
-               </table>
+              </table>
             </div>
           </CardContent>
         </Card>
@@ -134,30 +168,50 @@ export default function StockJournalier() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label>{t('stockJournalier.product')}</Label>
-                <Select value={productId} onValueChange={setProductId}>
-                  <SelectTrigger className="bg-card" >
-                    <SelectValue placeholder={t('stockJournalier.select_product')} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card">
-                    {products.map(p => (
-                      <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label>{t('stockJournalier.date')}</Label>
+                <Label>{t("stockJournalier.date")}</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
-              <div className="grid gap-2">
-                <Label>{t('stockJournalier.produced')}</Label>
-                <Input type="number" min="0" value={quantiteProduite} onChange={(e) => setQuantiteProduite(e.target.value)} />
+
+              <div className="space-y-3">
+                {stockRows.map((row, index) => (
+                  <div key={index} className="grid grid-cols-[1fr_120px_40px] gap-2 items-end">
+                    <div className="grid gap-2">
+                      <Label>{t("stockJournalier.product")}</Label>
+                      <Select value={row.productId} onValueChange={(value) => updateRow(index, "productId", value)}>
+                        <SelectTrigger className="bg-card">
+                          <SelectValue placeholder={t("stockJournalier.select_product")} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card">
+                          {products.map(p => (
+                            <SelectItem key={p.id} value={p.id.toString()}>
+                              {p.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>{t("stockJournalier.produced")}</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={row.quantiteProduite}
+                        onChange={(e) => updateRow(index, "quantiteProduite", e.target.value)}
+                      />
+                    </div>
+
+                    <Button variant="ghost" size="icon" onClick={() => removeRow(index)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-              <div className="grid gap-2">
-                <Label>{t('stockJournalier.lost')}</Label>
-                <Input type="number" min="0" value={quantitePerdue} onChange={(e) => setQuantitePerdue(e.target.value)} />
-              </div>
+
+              <Button type="button" variant="outline" onClick={addRow} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Ajouter un produit
+              </Button>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>

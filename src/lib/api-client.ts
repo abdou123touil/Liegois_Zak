@@ -864,7 +864,33 @@ export function useDeleteMatierePremiere() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["matieres-premieres"] }),
   });
 }
+export function useListLatestStockJournalier() {
+  return useQuery({
+    queryKey: ["stock-journalier-latest"],
+    queryFn: async () => {
+      const response = await apiRequest("/stock-journalier/latest");
+      if (!response.ok) throw new Error("Failed to fetch latest stock journalier");
+      return response.json() as Promise<StockJournalier[]>;
+    },
+  });
+}
 
+export function useDeleteStockJournalier() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/stock-journalier/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete stock journalier");
+
+      return true;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock-journalier"] }),
+  });
+}
 // Récupérer le stock d'une matière première
 export function useGetStockMatiere(matiereId: number) {
   return useQuery({
