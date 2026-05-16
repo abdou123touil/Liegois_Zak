@@ -104,7 +104,7 @@ export default function Employees() {
     try {
       await deleteMutation.mutateAsync({ id: employeeToDelete.id });
       toast({ title: t('common.success'), description: t('employees.delete_success') });
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      await queryClient.invalidateQueries({ queryKey: ["employees"] });
     } catch {
       toast({ title: t('common.error'), description: t('employees.delete_error'), variant: "destructive" });
     } finally {

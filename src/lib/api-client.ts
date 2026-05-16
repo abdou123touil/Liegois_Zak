@@ -627,15 +627,19 @@ export function useCreateExpense() {
 
 // 🔹 useDeleteExpense Hook (deletes an expense)
 export function useDeleteExpense() {
-    return useMutation({
-        mutationFn: async ({ id }: { id: number }) => {
-            const response = await apiRequest(`/expenses/${id}`, {
-                method: "DELETE",
-            });
-            if (!response.ok) throw new Error("Failed to delete expense.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const response = await apiRequest(`/expenses/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete expense.");
+      }
+
+      return true;
+    },
+  });
 }
 export function useListOrders() {
     return useQuery({
