@@ -1,14 +1,13 @@
-import { useState, useEffect } from "react";
-import { useListEmployees, useListFichesPaieByEmployee, useDownloadFichePaie, useGenerateFichePaie, useGetParametresPaie } from "@/lib/api-client";
+import { useState} from "react";
+import { useListEmployees, useListFichesPaieByEmployee, useDownloadFichePaie, useGenerateFichePaie} from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { FileText, Download, TrendingUp } from "lucide-react";
+import { FileText, Download} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -18,51 +17,45 @@ export default function FichesPaie() {
   const [employeeId, setEmployeeId] = useState<string>("");
   const [mois, setMois] = useState<string>((new Date().getMonth() + 1).toString());
   const [annee, setAnnee] = useState<string>(new Date().getFullYear().toString());
-  const [indemnite, setIndemnite] = useState<string>("");
-  const [tauxCotisations, setTauxCotisations] = useState<string>("");
-  const [majoration, setMajoration] = useState<string>("");
+
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: employees = [] } = useListEmployees();
-  const { data: parametres, isLoading: paramsLoading } = useGetParametresPaie();
   const { data: fiches = [], isLoading, refetch } = useListFichesPaieByEmployee(employeeId ? parseInt(employeeId) : undefined);
   const generateMutation = useGenerateFichePaie();
   const downloadMutation = useDownloadFichePaie();
 
   // Charger les paramètres par défaut dès qu’ils sont disponibles
-  useEffect(() => {
-    if (parametres) {
-      setIndemnite(parametres.indemniteTransport?.toString() ?? "");
-      setTauxCotisations(parametres.tauxCotisationsSociales?.toString() ?? "");
-      setMajoration(parametres.majorationHeuresSup?.toString() ?? "");
-    }
-  }, [parametres]);
 
-  const handleGenerate = async () => {
-    if (!employeeId || !indemnite || !tauxCotisations || !majoration) {
-      toast({ title: t('common.error'), description: "Veuillez remplir tous les champs", variant: "destructive" });
-      return;
-    }
-    try {
-      await generateMutation.mutateAsync({
-        employeeId: parseInt(employeeId),
-        mois: parseInt(mois),
-        annee: parseInt(annee),
-        indemniteTransport: parseFloat(indemnite),
-        tauxCotisationsSociales: parseFloat(tauxCotisations),
-        majorationHeuresSup: parseFloat(majoration),
-      });
-      toast({ title: t('common.success'), description: t('fichesPaie.generate_success') });
-      refetch();
-      queryClient.invalidateQueries({ queryKey: ["fiches-paie", parseInt(employeeId)] });
-    } catch {
-      toast({ title: t('common.error'), description: t('fichesPaie.generate_error'), variant: "destructive" });
-    }
-  };
 
-  const isGenerateDisabled = !employeeId || !indemnite || !tauxCotisations || !majoration || generateMutation.isPending;
+const handleGenerate = async () => {
+  if (!employeeId) {
+    toast({
+      title: t("common.error"),
+      description: "Veuillez sélectionner un employé",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  try {
+    await generateMutation.mutateAsync({
+      employeeId: parseInt(employeeId),
+      mois: parseInt(mois),
+      annee: parseInt(annee),
+    });
+
+    toast({ title: t("common.success"), description: t("fichesPaie.generate_success") });
+    await queryClient.invalidateQueries({ queryKey: ["fiches-paie", parseInt(employeeId)] });
+    refetch();
+  } catch {
+    toast({ title: t("common.error"), description: t("fichesPaie.generate_error"), variant: "destructive" });
+  }
+};
+
+  const isGenerateDisabled = !employeeId  || generateMutation.isPending;
 
   const handleDownload = async (ficheId: number) => {
     try {
@@ -75,7 +68,6 @@ export default function FichesPaie() {
 
   const getMonthName = (month: number) => format(new Date(2000, month - 1, 1), 'MMMM');
 
-  if (paramsLoading) return <ADMINLayout><div>Chargement...</div></ADMINLayout>;
 
   return (
     <ADMINLayout>
@@ -123,11 +115,7 @@ export default function FichesPaie() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <div><Label>Indemnité transport (TND)</Label><Input type="number" step="0.01" value={indemnite} onChange={e => setIndemnite(e.target.value)} /></div>
-              <div><Label>Taux cotisations sociales (%)</Label><Input type="number" step="0.01" value={tauxCotisations} onChange={e => setTauxCotisations(e.target.value)} /></div>
-              <div><Label>Majoration heures supplémentaires</Label><Input type="number" step="0.01" value={majoration} onChange={e => setMajoration(e.target.value)} placeholder="1.25" /></div>
-            </div>
+        
             <div className="mt-6">
               <Button onClick={handleGenerate} disabled={isGenerateDisabled} className="gap-2">
                 <FileText className="h-4 w-4" />
