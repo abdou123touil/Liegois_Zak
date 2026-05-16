@@ -34,10 +34,12 @@ export default function StockJournalier() {
   const openNewModal = () => {
     setDate(new Date().toISOString().split("T")[0]);
 
-    const latestRows = stocks.length > 0
-      ? stocks.map((stock) => ({
-        productId: stock.product?.id?.toString() || "",
-        quantiteProduite: stock.quantiteProduite?.toString() || "",
+    const latestStock = stocks[0];
+
+    const latestRows = latestStock?.lignes?.length
+      ? latestStock.lignes.map((ligne) => ({
+        productId: ligne.productId?.toString() || "",
+        quantiteProduite: ligne.quantiteProduite?.toString() || "",
       }))
       : [{ productId: "", quantiteProduite: "" }];
 
@@ -71,15 +73,14 @@ export default function StockJournalier() {
     }
 
     try {
-      await Promise.all(
-        validRows.map(row =>
-          createMutation.mutateAsync({
-            productId: parseInt(row.productId),
-            date,
-            quantiteProduite: parseInt(row.quantiteProduite),
-          })
-        )
-      );
+      await createMutation.mutateAsync({
+        date,
+        lignes: validRows.map(row => ({
+          productId: parseInt(row.productId),
+          quantiteProduite: parseInt(row.quantiteProduite),
+          quantitePerdue: 0,
+        })),
+      });
 
       toast({ title: t("common.success"), description: t("stockJournalier.create_success") });
       await queryClient.invalidateQueries({ queryKey: ["stock-journalier"] });
@@ -132,24 +133,48 @@ export default function StockJournalier() {
                     <tr><td colSpan={6} className="text-center py-12">{t('stockJournalier.empty')}</td></tr>
                   ) : (
                     <AnimatePresence>
-                      {stocks.map((stock, idx) => (
-                        <motion.tr
-                          key={stock.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.03 }}
-                          className="border-b border-primary/5 hover:bg-primary/5"
-                        >
-                          <td className="p-4 font-medium text-primary/90 flex items-center gap-2">
-                            <Package className="h-5 w-5 text-primary" /> {stock.product?.name}
-                          </td>
-                          <td className="p-4 text-primary/70">{new Date(stock.date).toLocaleDateString()}</td>
-                          <td className="p-4 text-primary/70">{stock.quantiteProduite}</td>
-                          <td className="p-4 text-primary/70">{stock.quantiteVendue ?? 0}</td>
-                          <td className="p-4 text-primary/70">{stock.quantiteInvendue ?? 0}</td>
-                          <td className="p-4 text-primary/70">{stock.quantitePerdue ?? 0}</td>
-                        </motion.tr>
-                      ))}
+                      {stocks.map((stock, idx) => {
+                        const totalProduite = stock.lignes?.reduce(
+                          (sum, ligne) => sum + (ligne.quantiteProduite ?? 0),
+                          0
+                        ) ?? 0;
+
+                        const totalVendue = stock.lignes?.reduce(
+                          (sum, ligne) => sum + (ligne.quantiteVendue ?? 0),
+                          0
+                        ) ?? 0;
+
+                        const totalInvendue = stock.lignes?.reduce(
+                          (sum, ligne) => sum + (ligne.quantiteInvendue ?? 0),
+                          0
+                        ) ?? 0;
+
+                        const totalPerdue = stock.lignes?.reduce(
+                          (sum, ligne) => sum + (ligne.quantitePerdue ?? 0),
+                          0
+                        ) ?? 0;
+
+                        return (
+                          <motion.tr
+                            key={stock.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.03 }}
+                            className="border-b border-primary/5 hover:bg-primary/5"
+                          >
+                            <td className="p-4 font-medium text-primary/90">
+                              {stock.lignes?.length ?? 0} produits
+                            </td>
+                            <td className="p-4 text-primary/70">
+                              {new Date(stock.date).toLocaleDateString()}
+                            </td>
+                            <td className="p-4 text-primary/70">{totalProduite}</td>
+                            <td className="p-4 text-primary/70">{totalVendue}</td>
+                            <td className="p-4 text-primary/70">{totalInvendue}</td>
+                            <td className="p-4 text-primary/70">{totalPerdue}</td>
+                          </motion.tr>
+                        );
+                      })}
                     </AnimatePresence>
                   )}
                 </tbody>

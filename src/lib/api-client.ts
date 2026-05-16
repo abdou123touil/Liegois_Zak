@@ -126,14 +126,29 @@ export interface StockMatiere {
 }
 
 // ==================== STOCK JOURNALIER ====================
-export interface StockJournalier {
-  id: number;
-  product: Product;
-  date: string;
+export interface StockJournalierLigne {
+  id?: number;
+  productId: number;
+  productName?: string;
   quantiteProduite: number;
   quantiteVendue?: number;
   quantiteInvendue?: number;
   quantitePerdue?: number;
+}
+
+export interface StockJournalier {
+  id: number;
+  date: string;
+  lignes: StockJournalierLigne[];
+}
+
+export interface CreateStockJournalierRequest {
+  date: string;
+  lignes: Array<{
+    productId: number;
+    quantiteProduite: number;
+    quantitePerdue?: number;
+  }>;
 }
 
 // ==================== DEMANDES D'ACHAT ====================
@@ -211,15 +226,7 @@ export interface DemandeAchat {
 }
 
 // Stock journalier
-export interface StockJournalier {
-  id: number;
-  product: Product;
-  date: string;
-  quantiteProduite: number;
-  quantiteVendue?: number;
-  quantiteInvendue?: number;
-  quantitePerdue?: number;
-}
+
 export interface ParametresPaie {
   id: number;
   indemniteTransport: number;
@@ -1123,12 +1130,18 @@ export function useListStockJournalier() {
 
 export function useCreateStockJournalier() {
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (data: Partial<StockJournalier>) => {
+    mutationFn: async (data: CreateStockJournalierRequest) => {
       const response = await apiRequest("/stock-journalier", {
         method: "POST",
         body: JSON.stringify(data),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to create stock journalier");
+      }
+
       return response.json() as Promise<StockJournalier>;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock-journalier"] }),
