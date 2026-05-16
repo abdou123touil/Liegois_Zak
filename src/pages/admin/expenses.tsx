@@ -188,24 +188,24 @@ export default function Expenses() {
               />
               {/* Panneau centré avec style inline pour éviter conflits */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
+                animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+                exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
                 transition={{ duration: 0.2 }}
                 style={{
-                  position: 'fixed',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '95vw',
-                  maxWidth: '500px',
-                  maxHeight: '85vh',
-                  overflowY: 'auto',
+                  position: "fixed",
+                  top: "50%",
+                  left: "50%",
+                  width: "95vw",
+                  maxWidth: "500px",
+                  maxHeight: "85vh",
+                  overflowY: "auto",
                   zIndex: 50,
-                  borderRadius: '1rem',
-                  border: '1px solid hsl(var(--border))',
-                  backgroundColor: 'hsl(var(--card))',
-                  boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
+                  borderRadius: "1rem",
+                  border: "1px solid hsl(var(--border))",
+                  backgroundColor: "hsl(var(--card))",
+                  boxShadow:
+                    "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
                 }}
               >
                 <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
