@@ -300,9 +300,7 @@ export default function StockJournalier() {
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setSelectedStock(null)}>
-                {t("common.close") || "Fermer"}
-              </Button>
+             
             </DialogFooter>
           </DialogContent>
         </Dialog>
