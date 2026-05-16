@@ -23,7 +23,8 @@ export default function Categories() {
   const [isActive, setisActive] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
   const { data: categories, isLoading } = useListCategories();
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
@@ -71,15 +72,23 @@ export default function Categories() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm(t('categories.confirm_delete'))) {
-      try {
-        await deleteMutation.mutateAsync({ id });
-        toast({ title: t('common.success'), description: t('categories.delete_success') });
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-      } catch (error) {
-        toast({ title: t('common.error'), description: t('categories.delete_error'), variant: "destructive" });
-      }
+  const handleDeleteClick = (category: Category) => {
+    setCategoryToDelete(category);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      await deleteMutation.mutateAsync({ id: categoryToDelete.id });
+      toast({ title: t('common.success'), description: t('categories.delete_success') });
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
+    } catch (error) {
+      toast({ title: t('common.error'), description: t('categories.delete_error'), variant: "destructive" });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setCategoryToDelete(null);
     }
   };
 
@@ -131,7 +140,7 @@ export default function Categories() {
                       <Button variant="ghost" size="icon" onClick={() => openEditModal(cat)} className="hover:bg-primary/10">
                         <Edit className="h-4 w-4 text-primary" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(cat.id)} className="hover:bg-destructive/10">
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(cat)} className="hover:bg-destructive/10">
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -174,6 +183,43 @@ export default function Categories() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleSave}>{editingCategory ? t('common.save') : t('common.create')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent
+            className="sm:max-w-[400px] rounded-2xl border border-border shadow-2xl"
+            style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-destructive">
+                Confirmer la suppression
+              </DialogTitle>
+            </DialogHeader>
+
+            <p className="text-primary/80">
+              Voulez-vous vraiment supprimer la catégorie{" "}
+              <strong>{categoryToDelete?.name}</strong> ? Cette action est irréversible.
+            </p>
+
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDeleteDialogOpen(false);
+                  setCategoryToDelete(null);
+                }}
+              >
+                {t('common.cancel')}
+              </Button>
+
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? t('common.loading') : "Supprimer"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

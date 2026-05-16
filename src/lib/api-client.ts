@@ -523,15 +523,19 @@ export function useUpdateCategory() {
 
 // 🔹 useDeleteCategory Hook (deletes a category)
 export function useDeleteCategory() {
-    return useMutation({
-        mutationFn: async ({ id }: { id: number }) => {
-            const response = await apiRequest(`/categories/${id}`, {
-                method: "DELETE",
-            });
-            if (!response.ok) throw new Error("Failed to delete category.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const response = await apiRequest(`/categories/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete category.");
+      }
+
+      return true;
+    },
+  });
 }
 
 // 🔹 Other existing functions (getListCategoriesQueryKey, getListProductsQueryKey, etc.)
@@ -584,15 +588,19 @@ export function useUpdateEmployee() {
 
 // 🔹 useDeleteEmployee Hook (deletes an employee)
 export function useDeleteEmployee() {
-    return useMutation({
-        mutationFn: async ({ id }: { id: number }) => {
-            const response = await apiRequest(`/employees/${id}`, {
-                method: "DELETE",
-            });
-            if (!response.ok) throw new Error("Failed to delete employee.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const response = await apiRequest(`/employees/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete employee.");
+      }
+
+      return true;
+    },
+  });
 }
 
 export function useListExpenses() {
