@@ -136,7 +136,7 @@ export default function Expenses() {
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('expenses.table.amount')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('expenses.table.date')}</th>
                     <th className="text-right p-4 text-sm font-medium text-primary/70">{t('expenses.table.actions')}</th>
-                  </tr>
+                  </td>
                 </thead>
                 <tbody>
                   {isLoading ? (
@@ -174,7 +174,7 @@ export default function Expenses() {
           </CardContent>
         </Card>
 
-        {/* Panneau fixe personnalisé (remplace le Dialog) */}
+        {/* Panneau fixe personnalisé – centrage robuste */}
         <AnimatePresence>
           {isModalOpen && (
             <>
@@ -186,15 +186,29 @@ export default function Expenses() {
                 className="fixed inset-0 z-50 bg-black/50"
                 onClick={() => setIsModalOpen(false)}
               />
-              {/* Panneau */}
+              {/* Panneau centré avec style inline pour éviter conflits */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-[500px] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl"
+                style={{
+                  position: 'fixed',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '95vw',
+                  maxWidth: '500px',
+                  maxHeight: '85vh',
+                  overflowY: 'auto',
+                  zIndex: 50,
+                  borderRadius: '1rem',
+                  border: '1px solid hsl(var(--border))',
+                  backgroundColor: 'hsl(var(--card))',
+                  boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
+                }}
               >
-                <div className="sticky  z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
                   <h2 className="text-xl font-semibold text-primary">{t('expenses.add_title')}</h2>
                   <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)}>
                     <X className="h-5 w-5" />
