@@ -29,12 +29,14 @@ export default function StockJournalier() {
   }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [editingStock, setEditingStock] = useState<StockJournalierType | null>(null);
 
   const { data: stocks = [], isLoading } = useListStockJournalier();
   const { data: products = [] } = useListProducts({});
   const createMutation = useCreateStockJournalier();
 
   const openNewModal = () => {
+    setEditingStock(null);
     setDate(new Date().toISOString().split("T")[0]);
 
     const latestStock = stocks[0];
@@ -63,6 +65,22 @@ export default function StockJournalier() {
       rows.map((row, i) => i === index ? { ...row, [field]: value } : row)
     );
   };
+  const openEditModal = (stock: StockJournalierType) => {
+    setEditingStock(stock);
+    setSelectedStock(null);
+    setDate(stock.date);
+
+    setStockRows(
+      stock.lignes?.length
+        ? stock.lignes.map((ligne) => ({
+          productId: ligne.productId?.toString() || "",
+          quantiteProduite: ligne.quantiteProduite?.toString() || "",
+        }))
+        : [{ productId: "", quantiteProduite: "" }]
+    );
+
+    setIsModalOpen(true);
+  };
   const handleSave = async () => {
     const validRows = stockRows.filter(row => row.productId && row.quantiteProduite);
 
@@ -88,6 +106,7 @@ export default function StockJournalier() {
       toast({ title: t("common.success"), description: t("stockJournalier.create_success") });
       await queryClient.invalidateQueries({ queryKey: ["stock-journalier"] });
       setIsModalOpen(false);
+      setEditingStock(null);
     } catch {
       toast({
         title: t("common.error"),
@@ -193,8 +212,9 @@ export default function StockJournalier() {
             style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
           >
             <DialogHeader>
-              <DialogTitle className="text-primary">{t('stockJournalier.add_title')}</DialogTitle>
-            </DialogHeader>
+              <DialogTitle className="text-primary">
+                {editingStock ? "Modifier le stock journalier" : t("stockJournalier.add_title")}
+              </DialogTitle>            </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label>{t("stockJournalier.date")}</Label>
@@ -244,7 +264,9 @@ export default function StockJournalier() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
-              <Button onClick={handleSave}>{t('common.create')}</Button>
+              <Button onClick={handleSave} disabled={createMutation.isPending}>
+                {editingStock ? "Mettre à jour" : t("common.create")}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -300,7 +322,12 @@ export default function StockJournalier() {
             </div>
 
             <DialogFooter>
-             
+              <Button variant="outline" onClick={() => setSelectedStock(null)}>
+                Fermer
+              </Button>
+              <Button onClick={() => selectedStock && openEditModal(selectedStock)}>
+                Mettre à jour
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
