@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { useListProducts, useListStockJournalier, useCreateStockJournalier } from "@/lib/api-client";
+import {
+  useListProducts,
+  useListStockJournalier,
+  useCreateStockJournalier,
+  StockJournalier as StockJournalierType,
+} from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,10 +21,8 @@ import { useTranslation } from "react-i18next";
 export default function StockJournalier() {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [productId, setProductId] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [quantiteProduite, setQuantiteProduite] = useState("");
-  const [quantitePerdue, setQuantitePerdue] = useState("0");
+  const [selectedStock, setSelectedStock] = useState<StockJournalierType | null>(null);
   const [stockRows, setStockRows] = useState<Array<{
     productId: string;
     quantiteProduite: string;
@@ -160,6 +163,7 @@ export default function StockJournalier() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.03 }}
+                            onClick={() => setSelectedStock(stock)}
                             className="border-b border-primary/5 hover:bg-primary/5"
                           >
                             <td className="p-4 font-medium text-primary/90">
@@ -241,6 +245,64 @@ export default function StockJournalier() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleSave}>{t('common.create')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={!!selectedStock} onOpenChange={(open) => !open && setSelectedStock(null)}>
+          <DialogContent
+            className="sm:max-w-[700px] rounded-2xl border border-border shadow-2xl"
+            style={{ backgroundColor: "hsl(var(--card))", backdropFilter: "none" }}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-primary">
+                Détails du stock -{" "}
+                {selectedStock ? new Date(selectedStock.date).toLocaleDateString() : ""}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-3 text-sm font-medium text-primary/70">Produit</th>
+                    <th className="text-left p-3 text-sm font-medium text-primary/70">Produite</th>
+                    <th className="text-left p-3 text-sm font-medium text-primary/70">Vendue</th>
+                    <th className="text-left p-3 text-sm font-medium text-primary/70">Invendue</th>
+                    <th className="text-left p-3 text-sm font-medium text-primary/70">Perdue</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {selectedStock?.lignes?.length ? (
+                    selectedStock.lignes.map((ligne) => (
+                      <tr key={ligne.id ?? ligne.productId} className="border-b border-primary/5">
+                        <td className="p-3 font-medium text-primary/90">
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4 text-primary" />
+                            {ligne.productName || "Produit inconnu"}
+                          </div>
+                        </td>
+                        <td className="p-3 text-primary/70">{ligne.quantiteProduite ?? 0}</td>
+                        <td className="p-3 text-primary/70">{ligne.quantiteVendue ?? 0}</td>
+                        <td className="p-3 text-primary/70">{ligne.quantiteInvendue ?? 0}</td>
+                        <td className="p-3 text-primary/70">{ligne.quantitePerdue ?? 0}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                        Aucun produit
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedStock(null)}>
+                {t("common.close") || "Fermer"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
