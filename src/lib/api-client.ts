@@ -479,15 +479,19 @@ export function useUpdateProduct() {
 
 // 🔹 useDeleteProduct Hook (deletes a product)
 export function useDeleteProduct() {
-    return useMutation({
-        mutationFn: async ({ id }: { id: number }) => {
-            const response = await apiRequest(`/products/${id}`, {
-                method: "DELETE",
-            });
-            if (!response.ok) throw new Error("Failed to delete product.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const response = await apiRequest(`/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete product.");
+      }
+
+      return true;
+    },
+  });
 }
 
 
@@ -759,14 +763,20 @@ export function useUpdateFournisseur() {
 
 export function useDeleteFournisseur() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/fournisseurs/${id}`, { method: "DELETE" });
+      const response = await apiRequest(`/fournisseurs/${id}`, { method: "DELETE" });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete fournisseur.");
+      }
+
+      return true;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["fournisseurs"] }),
   });
 }
-
 // ==================== ACHATS ====================
 export function useListAchats() {
   return useQuery({

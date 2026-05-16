@@ -25,7 +25,8 @@ export default function Fournisseurs() {
   const [actif, setActif] = useState(true);
   const [defaultDelayLivraison, setDefaultDelayLivraison] = useState("");
   const [notes, setNotes] = useState("");
-
+const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+const [fournisseurToDelete, setFournisseurToDelete] = useState<Fournisseur | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -92,17 +93,25 @@ export default function Fournisseurs() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm(t('fournisseurs.confirm_delete'))) {
-      try {
-        await deleteMutation.mutateAsync(id);
-        toast({ title: t('common.success'), description: t('fournisseurs.delete_success') });
-        queryClient.invalidateQueries({ queryKey: ["fournisseurs"] });
-      } catch (error) {
-        toast({ title: t('common.error'), description: t('fournisseurs.delete_error'), variant: "destructive" });
-      }
-    }
-  };
+  const handleDeleteClick = (fournisseur: Fournisseur) => {
+  setFournisseurToDelete(fournisseur);
+  setIsDeleteDialogOpen(true);
+};
+
+const confirmDelete = async () => {
+  if (!fournisseurToDelete) return;
+
+  try {
+    await deleteMutation.mutateAsync(fournisseurToDelete.id);
+    toast({ title: t('common.success'), description: t('fournisseurs.delete_success') });
+    await queryClient.invalidateQueries({ queryKey: ["fournisseurs"] });
+  } catch (error) {
+    toast({ title: t('common.error'), description: t('fournisseurs.delete_error'), variant: "destructive" });
+  } finally {
+    setIsDeleteDialogOpen(false);
+    setFournisseurToDelete(null);
+  }
+};
 
   return (
     <ADMINLayout>
@@ -166,7 +175,7 @@ export default function Fournisseurs() {
                             <Button variant="ghost" size="icon" onClick={() => openEditModal(f)} className="hover:bg-primary/10">
                               <Edit className="h-4 w-4 text-primary" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(f.id)} className="hover:bg-destructive/10">
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(f)} className="hover:bg-destructive/10">
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </td>
@@ -228,6 +237,43 @@ export default function Fournisseurs() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+  <DialogContent
+    className="sm:max-w-[400px] rounded-2xl border border-border shadow-2xl"
+    style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
+  >
+    <DialogHeader>
+      <DialogTitle className="text-destructive">
+        Confirmer la suppression
+      </DialogTitle>
+    </DialogHeader>
+
+    <p className="text-primary/80">
+      Voulez-vous vraiment supprimer le fournisseur{" "}
+      <strong>{fournisseurToDelete?.nom}</strong> ? Cette action est irréversible.
+    </p>
+
+    <DialogFooter className="mt-4">
+      <Button
+        variant="outline"
+        onClick={() => {
+          setIsDeleteDialogOpen(false);
+          setFournisseurToDelete(null);
+        }}
+      >
+        {t('common.cancel')}
+      </Button>
+
+      <Button
+        variant="destructive"
+        onClick={confirmDelete}
+        disabled={deleteMutation.isPending}
+      >
+        {deleteMutation.isPending ? t('common.loading') : "Supprimer"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
       </div>
     </ADMINLayout>
   );
