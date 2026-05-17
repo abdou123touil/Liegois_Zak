@@ -428,13 +428,14 @@ export default function Pos() {
                   {user?.name?.charAt(0) || "C"}
                 </div>
                 <span className="text-sm font-medium hidden sm:block text-primary/80">{user?.name}</span>
-                <Button variant="ghost" size="icon" onClick={handleLogout} className="text-primary/60 hover:text-destructive">
-                  <LogOut className="h-5 w-5" />
-                </Button>
                 <Button variant="outline" onClick={() => setDevisListOpen(true)} className="gap-2">
                   <FileText className="h-4 w-4" />
                   Devis
                 </Button>
+                <Button variant="ghost" size="icon" onClick={handleLogout} className="text-primary/60 hover:text-destructive">
+                  <LogOut className="h-5 w-5" />
+                </Button>
+
               </div>
             </div>
           </header>
