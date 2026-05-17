@@ -1214,3 +1214,102 @@ export function useCreateEchange() {
     },
   });
 }
+export type DevisStatus = "EN_ATTENTE" | "CONFIRME" | "ANNULE";
+
+export interface DevisItem {
+  id: number;
+  productId: number;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface Devis {
+  id: number;
+  clientName?: string;
+  clientPhone?: string;
+  notes?: string;
+  total: number;
+  status: DevisStatus;
+  createdAt: string;
+  items: DevisItem[];
+}
+
+export function useListDevis() {
+  return useQuery({
+    queryKey: ["devis"],
+    queryFn: async () => {
+      const response = await apiRequest("/devis");
+      if (!response.ok) throw new Error("Failed to fetch devis");
+      return response.json() as Promise<Devis[]>;
+    },
+    refetchInterval: 5000,
+  });
+}
+
+export function useCreateDevis() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      employeeId: number;
+      clientName?: string;
+      clientPhone?: string;
+      notes?: string;
+      items: Array<{ productId: number; quantity: number }>;
+    }) => {
+      const response = await apiRequest("/devis", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to create devis");
+      return response.json() as Promise<Devis>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["devis"] }),
+  });
+}
+
+export function useConfirmDevis() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: { employeeId: number; paymentMethod: string; amountPaid: number };
+    }) => {
+      const response = await apiRequest(`/devis/${id}/confirm`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to confirm devis");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["devis"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+    },
+  });
+}
+
+export function useCancelDevis() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/devis/${id}/cancel`, {
+        method: "POST",
+      });
+
+      if (!response.ok) throw new Error("Failed to cancel devis");
+      return true;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["devis"] }),
+  });
+}

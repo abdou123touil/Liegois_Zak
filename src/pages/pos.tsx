@@ -1,5 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
-import { useListCategories, useListProducts, useCreateOrder, getGetDashboardStatsQueryKey } from "@/lib/api-client";
+import {
+  useListCategories,
+  useListProducts,
+  useCreateOrder,
+  getGetDashboardStatsQueryKey,
+  useCreateDevis,
+  useListDevis,
+  useConfirmDevis,
+  useCancelDevis,
+  Devis,
+} from "@/lib/api-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -10,9 +20,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Plus, Minus, CreditCard, Banknote, HelpCircle, ShoppingCart, Loader2, Croissant, Package, X } from "lucide-react";
+import { LogOut, Plus, Minus, CreditCard, Banknote, HelpCircle, ShoppingCart, Loader2, Croissant, Package, X, FileText, CheckCircle, XCircle } from "lucide-react";
 import { useLogout } from "@/lib/api-client";
-import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -172,27 +181,34 @@ export default function Pos() {
   const [userId, setUserId] = useState<number | null>(null);
   const { user, setUser } = useAuth();
   const logoutMutation = useLogout();
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
+  const [devisModalOpen, setDevisModalOpen] = useState(false);
+  const [devisListOpen, setDevisListOpen] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [devisNotes, setDevisNotes] = useState("");
+  const [selectedDevis, setSelectedDevis] = useState<Devis | null>(null);
   const { data: categories } = useListCategories();
   const { data: products, isLoading: isLoadingProducts } = useListProducts({ categoryId: activeCategory ?? null });
   const createOrderMutation = useCreateOrder();
   const [discountType, setDiscountType] = useState<"fixed" | "percentage">("fixed");
   const [discountValue, setDiscountValue] = useState("");
   const [discountReason, setDiscountReason] = useState("");
-  
-const handleLogout = async () => {
-  try {
-    await logoutMutation.mutateAsync();
-    setUser(null);
-    // Redirection forcée pour réinitialiser complètement l'état React
-    window.location.href = "/login";
-  } catch (error) {
-    console.error("Logout error", error);
-  }
-};
+  const { data: devis = [] } = useListDevis();
+  const createDevisMutation = useCreateDevis();
+  const confirmDevisMutation = useConfirmDevis();
+  const cancelDevisMutation = useCancelDevis();
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+      setUser(null);
+      // Redirection forcée pour réinitialiser complètement l'état React
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout error", error);
+    }
+  };
 
   const addToCart = (product: { id: number; name: string; price: number }) => {
     setCart(prev => {
@@ -318,7 +334,65 @@ const handleLogout = async () => {
       toast({ title: t('common.error'), description: t('pos.payment_error'), variant: "destructive" });
     }
   };
+  const handleCreateDevis = async () => {
+    if (cart.length === 0 || !userId) return;
 
+    try {
+      await createDevisMutation.mutateAsync({
+        employeeId: userId,
+        clientName: clientName || undefined,
+        clientPhone: clientPhone || undefined,
+        notes: devisNotes || undefined,
+        items: cart.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      });
+
+      toast({ title: "Succès", description: "Devis enregistré." });
+      setDevisModalOpen(false);
+      setIsCartOpen(false);
+      setCart([]);
+      setClientName("");
+      setClientPhone("");
+      setDevisNotes("");
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de créer le devis.", variant: "destructive" });
+    }
+  };
+
+  const handleConfirmDevis = async (devisToConfirm: Devis) => {
+    if (!userId) return;
+
+    try {
+      await confirmDevisMutation.mutateAsync({
+        id: devisToConfirm.id,
+        data: {
+          employeeId: userId,
+          paymentMethod: "cash",
+          amountPaid: devisToConfirm.total,
+        },
+      });
+
+      toast({ title: "Succès", description: "Devis confirmé et ajouté aux commandes." });
+      setSelectedDevis(null);
+      setDevisListOpen(false);
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de confirmer le devis.", variant: "destructive" });
+    }
+
+  };
+
+  const handleCancelDevis = async (id: number) => {
+    try {
+      await cancelDevisMutation.mutateAsync(id);
+      toast({ title: "Succès", description: "Devis annulé." });
+      setSelectedDevis(null);
+      setDevisListOpen(false);
+    } catch {
+      toast({ title: "Erreur", description: "Impossible d'annuler le devis.", variant: "destructive" });
+    }
+  };
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('fr-TN', {
       style: 'currency',
@@ -356,6 +430,10 @@ const handleLogout = async () => {
                 <span className="text-sm font-medium hidden sm:block text-primary/80">{user?.name}</span>
                 <Button variant="ghost" size="icon" onClick={handleLogout} className="text-primary/60 hover:text-destructive">
                   <LogOut className="h-5 w-5" />
+                </Button>
+                <Button variant="outline" onClick={() => setDevisListOpen(true)} className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Devis
                 </Button>
               </div>
             </div>
@@ -558,7 +636,7 @@ const handleLogout = async () => {
                         onChange={(e) => setDiscountValue(e.target.value)}
                         className="w-24"
                       />
-                   
+
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -576,6 +654,15 @@ const handleLogout = async () => {
                     </div>
                   </div>
                   <Button
+                    variant="outline"
+                    className="w-full h-12 rounded-xl gap-2"
+                    disabled={cart.length === 0}
+                    onClick={() => setDevisModalOpen(true)}
+                  >
+                    <FileText className="h-4 w-4" />
+                    Créer un devis
+                  </Button>
+                  <Button
                     className="w-full h-14 text-lg rounded-xl shadow-md hover:shadow-lg transition-all bg-primary hover:bg-primary/90"
                     disabled={cart.length === 0}
                     onClick={() => {
@@ -592,6 +679,157 @@ const handleLogout = async () => {
           )}
         </AnimatePresence>
 
+        <Dialog open={devisModalOpen} onOpenChange={setDevisModalOpen}>
+          <DialogContent className="sm:max-w-[520px] rounded-2xl bg-card border border-primary/20 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-primary">Créer un devis</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <Label>Client</Label>
+                  <Input value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Nom client" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Téléphone</Label>
+                  <Input value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+216..." />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Notes</Label>
+                <Input value={devisNotes} onChange={(e) => setDevisNotes(e.target.value)} placeholder="Remarque optionnelle" />
+              </div>
+
+              <div className="rounded-xl border border-primary/10 bg-primary/5 p-4 space-y-2">
+                {cart.map((item) => (
+                  <div key={item.productId} className="flex justify-between text-sm">
+                    <span>{item.name} x {item.quantity}</span>
+                    <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
+                  </div>
+                ))}
+
+                <div className="flex justify-between pt-3 border-t border-primary/10 text-lg font-bold text-primary">
+                  <span>Total</span>
+                  <span>{formatCurrency(discountedTotal)}</span>
+                </div>
+              </div>
+
+              <Button
+                className="w-full h-12 rounded-xl"
+                onClick={handleCreateDevis}
+                disabled={createDevisMutation.isPending}
+              >
+                {createDevisMutation.isPending ? "Enregistrement..." : "Enregistrer le devis"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={devisListOpen} onOpenChange={setDevisListOpen}>
+          <DialogContent className="sm:max-w-[760px] max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-primary/20 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-primary">Devis en attente</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-3">
+              {devis.filter((d) => d.status === "EN_ATTENTE").length === 0 ? (
+                <div className="py-10 text-center text-primary/50">Aucun devis en attente</div>
+              ) : (
+                devis
+                  .filter((d) => d.status === "EN_ATTENTE")
+                  .map((d) => (
+                    <div
+                      key={d.id}
+                      className="rounded-xl border border-primary/10 bg-primary/5 p-4 flex items-center justify-between gap-4"
+                    >
+                      <div>
+                        <div className="font-semibold text-primary">
+                          Devis #{d.id} {d.clientName ? `- ${d.clientName}` : ""}
+                        </div>
+                        <div className="text-sm text-primary/60">
+                          {new Date(d.createdAt).toLocaleString()} - {d.items.length} articles
+                        </div>
+                        {d.notes && <div className="text-sm text-primary/70 mt-1">{d.notes}</div>}
+                      </div>
+
+                      <div className="text-right">
+                        <div className="font-bold text-lg text-primary">{formatCurrency(d.total)}</div>
+                        <div className="flex gap-2 mt-2">
+                          <Button size="sm" onClick={() => setSelectedDevis(d)}>
+                            Voir
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={!!selectedDevis} onOpenChange={(open) => !open && setSelectedDevis(null)}>
+          <DialogContent className="sm:max-w-[620px] rounded-2xl bg-card border border-primary/20 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-primary">
+                Devis #{selectedDevis?.id}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedDevis && (
+              <div className="space-y-4">
+                <div className="rounded-xl border border-primary/10 p-4 bg-primary/5">
+                  <div className="text-sm text-primary/60">Client</div>
+                  <div className="font-medium text-primary">
+                    {selectedDevis.clientName || "Non renseigné"}
+                  </div>
+                  {selectedDevis.clientPhone && (
+                    <div className="text-sm text-primary/70">{selectedDevis.clientPhone}</div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  {selectedDevis.items.map((item) => (
+                    <div key={item.id} className="flex justify-between border-b border-primary/10 py-2">
+                      <div>
+                        <div className="font-medium text-primary">{item.productName}</div>
+                        <div className="text-sm text-primary/60">
+                          {item.quantity} x {formatCurrency(item.unitPrice)}
+                        </div>
+                      </div>
+                      <div className="font-semibold text-primary">{formatCurrency(item.subtotal)}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-between text-xl font-bold text-primary pt-2">
+                  <span>Total</span>
+                  <span>{formatCurrency(selectedDevis.total)}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => handleCancelDevis(selectedDevis.id)}
+                    disabled={cancelDevisMutation.isPending}
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Annuler
+                  </Button>
+
+                  <Button
+                    className="gap-2"
+                    onClick={() => handleConfirmDevis(selectedDevis)}
+                    disabled={confirmDevisMutation.isPending}
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Confirmer achat
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
         {/* Modal de paiement repensé */}
         <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
           <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-primary/20 shadow-2xl p-0">
