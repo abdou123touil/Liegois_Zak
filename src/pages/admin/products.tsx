@@ -73,7 +73,6 @@ const [productToDelete, setProductToDelete] = useState<Product | null>(null);
       description: description || undefined,
       isActive,
     };
-    console.log("Saving product with data:", productData.isActive);
     try {
       if (editingProduct) {
         await updateMutation.mutateAsync({ id: editingProduct.id, data: productData });

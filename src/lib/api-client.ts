@@ -325,12 +325,9 @@ export function useGetMe() {
   return useQuery({
     queryKey: ["me"],
     queryFn: async () => {
-      console.log("🔵 Fetching /me...");
       const response = await apiRequest("/me");
-      console.log("Status:", response.status);
       if (!response.ok) throw new Error("Failed to fetch user");
       const data = await response.json();
-      console.log("User data:", data);
       return { id: data.id, name: data.name, username: data.username, role: data.role, isActive: true };
     },
     retry: false,
@@ -406,12 +403,9 @@ export function useListCategories() {
   return useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      console.log("🔵 Fetching categories...");
       const response = await apiRequest("/categories");
-      console.log("Status:", response.status);
       if (!response.ok) throw new Error("Failed to fetch categories");
       const data = await response.json();
-      console.log("Categories data:", data);
       return data;
     },
   });
@@ -432,7 +426,6 @@ export function useListProducts({ categoryId }: { categoryId?: number }) {
 
             const data = await response.json(); // ✅ UNE SEULE FOIS
 
-            console.log("Products data:", data); // ✅ utilise data
 
             return data; // ✅ retourne data
         },

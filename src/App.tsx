@@ -53,7 +53,6 @@ function AppRouter() {
       } else {
         const currentPath = window.location.pathname;
         if (currentPath === "/login" || currentPath === "/") {
-          console.log("Redirecting based on user role:", user.role);
           const role = user.role?.toLowerCase();
           if (role === "admin") setLocation("/admin");
           else if (role === "chef") setLocation("/chef");
