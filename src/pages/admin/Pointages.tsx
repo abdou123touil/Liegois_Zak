@@ -216,7 +216,7 @@ export default function Pointages() {
                           <td className="p-4 text-primary/70">{new Date(pointage.date).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{pointage.heureArrivee}</td>
                           <td className="p-4 text-primary/70">{pointage.heureDepart || '-'}</td>
-                          <td className="p-4 text-primary/70">{pointage.heuresPause?.toFixed(2) || '0.00'} H</td>
+                          <td className="p-4 text-primary/70">{pointage.heuresPause?.toFixed(2) || '0'}h</td>
                           <td className="p-4 text-primary/70">{pointage.heuresTravaillees ?? '-'}</td>
                           <td className="p-4 text-right">
                             <div className="flex justify-end gap-2">
