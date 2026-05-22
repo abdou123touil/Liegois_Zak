@@ -24,8 +24,8 @@ export default function Products() {
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
-const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -54,8 +54,8 @@ const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     setCategoryId(product.categoryId.toString());
     setImageUrl(product.imageUrl || "");
     setDescription(product.description || "");
-    setIsActive(product.isActive );
-    
+    setIsActive(product.isActive);
+
     setIsModalOpen(true);
   };
 
@@ -89,30 +89,30 @@ const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   };
 
   const handleDeleteClick = (product: Product) => {
-  setProductToDelete(product);
-  setIsDeleteDialogOpen(true);
-};
+    setProductToDelete(product);
+    setIsDeleteDialogOpen(true);
+  };
 
-const confirmDelete = async () => {
-  if (!productToDelete) return;
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
 
-  try {
-    await deleteMutation.mutateAsync({ id: productToDelete.id });
-    toast({ title: t('common.success'), description: t('products.delete_success') });
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
-  } catch (error) {
-    toast({ title: t('common.error'), description: t('products.delete_error'), variant: "destructive" });
-  } finally {
-    setIsDeleteDialogOpen(false);
-    setProductToDelete(null);
-  }
-};
-const formatCurrency = (val: number) => {
-  return new Intl.NumberFormat('fr-TN', { 
-    style: 'currency', 
-    currency: 'TND' 
-  }).format(val);
-};
+    try {
+      await deleteMutation.mutateAsync({ id: productToDelete.id });
+      toast({ title: t('common.success'), description: t('products.delete_success') });
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+    } catch (error) {
+      toast({ title: t('common.error'), description: t('products.delete_error'), variant: "destructive" });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setProductToDelete(null);
+    }
+  };
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('fr-TN', {
+      style: 'currency',
+      currency: 'TND'
+    }).format(val);
+  };
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -175,8 +175,11 @@ const formatCurrency = (val: number) => {
                           <td className="p-4 text-primary/70">{product.categoryName || t('common.unknown')}</td>
                           <td className="p-4 font-semibold text-primary">{formatCurrency(product.price)}</td>
                           <td className="p-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.isActive ?  'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400':'bg-primary/10 text-primary' }`}>
-                              {product.isActive ? t('products.status_inactive') : t('products.status_active')}
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.isActive
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                              }`}>
+                              {product.isActive ? t('products.status_active') : t('products.status_inactive')}
                             </span>
                           </td>
                           <td className="p-4 text-right space-x-2">
@@ -253,42 +256,42 @@ const formatCurrency = (val: number) => {
           </DialogContent>
         </Dialog>
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-  <DialogContent
-    className="sm:max-w-[400px] rounded-2xl border border-border shadow-2xl"
-    style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
-  >
-    <DialogHeader>
-      <DialogTitle className="text-destructive">
-        Confirmer la suppression
-      </DialogTitle>
-    </DialogHeader>
+          <DialogContent
+            className="sm:max-w-[400px] rounded-2xl border border-border shadow-2xl"
+            style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-destructive">
+                Confirmer la suppression
+              </DialogTitle>
+            </DialogHeader>
 
-    <p className="text-primary/80">
-      Voulez-vous vraiment supprimer le produit{" "}
-      <strong>{productToDelete?.name}</strong> ? Cette action est irréversible.
-    </p>
+            <p className="text-primary/80">
+              Voulez-vous vraiment supprimer le produit{" "}
+              <strong>{productToDelete?.name}</strong> ? Cette action est irréversible.
+            </p>
 
-    <DialogFooter className="mt-4">
-      <Button
-        variant="outline"
-        onClick={() => {
-          setIsDeleteDialogOpen(false);
-          setProductToDelete(null);
-        }}
-      >
-        {t('common.cancel')}
-      </Button>
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDeleteDialogOpen(false);
+                  setProductToDelete(null);
+                }}
+              >
+                {t('common.cancel')}
+              </Button>
 
-      <Button
-        variant="destructive"
-        onClick={confirmDelete}
-        disabled={deleteMutation.isPending}
-      >
-        {deleteMutation.isPending ? t('common.loading') : "Supprimer"}
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? t('common.loading') : "Supprimer"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
