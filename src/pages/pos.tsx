@@ -27,7 +27,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
-
+import { Checkbox } from "@/components/ui/checkbox";
 interface CartItem {
   productId: number;
   name: string;
@@ -198,6 +198,7 @@ export default function Pos() {
   const { data: devis = [] } = useListDevis();
   const createDevisMutation = useCreateDevis();
   const confirmDevisMutation = useConfirmDevis();
+  const [printTicket, setPrintTicket] = useState(false);
   const cancelDevisMutation = useCancelDevis();
   const handleLogout = async () => {
     try {
@@ -313,13 +314,16 @@ export default function Pos() {
         qrCodeUrl
       );
 
-      const printWindow = window.open('', '_blank', 'width=400,height=600');
-      if (printWindow) {
-        printWindow.document.write(ticketHtml);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.onafterprint = () => printWindow.close();
+      if (printTicket) {
+        const printWindow = window.open("", "_blank", "width=400,height=600");
+
+        if (printWindow) {
+          printWindow.document.write(ticketHtml);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.onafterprint = () => printWindow.close();
+        }
       }
 
       setPaymentModalOpen(false);
@@ -328,8 +332,10 @@ export default function Pos() {
       setAmountEntered("0");
       setDiscountValue("");
       setDiscountReason("");
+      setPrintTicket(false);
       queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
       setTimeout(() => setSuccessModalOpen(false), 3000);
+      
     } catch (error) {
       toast({ title: t('common.error'), description: t('pos.payment_error'), variant: "destructive" });
     }
@@ -669,6 +675,7 @@ export default function Pos() {
                     onClick={() => {
                       setPaymentMethod("cash");
                       setAmountEntered(discountedTotal.toString());
+                      setPrintTicket(false);
                       setPaymentModalOpen(true);
                     }}
                   >
@@ -908,7 +915,22 @@ export default function Pos() {
                   <p className="text-sm text-primary/70">{t('pos.payment_instruction')}</p>
                 </div>
               )}
+              <div className="flex items-center justify-between rounded-xl border border-primary/10 bg-primary/5 px-4 py-3">
+                <div>
+                  <Label htmlFor="printTicket" className="font-medium text-primary">
+                    Imprimer le ticket
+                  </Label>
+                  <p className="text-xs text-primary/60 mt-0.5">
+                    Générer le ticket de caisse après validation
+                  </p>
+                </div>
 
+                <Checkbox
+                  id="printTicket"
+                  checked={printTicket}
+                  onCheckedChange={(checked) => setPrintTicket(!!checked)}
+                />
+              </div>
               <Button
                 className="w-full h-12 text-base rounded-xl shadow-md bg-primary hover:bg-primary/90 disabled:opacity-50"
                 disabled={(paymentMethod === "cash" && parseFloat(amountEntered) < discountedTotal) || createOrderMutation.isPending}
