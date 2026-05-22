@@ -145,13 +145,13 @@ export default function Products() {
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('products.table.price')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('products.table.status')}</th>
                     <th className="text-right p-4 text-sm font-medium text-primary/70">{t('products.table.actions')}</th>
-                  </td>
+                  </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('common.loading')}...<\/td></tr>
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('common.loading')}...</td></tr>
                   ) : products?.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('products.empty')}<\/td></tr>
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('products.empty')}</td></tr>
                   ) : (
                     <AnimatePresence>
                       {products?.map((product, idx) => {
@@ -197,7 +197,7 @@ export default function Products() {
                     </AnimatePresence>
                   )}
                 </tbody>
-              8va
+              </table>
             </div>
           </CardContent>
         </Card>
