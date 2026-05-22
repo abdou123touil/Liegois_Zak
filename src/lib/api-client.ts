@@ -191,6 +191,8 @@ export interface Pointage {
   heuresTravaillees?: number;
   heuresSupplementaires?: number;
   statut: string;
+  heuresPause?: number;
+
 }
 
 // ==================== FICHES DE PAIE ====================
@@ -1016,6 +1018,23 @@ export function useUpdatePointageDepart() {
       const response = await apiRequest(`/pointages/${id}/depart?heureDepart=${heureDepart}`, {
         method: "PUT",
       });
+      return response.json() as Promise<Pointage>;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pointages"] }),
+  });
+}
+export function useUpdatePointage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Pointage> }) => {
+      const response = await apiRequest(`/pointages/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to update pointage");
+
       return response.json() as Promise<Pointage>;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pointages"] }),

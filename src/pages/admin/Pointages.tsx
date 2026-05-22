@@ -2,8 +2,8 @@ import { useState } from "react";
 import {
   useListPointages,
   useCreatePointageArrivee,
-  useUpdatePointageDepart,
   useListEmployees,
+  useUpdatePointage
 } from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import {  Clock, LogOut, LogIn, CalendarCheck } from "lucide-react";
+import { Clock, LogOut, LogIn, CalendarCheck, Edit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -40,12 +40,15 @@ export default function Pointages() {
   const { data: employees = [] } = useListEmployees();
 
   const createArrivee = useCreatePointageArrivee();
-  const updateDepart = useUpdatePointageDepart();
 
   const pointagesAujourdhui = pointages.filter((p) => p.date === today);
   const presents = pointagesAujourdhui.filter((p) => !p.heureDepart).length;
   const termines = pointagesAujourdhui.filter((p) => !!p.heureDepart).length; // ← plus d'argument
-
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingPointage, setEditingPointage] = useState<any | null>(null);
+  const [editArrivalTime, setEditArrivalTime] = useState("");
+  const [editDepartTime, setEditDepartTime] = useState("");
+  const [pauseHours, setPauseHours] = useState("0");
 
   const openArrivalModal = () => {
     setEmployeeId("");
@@ -53,6 +56,7 @@ export default function Pointages() {
     setHeureArrivee(currentTime());
     setIsArrivalModalOpen(true);
   };
+  const updatePointage = useUpdatePointage();
 
   const handleArrivalSave = async () => {
     if (!employeeId || !date || !heureArrivee) {
@@ -77,29 +81,61 @@ export default function Pointages() {
   const openDepartModal = (pointageId: number) => {
     setSelectedPointageId(pointageId);
     setDepartTime(currentTime());
+    setPauseHours("0");
     setIsDepartModalOpen(true);
   };
-
   const handleDepartSave = async () => {
     if (!selectedPointageId || !departTime) {
       toast({ title: t('common.error'), description: t('pointages.validation_depart'), variant: "destructive" });
       return;
     }
 
-    const fullDepartTime = `${departTime}:00`;
-
     try {
-      await updateDepart.mutateAsync({ id: selectedPointageId, heureDepart: fullDepartTime });
+      await updatePointage.mutateAsync({
+        id: selectedPointageId,
+        data: {
+          heureDepart: `${departTime}:00`,
+          heuresPause: parseFloat(pauseHours || "0"),
+        },
+      });
+
       toast({ title: t('common.success'), description: t('pointages.depart_success') });
-      queryClient.invalidateQueries({ queryKey: ["pointages"] });
       setIsDepartModalOpen(false);
       setSelectedPointageId(null);
       setDepartTime("");
+      setPauseHours("0");
     } catch {
       toast({ title: t('common.error'), description: t('pointages.save_error'), variant: "destructive" });
     }
   };
+  const openEditModal = (pointage: any) => {
+    setEditingPointage(pointage);
+    setEditArrivalTime(pointage.heureArrivee?.slice(0, 5) || "");
+    setEditDepartTime(pointage.heureDepart?.slice(0, 5) || "");
+    setPauseHours(pointage.heuresPause?.toString() || "0");
+    setIsEditModalOpen(true);
+  };
 
+  const handleEditSave = async () => {
+    if (!editingPointage || !editArrivalTime) return;
+
+    try {
+      await updatePointage.mutateAsync({
+        id: editingPointage.id,
+        data: {
+          heureArrivee: `${editArrivalTime}:00`,
+          heureDepart: editDepartTime ? `${editDepartTime}:00` : undefined,
+          heuresPause: parseFloat(pauseHours || "0"),
+        },
+      });
+
+      toast({ title: t("common.success"), description: "Pointage mis à jour" });
+      setIsEditModalOpen(false);
+      setEditingPointage(null);
+    } catch {
+      toast({ title: t("common.error"), description: t("pointages.save_error"), variant: "destructive" });
+    }
+  };
   return (
     <ADMINLayout>
       <div className="space-y-6">
@@ -154,15 +190,16 @@ export default function Pointages() {
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('pointages.table.date')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('pointages.table.arrival')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('pointages.table.departure')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-primary/70">{t('pointages.table.pause')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('pointages.table.hours')}</th>
                     <th className="text-right p-4 text-sm font-medium text-primary/70">{t('pointages.table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12">{t('common.loading')}</td></tr>
+                    <tr><td colSpan={7} className="text-center py-12">{t('common.loading')}</td></tr>
                   ) : pointages.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12">{t('pointages.empty')}</td></tr>
+                    <tr><td colSpan={7} className="text-center py-12">{t('pointages.empty')}</td></tr>
                   ) : (
                     <AnimatePresence>
                       {pointages.map((pointage, idx) => (
@@ -179,19 +216,32 @@ export default function Pointages() {
                           <td className="p-4 text-primary/70">{new Date(pointage.date).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{pointage.heureArrivee}</td>
                           <td className="p-4 text-primary/70">{pointage.heureDepart || '-'}</td>
+                          <td className="p-4 text-primary/70">{pointage.heuresPause?.toFixed(2) || '0.00'} H</td>
                           <td className="p-4 text-primary/70">{pointage.heuresTravaillees ?? '-'}</td>
                           <td className="p-4 text-right">
-                            {!pointage.heureDepart && (
+                            <div className="flex justify-end gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => openDepartModal(pointage.id)}
+                                onClick={() => openEditModal(pointage)}
                                 className="gap-2"
                               >
-                                <LogOut className="h-4 w-4" />
-                                Départ
+                                <Edit className="h-4 w-4" />
+                                Modifier
                               </Button>
-                            )}
+
+                              {!pointage.heureDepart && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openDepartModal(pointage.id)}
+                                  className="gap-2"
+                                >
+                                  <LogOut className="h-4 w-4" />
+                                  Départ
+                                </Button>
+                              )}
+                            </div>
                           </td>
                         </motion.tr>
                       ))}
@@ -256,10 +306,62 @@ export default function Pointages() {
                 <Label>{t('pointages.depart_time')}</Label>
                 <Input type="time" value={departTime} onChange={(e) => setDepartTime(e.target.value)} />
               </div>
+              <div className="grid gap-2">
+                <Label>Temps de pause (heures)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.25"
+                  value={pauseHours}
+                  onChange={(e) => setPauseHours(e.target.value)}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDepartModalOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleDepartSave}>{t('common.save')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent
+            className="sm:max-w-[420px] rounded-2xl border border-border shadow-2xl"
+            style={{ backgroundColor: 'hsl(var(--card))', backdropFilter: 'none' }}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-primary">Modifier le pointage</DialogTitle>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label>Heure d'arrivée</Label>
+                <Input type="time" value={editArrivalTime} onChange={(e) => setEditArrivalTime(e.target.value)} />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Heure de départ</Label>
+                <Input type="time" value={editDepartTime} onChange={(e) => setEditDepartTime(e.target.value)} />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Temps de pause (heures)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.25"
+                  value={pauseHours}
+                  onChange={(e) => setPauseHours(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button onClick={handleEditSave} disabled={updatePointage.isPending}>
+                {updatePointage.isPending ? t("common.loading") : t("common.save")}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
