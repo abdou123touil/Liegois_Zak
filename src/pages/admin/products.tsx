@@ -28,13 +28,16 @@ export default function Products() {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
   const { data: products, isLoading } = useListProducts({});
   const { data: categories } = useListCategories();
 
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
+  const getProductIsActive = (product: Product) => {
+    return Boolean((product as any).isActive ?? (product as any).active);
+  };
+  const productActive = getProductIsActive(product);
 
   const openNewModal = () => {
     setEditingProduct(null);
@@ -54,7 +57,7 @@ export default function Products() {
     setCategoryId(product.categoryId.toString());
     setImageUrl(product.imageUrl || "");
     setDescription(product.description || "");
-    setIsActive(product.isActive);
+    setIsActive(getProductIsActive(product));
 
     setIsModalOpen(true);
   };
@@ -175,11 +178,11 @@ export default function Products() {
                           <td className="p-4 text-primary/70">{product.categoryName || t('common.unknown')}</td>
                           <td className="p-4 font-semibold text-primary">{formatCurrency(product.price)}</td>
                           <td className="p-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.isActive
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${productActive
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                 : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                               }`}>
-                              {product.isActive ? t('products.status_active') : t('products.status_inactive')}
+                              {productActive ? t('products.status_active') : t('products.status_inactive')}
                             </span>
                           </td>
                           <td className="p-4 text-right space-x-2">
