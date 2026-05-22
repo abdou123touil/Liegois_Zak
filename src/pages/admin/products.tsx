@@ -34,10 +34,11 @@ export default function Products() {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
+
+  // Fonction pour déterminer si un produit est actif
   const getProductIsActive = (product: Product) => {
     return Boolean((product as any).isActive ?? (product as any).active);
   };
-  const productActive = getProductIsActive(product);
 
   const openNewModal = () => {
     setEditingProduct(null);
@@ -58,7 +59,6 @@ export default function Products() {
     setImageUrl(product.imageUrl || "");
     setDescription(product.description || "");
     setIsActive(getProductIsActive(product));
-
     setIsModalOpen(true);
   };
 
@@ -110,12 +110,11 @@ export default function Products() {
       setProductToDelete(null);
     }
   };
+
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('fr-TN', {
-      style: 'currency',
-      currency: 'TND'
-    }).format(val);
+    return new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND' }).format(val);
   };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -146,59 +145,59 @@ export default function Products() {
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('products.table.price')}</th>
                     <th className="text-left p-4 text-sm font-medium text-primary/70">{t('products.table.status')}</th>
                     <th className="text-right p-4 text-sm font-medium text-primary/70">{t('products.table.actions')}</th>
-                  </tr>
+                  </td>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('common.loading')}...</td></tr>
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('common.loading')}...<\/td></tr>
                   ) : products?.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('products.empty')}</td></tr>
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('products.empty')}<\/td></tr>
                   ) : (
                     <AnimatePresence>
-                      {products?.map((product, idx) => (
-                        <motion.tr
-                          key={product.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.03 }}
-                          className="border-b border-primary/5 hover:bg-primary/5 transition"
-                        >
-                          <td className="p-4">
-                            {product.imageUrl ? (
-                              <div className="w-10 h-10 rounded-md overflow-hidden bg-muted shadow-sm">
-                                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                              </div>
-                            ) : (
-                              <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
-                                <Package className="h-5 w-5" />
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-4 font-medium text-primary/90">{product.name}</td>
-                          <td className="p-4 text-primary/70">{product.categoryName || t('common.unknown')}</td>
-                          <td className="p-4 font-semibold text-primary">{formatCurrency(product.price)}</td>
-                          <td className="p-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${productActive
-                                ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                                : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              }`}>
-                              {productActive ? t('products.status_active') : t('products.status_inactive')}
-                            </span>
-                          </td>
-                          <td className="p-4 text-right space-x-2">
-                            <Button variant="ghost" size="icon" onClick={() => openEditModal(product)} className="hover:bg-primary/10">
-                              <Edit className="h-4 w-4 text-primary" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(product)} className="hover:bg-destructive/10">
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </td>
-                        </motion.tr>
-                      ))}
+                      {products?.map((product, idx) => {
+                        const productActive = getProductIsActive(product);
+                        return (
+                          <motion.tr
+                            key={product.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.03 }}
+                            className="border-b border-primary/5 hover:bg-primary/5 transition"
+                          >
+                            <td className="p-4">
+                              {product.imageUrl ? (
+                                <div className="w-10 h-10 rounded-md overflow-hidden bg-muted shadow-sm">
+                                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
+                                  <Package className="h-5 w-5" />
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-4 font-medium text-primary/90">{product.name}</td>
+                            <td className="p-4 text-primary/70">{product.categoryName || t('common.unknown')}</td>
+                            <td className="p-4 font-semibold text-primary">{formatCurrency(product.price)}</td>
+                            <td className="p-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${productActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
+                                {productActive ? t('products.status_active') : t('products.status_inactive')}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right space-x-2">
+                              <Button variant="ghost" size="icon" onClick={() => openEditModal(product)} className="hover:bg-primary/10">
+                                <Edit className="h-4 w-4 text-primary" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(product)} className="hover:bg-destructive/10">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </td>
+                          </motion.tr>
+                        );
+                      })}
                     </AnimatePresence>
                   )}
                 </tbody>
-              </table>
+              8va
             </div>
           </CardContent>
         </Card>
@@ -224,7 +223,7 @@ export default function Products() {
                 <div className="grid gap-2">
                   <Label htmlFor="category">{t('products.category_label')}</Label>
                   <Select value={categoryId} onValueChange={setCategoryId}>
-                    <SelectTrigger className="rounded-lg border-primary/20 bg-card" >
+                    <SelectTrigger className="rounded-lg border-primary/20 bg-card">
                       <SelectValue placeholder={t('products.select_category')} />
                     </SelectTrigger>
                     <SelectContent className="bg-card">
@@ -275,21 +274,10 @@ export default function Products() {
             </p>
 
             <DialogFooter className="mt-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsDeleteDialogOpen(false);
-                  setProductToDelete(null);
-                }}
-              >
+              <Button variant="outline" onClick={() => { setIsDeleteDialogOpen(false); setProductToDelete(null); }}>
                 {t('common.cancel')}
               </Button>
-
-              <Button
-                variant="destructive"
-                onClick={confirmDelete}
-                disabled={deleteMutation.isPending}
-              >
+              <Button variant="destructive" onClick={confirmDelete} disabled={deleteMutation.isPending}>
                 {deleteMutation.isPending ? t('common.loading') : "Supprimer"}
               </Button>
             </DialogFooter>
