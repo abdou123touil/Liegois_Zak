@@ -1,28 +1,28 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;//     || "http://localhost:8081/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;//     || "http://localhost:8081/api";
 
 let token: string | null = null;
 export type SalesByDay = {
-    date: string;
-    sales: number;
+  date: string;
+  sales: number;
 };
 
 // 🔹 Top Products Type (for typing the top products data)
 export type TopProduct = {
-    productName: string;
-    totalRevenue: number;
+  productName: string;
+  totalRevenue: number;
 };
 
 // 🔹 Salary Summary Type (for typing employee salary data)
 export type SalarySummary = {
-    employeeId: number;
-    employeeName: string;
-    role: string;
-    ordersHandled: number;
-    monthlySalary?: number;
-    hourlyRate?: number;
-    hoursPerMonth?: number;
+  employeeId: number;
+  employeeName: string;
+  role: string;
+  ordersHandled: number;
+  monthlySalary?: number;
+  hourlyRate?: number;
+  hoursPerMonth?: number;
 };
 
 // Dans api-client.ts, mettez à jour Employee
@@ -37,46 +37,46 @@ export type Employee = {
   hoursPerMonth?: number;
   monthlySalary?: number;
   isActive: boolean;
-   dateEmbauche?: string;
+  dateEmbauche?: string;
   congesParAn?: number;
   joursCongeRestants?: number;
 };
 export type Category = {
-    id: number;
-    name: string;
-    icon: string;
-    color: string;
-    isActive:boolean;
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+  isActive: boolean;
 };
 export type Product = {
-    id: number;
-    name: string;
-    price: number;
-    categoryId: number;
-    imageUrl?: string;
-    description?: string;
-    isActive: boolean;
-    categoryName?: string; 
+  id: number;
+  name: string;
+  price: number;
+  categoryId: number;
+  imageUrl?: string;
+  description?: string;
+  isActive: boolean;
+  categoryName?: string;
 };
 export type Expense = {
-    id: number;
-    label: string;
-    amount: number;
-    category: string;
-    notes?: string;
-    date: string;
+  id: number;
+  label: string;
+  amount: number;
+  category: string;
+  notes?: string;
+  date: string;
 };
 
 export type Order = {
-    id: number;
-    createdAt: string;
-    total: number;
-    paymentMethod: string;
-    employeeId: number;
-    employeeName?: string;
-    amountPaid: number;
-    change?: number;
-    items: Array<{ productName: string; quantity: number; unitPrice: number; subtotal: number }>;
+  id: number;
+  createdAt: string;
+  total: number;
+  paymentMethod: string;
+  employeeId: number;
+  employeeName?: string;
+  amountPaid: number;
+  change?: number;
+  items: Array<{ productName: string; quantity: number; unitPrice: number; subtotal: number }>;
 };
 // ==================== FOURNISSEURS ====================
 export interface Fournisseur {
@@ -279,20 +279,20 @@ export function useUpdateParametresPaie() {
 
 // Gestion du token
 export function getToken(): string | null {
-    return localStorage.getItem("jwt_token");
+  return localStorage.getItem("jwt_token");
 }
 
 function setToken(token: string) {
-    localStorage.setItem("jwt_token", token);
+  localStorage.setItem("jwt_token", token);
 }
 
 export function removeToken() {
-    localStorage.removeItem("jwt_token");
+  localStorage.removeItem("jwt_token");
 }
 
 function authHeaders(): HeadersInit {
-    const token = getToken();
-    return token ? { "Authorization": `Bearer ${token}` } : {};
+  const token = getToken();
+  return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
 // 🔹 UseLogin Hook (to be replaced by your actual API request)
@@ -348,28 +348,28 @@ export function useLogout() {
   });
 }
 export function getListCategoriesQueryKey() {
-    return ["categories"];
+  return ["categories"];
 }
 
 // 🔹 getListProductsQueryKey
 export function getListProductsQueryKey({ categoryId }: { categoryId: number | undefined }) {
-    return ["products", categoryId];
+  return ["products", categoryId];
 }
 
 // 🔹 Other existing API functions (useGetMe, useLogout, etc.)
 
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
-    const headers = {
-        "Content-Type": "application/json",
-        ...authHeaders(),
-        ...options.headers,
-    };
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
-    if (response.status === 401) {
-        removeToken();
-        throw new Error("Session expired");
-    }
-    return response;
+  const headers = {
+    "Content-Type": "application/json",
+    ...authHeaders(),
+    ...options.headers,
+  };
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
+  if (response.status === 401) {
+    removeToken();
+    throw new Error("Session expired");
+  }
+  return response;
 }
 
 export function useGetDashboardStats() {
@@ -385,21 +385,21 @@ export function useGetDashboardStats() {
   });
 }
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
-    const headers = {
-        "Content-Type": "application/json",
-        ...authHeaders(),
-        ...options.headers,
-    };
-    const response = await fetch(url, { ...options, headers });
-    if (response.status === 401) {
-        removeToken();
-        throw new Error("Session expired");
-    }
-    return response;
+  const headers = {
+    "Content-Type": "application/json",
+    ...authHeaders(),
+    ...options.headers,
+  };
+  const response = await fetch(url, { ...options, headers });
+  if (response.status === 401) {
+    removeToken();
+    throw new Error("Session expired");
+  }
+  return response;
 }
 // 🔹 Key for Dashboard Stats Query
 export function getGetDashboardStatsQueryKey() {
-    return ["dashboardStats"];
+  return ["dashboardStats"];
 }
 export function useListCategories() {
   return useQuery({
@@ -415,37 +415,37 @@ export function useListCategories() {
 
 // 🔹 useListProducts Hook (fetches products based on category)
 export function useListProducts({ categoryId }: { categoryId?: number }) {
-    return useQuery({
-        queryKey: ["products", categoryId],
-        queryFn: async () => {
-            const url = categoryId
-                ? `${API_BASE_URL}/products?categoryId=${categoryId}`
-                : `${API_BASE_URL}/products`;
+  return useQuery({
+    queryKey: ["products", categoryId],
+    queryFn: async () => {
+      const url = categoryId
+        ? `${API_BASE_URL}/products?categoryId=${categoryId}`
+        : `${API_BASE_URL}/products`;
 
-            const response = await fetch(url, { headers: authHeaders() });
+      const response = await fetch(url, { headers: authHeaders() });
 
-            if (!response.ok) throw new Error("Failed to fetch products");
+      if (!response.ok) throw new Error("Failed to fetch products");
 
-            const data = await response.json(); // ✅ UNE SEULE FOIS
+      const data = await response.json(); // ✅ UNE SEULE FOIS
 
 
-            return data; // ✅ retourne data
-        },
-    });
+      return data; // ✅ retourne data
+    },
+  });
 }
 
 // 🔹 useCreateOrder Hook (handles order creation)
 export function useCreateOrder() {
-    return useMutation({
-        mutationFn: async ({ data }: { data: {employeeId:number ;reductionMontant: number | null; reductionPourcentage: number | null; motifReduction: string; amountPaid: number; paymentMethod: string; items: any[] } }) => {
-            const response = await apiRequest("/orders", {
-                method: "POST",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Error creating order");
-            return response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ data }: { data: { employeeId: number; reductionMontant: number | null; reductionPourcentage: number | null; motifReduction: string; amountPaid: number; paymentMethod: string; items: any[] } }) => {
+      const response = await apiRequest("/orders", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Error creating order");
+      return response.json();
+    },
+  });
 }
 
 
@@ -455,30 +455,30 @@ export function useCreateOrder() {
 
 // 🔹 useCreateProduct Hook (creates a new product)
 export function useCreateProduct() {
-    return useMutation({
-        mutationFn: async ({ data }: { data: Product }) => {
-            const response = await apiRequest("/products", {
-                method: "POST",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to create product.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ data }: { data: Product }) => {
+      const response = await apiRequest("/products", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create product.");
+      return await response.json();
+    },
+  });
 }
 
 // 🔹 useUpdateProduct Hook (updates an existing product)
 export function useUpdateProduct() {
-    return useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: Product }) => {
-            const response = await apiRequest(`/products/${id}`, {
-                method: "PUT",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to update product.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Product }) => {
+      const response = await apiRequest(`/products/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to update product.");
+      return await response.json();
+    },
+  });
 }
 
 // 🔹 useDeleteProduct Hook (deletes a product)
@@ -503,30 +503,30 @@ export function useDeleteProduct() {
 
 // 🔹 useCreateCategory Hook (creates a new category)
 export function useCreateCategory() {
-    return useMutation({
-        mutationFn: async ({ data }: { data: Category }) => {
-            const response = await apiRequest("/categories", {
-                method: "POST",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to create category.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ data }: { data: Category }) => {
+      const response = await apiRequest("/categories", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create category.");
+      return await response.json();
+    },
+  });
 }
 
 // 🔹 useUpdateCategory Hook (updates an existing category)
 export function useUpdateCategory() {
-    return useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: Category }) => {
-            const response = await apiRequest(`/categories/${id}`, {
-                method: "PUT",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to update category.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Category }) => {
+      const response = await apiRequest(`/categories/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to update category.");
+      return await response.json();
+    },
+  });
 }
 
 // 🔹 useDeleteCategory Hook (deletes a category)
@@ -551,47 +551,47 @@ export function useDeleteCategory() {
 
 
 export function useListEmployees() {
-    return useQuery({
-        queryKey: ["employees"],
-        queryFn: async () => {
-            const response = await apiRequest("/employees");
-            const data = await response.json();
-            return data;
-        },
-    });
+  return useQuery({
+    queryKey: ["employees"],
+    queryFn: async () => {
+      const response = await apiRequest("/employees");
+      const data = await response.json();
+      return data;
+    },
+  });
 }
 
 // 🔹 getListEmployeesQueryKey (returns the query key for employees)
 export function getListEmployeesQueryKey() {
-    return ["employees"];
+  return ["employees"];
 }
 
 // 🔹 useCreateEmployee Hook (creates a new employee)
 export function useCreateEmployee() {
-    return useMutation({
-        mutationFn: async ({ data }: { data: Employee }) => {
-            const response = await apiRequest("/employees", {
-                method: "POST",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to create employee.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ data }: { data: Employee }) => {
+      const response = await apiRequest("/employees", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create employee.");
+      return await response.json();
+    },
+  });
 }
 
 // 🔹 useUpdateEmployee Hook (updates an existing employee)
 export function useUpdateEmployee() {
-    return useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: Employee }) => {
-            const response = await apiRequest(`/employees/${id}`, {
-                method: "PUT",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to update employee.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Employee }) => {
+      const response = await apiRequest(`/employees/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to update employee.");
+      return await response.json();
+    },
+  });
 }
 
 // 🔹 useDeleteEmployee Hook (deletes an employee)
@@ -612,33 +612,33 @@ export function useDeleteEmployee() {
 }
 
 export function useListExpenses() {
-    return useQuery({
-        queryKey: ["expenses"],
-        queryFn: async () => {
-            const response = await apiRequest("/expenses");
-            const data = await response.json();
-            return data;
-        },
-    });
+  return useQuery({
+    queryKey: ["expenses"],
+    queryFn: async () => {
+      const response = await apiRequest("/expenses");
+      const data = await response.json();
+      return data;
+    },
+  });
 }
 
 // 🔹 getListExpensesQueryKey (returns the query key for expenses)
 export function getListExpensesQueryKey() {
-    return ["expenses"];
+  return ["expenses"];
 }
 
 // 🔹 useCreateExpense Hook (creates a new expense)
 export function useCreateExpense() {
-    return useMutation({
-        mutationFn: async ({ data }: { data: Expense }) => {
-            const response = await apiRequest("/expenses", {
-                method: "POST",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to create expense.");
-            return await response.json();
-        },
-    });
+  return useMutation({
+    mutationFn: async ({ data }: { data: Expense }) => {
+      const response = await apiRequest("/expenses", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create expense.");
+      return await response.json();
+    },
+  });
 }
 
 // 🔹 useDeleteExpense Hook (deletes an expense)
@@ -658,19 +658,19 @@ export function useDeleteExpense() {
   });
 }
 export function useListOrders() {
-    return useQuery({
-        queryKey: ["orders"],
-        queryFn: async () => {
-            const response = await apiRequest("/orders");
-            const data = await response.json();
-            return data;
-        },
-    });
+  return useQuery({
+    queryKey: ["orders"],
+    queryFn: async () => {
+      const response = await apiRequest("/orders");
+      const data = await response.json();
+      return data;
+    },
+  });
 }
 
 // 🔹 getListOrdersQueryKey (returns the query key for orders)
 export function getListOrdersQueryKey() {
-    return ["orders"];
+  return ["orders"];
 }
 
 export function useGetSalesByDay({ days }: { days: number }) {
@@ -689,43 +689,43 @@ export function useGetSalesByDay({ days }: { days: number }) {
 
 // 🔹 getGetSalesByDayQueryKey (returns the query key for sales by day)
 export function getGetSalesByDayQueryKey({ days }: { days: number }) {
-    return ["salesByDay", days];
+  return ["salesByDay", days];
 }
 
 // 🔹 useGetTopProducts Hook (fetches top products data)
 export function useGetTopProducts({ limit }: { limit: number }) {
-    return useQuery({
-        queryKey: ["topProducts", limit],
-        queryFn: async () => {
-            // Replace with actual API call
-            const response = await apiRequest(`/top-products?limit=${limit}`);
-            const data = await response.json();
-            return data as TopProduct[];
-        },
-    });
+  return useQuery({
+    queryKey: ["topProducts", limit],
+    queryFn: async () => {
+      // Replace with actual API call
+      const response = await apiRequest(`/top-products?limit=${limit}`);
+      const data = await response.json();
+      return data as TopProduct[];
+    },
+  });
 }
 
 // 🔹 getGetTopProductsQueryKey (returns the query key for top products)
 export function getGetTopProductsQueryKey({ limit }: { limit: number }) {
-    return ["topProducts", limit];
+  return ["topProducts", limit];
 }
 
 // 🔹 useGetSalarySummary Hook (fetches salary summary for employees)
 export function useGetSalarySummary() {
-    return useQuery({
-        queryKey: ["salarySummary"],
-        queryFn: async () => {
-            // Replace with actual API call
-            const response = await apiRequest("/salary-summary");
-            const data = await response.json();
-            return data as SalarySummary[];
-        },
-    });
+  return useQuery({
+    queryKey: ["salarySummary"],
+    queryFn: async () => {
+      // Replace with actual API call
+      const response = await apiRequest("/salary-summary");
+      const data = await response.json();
+      return data as SalarySummary[];
+    },
+  });
 }
 
 // 🔹 getGetSalarySummaryQueryKey (returns the query key for salary summary)
 export function getGetSalarySummaryQueryKey() {
-    return ["salarySummary"];
+  return ["salarySummary"];
 }
 
 // ==================== FOURNISSEURS ====================
@@ -1193,6 +1193,7 @@ export interface Echange {
   montant: number;
   description?: string;
   expenseId?: number;
+  orderId?: number;
 }
 
 export function useListEchanges() {
@@ -1223,6 +1224,9 @@ export function useCreateEchange() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["echanges"] });
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["salesByDay"] });
     },
   });
 }
