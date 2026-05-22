@@ -445,7 +445,9 @@
       "arrival": "Arrival",
       "departure": "Departure",
       "hours": "Hours",
-      "actions": "Actions"
+      "actions": "Actions",
+      "pause": "Pause",
+      "work_hours": "Work hours"
     },
     "empty": "No attendance records",
     "arrival_title": "Record arrival",

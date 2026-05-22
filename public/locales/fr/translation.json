@@ -442,7 +442,9 @@
       "arrival": "Arrivée",
       "departure": "Départ",
       "hours": "Heures",
-      "actions": "Actions"
+      "actions": "Actions",
+      "pause": "Pause",
+      "work_hours": "Heures de travail"
     },
     "empty": "Aucun pointage",
     "arrival_title": "Enregistrer l'arrivée",
