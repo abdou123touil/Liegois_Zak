@@ -64,7 +64,14 @@
     "pay_slips": "Fiches de paie",
     "attendance": "Présence",
     "payroll": "Paie",
-    "exchanges": "Échanges"
+    "exchanges": "Échanges",
+    "returns": "Retours",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "admin_panel": "Panneau d'administration",
+    "chef_panel": "Espace Chef",
+    "responsable_panel": "Espace Responsable",
+    "cost_calculation": "Calcul du coût de revient"
   },
   "actions": {
     "logout": "Déconnexion"

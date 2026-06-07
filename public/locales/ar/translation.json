@@ -44,7 +44,8 @@
     "top_products": "أفضل المنتجات",
     "orders_by_employee": "الطلبات حسب الموظف",
     "financial_summary": "الملخص المالي",
-    "total_earnings_today": "إجمالي الأرباح اليوم"
+    "total_earnings_today": "إجمالي الأرباح اليوم",
+    "cost_calculation": "حساب تكلفة المنتج"
   },
   "nav": {
     "dashboard": "لوحة القيادة",

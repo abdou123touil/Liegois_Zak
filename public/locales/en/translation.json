@@ -44,7 +44,8 @@
     "top_products": "Top products",
     "orders_by_employee": "Orders by employee",
     "financial_summary": "Financial summary",
-    "total_earnings_today": "Total earnings today"
+    "total_earnings_today": "Total earnings today",
+     "cost_calculation": "Cost calculation"
   },
   "nav": {
     "dashboard": "Dashboard",
