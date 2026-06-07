@@ -38,7 +38,8 @@ import ResponsablePointages from "./pages/responsable/pointages";
 import ChefPointages from "./pages/chef/pointages";
 import Echanges from "./pages/admin/Echanges";
 import ChefCalculCoutProduit from "./pages/chef/calcul-cout-produit";
-
+import DemandeGateau from "./pages/public/DemandeGateau";
+import ChefDemandesGateaux from "./pages/chef/demandes-gateaux";
 const queryClient = new QueryClient();
 
 // Composant qui contient toute la logique de routage
@@ -77,7 +78,7 @@ function AppRouter() {
         <Switch>
           {/* Routes communes */}
           <Route path="/login" component={Login} />
-
+          <Route path="/demande-gateau" component={DemandeGateau} />
           {/* Routes Admin */}
           <Route path="/admin" component={Dashboard} />
           <Route path="/admin/products" component={Products} />
@@ -104,6 +105,7 @@ function AppRouter() {
               <Route path="/chef/matieres-premieres" component={ChefMatieresPremieres} />
               <Route path="/chef/pointages" component={ChefPointages} />
               <Route path="/chef/calcul-cout-produit" component={ChefCalculCoutProduit} />
+              <Route path="/chef/demandes-gateaux" component={ChefDemandesGateaux} />
             </>
           )}
 
@@ -153,6 +155,7 @@ function LoginRoutes() {
       <Route path="/login" component={Login} />
       <Route path="/" component={Login} />
       <Route path="/:rest*" component={Login} />
+      <Route path="/demande-gateau" component={DemandeGateau} />
     </Switch>
   );
 }

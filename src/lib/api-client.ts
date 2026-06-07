@@ -878,6 +878,89 @@ export function useCalculerCoutProduit() {
     },
   });
 }
+export type DemandeGateauStatus =
+  | "NOUVELLE"
+  | "VUE_PAR_CHEF"
+  | "ACCEPTEE"
+  | "REFUSEE"
+  | "TERMINEE";
+
+export interface DemandeGateau {
+  id: number;
+  typeEvenement?: string;
+  formatGateau?: string;
+  nombrePersonnes?: number;
+  gouts?: string;
+  garnitures?: string;
+  decoration?: string;
+  couleurs?: string;
+  texteGateau?: string;
+  dateEvenement?: string;
+  heureSouhaitee?: string;
+  livraison?: boolean;
+  adresseLivraison?: string;
+  clientNom?: string;
+  clientTelephone?: string;
+  clientEmail?: string;
+  notesClient?: string;
+  noteChef?: string;
+  budgetClient?: number;
+  prixPropose?: number;
+  status: DemandeGateauStatus;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export function useCreateDemandeGateau() {
+  return useMutation({
+    mutationFn: async (data: Partial<DemandeGateau>) => {
+      const response = await apiRequest("/demandes-gateaux", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to create cake request");
+      return response.json() as Promise<DemandeGateau>;
+    },
+  });
+}
+
+export function useListDemandesGateaux() {
+  return useQuery({
+    queryKey: ["demandes-gateaux"],
+    queryFn: async () => {
+      const response = await apiRequest("/demandes-gateaux");
+      if (!response.ok) throw new Error("Failed to fetch cake requests");
+      return response.json() as Promise<DemandeGateau[]>;
+    },
+    refetchInterval: 10000,
+  });
+}
+
+export function useUpdateDemandeGateau() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: Partial<DemandeGateau>;
+    }) => {
+      const response = await apiRequest(`/demandes-gateaux/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to update cake request");
+      return response.json() as Promise<DemandeGateau>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["demandes-gateaux"] });
+    },
+  });
+}
 
 // ==================== MATIÈRES PREMIÈRES ====================
 export function useListMatieresPremieres() {
