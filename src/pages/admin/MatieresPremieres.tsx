@@ -117,11 +117,13 @@ export default function MatieresPremieres() {
             ? { id: parseInt(fournisseurPrefereId) }
             : null;
 
+        const conversion = parseFloat(quantiteBaseParUnite || "1");
+
         const data: any = {
             nom,
             uniteMesure,
-            uniteBase,
-            quantiteBaseParUnite: parseFloat(quantiteBaseParUnite || "1"),
+            uniteBase: uniteBase || "g",
+            quantiteBaseParUnite: Number.isFinite(conversion) && conversion > 0 ? conversion : 1,
             seuilAlerteBase: seuilAlerteBase ? parseFloat(seuilAlerteBase) : null,
             fournisseurPrefere: fournisseurData,
             actif,
@@ -292,7 +294,7 @@ export default function MatieresPremieres() {
                                 <Label>{t('matieresPremieres.name')}</Label>
                                 <Input value={nom} onChange={(e) => setNom(e.target.value)} />
                             </div>
-                           
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label>{t("matieresPremieres.purchase_unit")}</Label>
@@ -370,7 +372,7 @@ export default function MatieresPremieres() {
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div>
-                                    <Label>{t("matieresPremieres.matiere")}</Label>
+                                <Label>{t("matieresPremieres.matiere")}</Label>
                                 <Input value={selectedMatiere?.nom} disabled />
                             </div>
                             <div>
