@@ -840,9 +840,26 @@ export interface CalculCoutProduitResponse {
   coutTotal: number;
   coutParPiece: number;
   ingredients: IngredientCoutResponse[];
+  id?: number;
+  createdAt?: string;
 }
+export function useListHistoriqueCoutProduits() {
+  return useQuery({
+    queryKey: ["historique-cout-produits"],
+    queryFn: async () => {
+      const response = await apiRequest("/cout-produits/historique");
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch cost history");
+      }
+
+      return response.json() as Promise<CalculCoutProduitResponse[]>;
+    },
+  });
+}
 export function useCalculerCoutProduit() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: CalculCoutProduitRequest) => {
       const response = await apiRequest("/cout-produits/calculer", {
@@ -855,6 +872,9 @@ export function useCalculerCoutProduit() {
       }
 
       return response.json() as Promise<CalculCoutProduitResponse>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["historique-cout-produits"] });
     },
   });
 }
