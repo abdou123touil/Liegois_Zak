@@ -320,6 +320,9 @@
   "achats": {
     "title": "المشتريات",
     "subtitle": "إدارة مشتريات المواد الأولية والمستلزمات",
+    "purchase_unit_conversion": "1 {{unit}} = {{quantity}} {{baseUnit}}",
+    "stock_added": "تم إضافة المخزون",
+
     "add_button": "عملية شراء جديدة",
     "list_title": "سجل المشتريات",
     "select_matiere": "اختر مادة أولية",
@@ -350,6 +353,17 @@
   },
   "matieresPremieres": {
     "title": "المواد الأولية",
+    "purchase_unit": "وحدة الشراء",
+    "purchase_unit_placeholder": "حقيبة, صندوق, كغ, ل...",
+    "unitdeca": "وحدة الحساب",
+    "unitdeca_placeholder": "اختر وحدة الحساب",
+    "quantity_in_purchase_unit": "كمية الحساب في وحدة الشراء 1",
+    "quantity_placeholder": "مثال: حقيبة 25 كغ = 25000",
+    "threshold_base": "حد التنبيه ({{unit}})",
+    "edit_stock": "تعديل المخزون",
+    "matiere": "المادة الأولية",
+    "new_quantity": "الكمية الجديدة ({{unit}})",
+    "delete_confirm": "هل تريد حقًا حذف المادة الأولية",
     "subtitle": "إدارة مخزون المواد الأولية وحدود التنبيه",
     "add_button": "إضافة",
     "list_title": "قائمة المواد",

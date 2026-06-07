@@ -29,7 +29,9 @@ export default function MatieresPremieres() {
     const [editingItem, setEditingItem] = useState<MatierePremiere | null>(null);
     const [nom, setNom] = useState("");
     const [uniteMesure, setUniteMesure] = useState("");
-    const [seuilAlerte, setSeuilAlerte] = useState("");
+    const [seuilAlerteBase, setSeuilAlerteBase] = useState("");
+    const [uniteBase, setUniteBase] = useState("g");
+    const [quantiteBaseParUnite, setQuantiteBaseParUnite] = useState("1");
     const [fournisseurPrefereId, setFournisseurPrefereId] = useState("none");
     const [actif, setActif] = useState(true);
     const [isStockModalOpen, setIsStockModalOpen] = useState(false);
@@ -54,7 +56,9 @@ export default function MatieresPremieres() {
         setEditingItem(null);
         setNom("");
         setUniteMesure("");
-        setSeuilAlerte("");
+        setUniteBase("g");
+        setQuantiteBaseParUnite("1");
+        setSeuilAlerteBase("");
         setFournisseurPrefereId("");
         setActif(true);
         setIsModalOpen(true);
@@ -67,7 +71,9 @@ export default function MatieresPremieres() {
         setEditingItem(item);
         setNom(item.nom);
         setUniteMesure(item.uniteMesure);
-        setSeuilAlerte(item.seuilAlerte?.toString() || "");
+        setUniteBase(item.uniteBase || "g");
+        setQuantiteBaseParUnite(item.quantiteBaseParUnite?.toString() || "1");
+        setSeuilAlerteBase(item.seuilAlerteBase?.toString() || "");
         setFournisseurPrefereId(item.fournisseurPrefere?.id?.toString() || "none");
         setActif(item.actif);
         setIsModalOpen(true);
@@ -114,7 +120,9 @@ export default function MatieresPremieres() {
         const data: any = {
             nom,
             uniteMesure,
-            seuilAlerte: seuilAlerte ? parseFloat(seuilAlerte) : null,
+            uniteBase,
+            quantiteBaseParUnite: parseFloat(quantiteBaseParUnite || "1"),
+            seuilAlerteBase: seuilAlerteBase ? parseFloat(seuilAlerteBase) : null,
             fournisseurPrefere: fournisseurData,
             actif,
         };
@@ -157,7 +165,7 @@ export default function MatieresPremieres() {
     // Composant pour afficher l'indicateur d'alerte seuil
     const StockIndicator = ({ matiere }: { matiere: MatierePremiere }) => {
         const { data: stock } = useGetStockMatiere(matiere.id);
-        const seuil = matiere.seuilAlerte || 0;
+        const seuil = matiere.seuilAlerteBase || 0;
         const quantite = stock?.quantiteActuelle || 0;
         const isLow = seuil > 0 && quantite <= seuil;
 
@@ -165,7 +173,7 @@ export default function MatieresPremieres() {
         return (
             <div className="flex items-center gap-2">
                 <span className={isLow ? "text-destructive font-semibold" : "text-primary/80"}>
-                    {quantite} {matiere.uniteMesure}
+                    {quantite} {matiere.uniteBase || "g"}
                 </span>
                 {isLow && (
                     <AlertTriangle className="h-4 w-4 text-destructive" title={t('matieresPremieres.stock_alert')} />
@@ -225,7 +233,12 @@ export default function MatieresPremieres() {
                                                     <td className="p-4 font-medium text-primary/90 flex items-center gap-2">
                                                         <Package className="h-5 w-5 text-primary" /> {item.nom}
                                                     </td>
-                                                    <td className="p-4 text-primary/70">{item.uniteMesure}</td>
+                                                    <td className="p-4 text-primary/70">
+                                                        <div>{item.uniteMesure}</div>
+                                                        <div className="text-xs text-primary/50">
+                                                            1 {item.uniteMesure} = {item.quantiteBaseParUnite || 1} {item.uniteBase || "g"}
+                                                        </div>
+                                                    </td>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-2">
                                                             <StockIndicator matiere={item} />
@@ -239,7 +252,9 @@ export default function MatieresPremieres() {
                                                             </Button>
                                                         </div>
                                                     </td>
-                                                    <td className="p-4 text-primary/70">{item.seuilAlerte || '-'}</td>
+                                                    <td className="p-4 text-primary/70">
+                                                        {item.seuilAlerteBase ? `${item.seuilAlerteBase} ${item.uniteBase || "g"}` : "-"}
+                                                    </td>
                                                     <td className="p-4 text-primary/70">{item.fournisseurPrefere?.nom || '-'}</td>
                                                     <td className="p-4">
                                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.actif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
@@ -277,13 +292,51 @@ export default function MatieresPremieres() {
                                 <Label>{t('matieresPremieres.name')}</Label>
                                 <Input value={nom} onChange={(e) => setNom(e.target.value)} />
                             </div>
-                            <div className="grid gap-2">
-                                <Label>{t('matieresPremieres.unit')}</Label>
-                                <Input value={uniteMesure} onChange={(e) => setUniteMesure(e.target.value)} />
+                           
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label>{t("matieresPremieres.purchase_unit")}</Label>
+                                    <Input
+                                        value={uniteMesure}
+                                        onChange={(e) => setUniteMesure(e.target.value)}
+                                        placeholder={t("matieresPremieres.purchase_unit_placeholder")}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label>{t('matieresPremieres.unitdeca')}</Label>
+                                    <Select value={uniteBase} onValueChange={setUniteBase}>
+                                        <SelectTrigger className="bg-card">
+                                            <SelectValue placeholder={t('matieresPremieres.unitdeca_placeholder')} />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-card">
+                                            <SelectItem value="g">g</SelectItem>
+                                            <SelectItem value="ml">ml</SelectItem>
+                                            <SelectItem value="piece">piece</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
+
                             <div className="grid gap-2">
-                                <Label>{t('matieresPremieres.threshold')}</Label>
-                                <Input type="number" step="0.01" value={seuilAlerte} onChange={(e) => setSeuilAlerte(e.target.value)} />
+                                <Label>{t('matieresPremieres.quantity_in_purchase_unit')}</Label>
+                                <Input
+                                    type="number"
+                                    step="0.001"
+                                    value={quantiteBaseParUnite}
+                                    onChange={(e) => setQuantiteBaseParUnite(e.target.value)}
+                                    placeholder={t('matieresPremieres.quantity_placeholder')}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>{t("matieresPremieres.threshold_base", { unit: uniteBase })}</Label>
+                                <Input
+                                    type="number"
+                                    step="0.001"
+                                    value={seuilAlerteBase}
+                                    onChange={(e) => setSeuilAlerteBase(e.target.value)}
+                                />
                             </div>
                             <div className="grid gap-2">
                                 <Label>{t('matieresPremieres.preferred_supplier')}</Label>
@@ -313,15 +366,15 @@ export default function MatieresPremieres() {
                 <Dialog open={isStockModalOpen} onOpenChange={setIsStockModalOpen}>
                     <DialogContent className="sm:max-w-[400px]">
                         <DialogHeader>
-                            <DialogTitle>Modifier le stock</DialogTitle>
+                            <DialogTitle>{t("matieresPremieres.edit_stock")}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div>
-                                <Label>Matière</Label>
+                                    <Label>{t("matieresPremieres.matiere")}</Label>
                                 <Input value={selectedMatiere?.nom} disabled />
                             </div>
                             <div>
-                                <Label>Nouvelle quantité ({selectedMatiere?.uniteMesure})</Label>
+                                <Label>{t("matieresPremieres.new_quantity", { unit: selectedMatiere?.uniteBase || "g" })}</Label>
                                 <Input
                                     type="number"
                                     step="0.01"
@@ -332,10 +385,10 @@ export default function MatieresPremieres() {
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setIsStockModalOpen(false)}>
-                                Annuler
+                                {t("common.cancel")}
                             </Button>
                             <Button onClick={handleUpdateStock} disabled={updateStockMutation.isPending}>
-                                {updateStockMutation.isPending ? "Mise à jour..." : "Enregistrer"}
+                                {updateStockMutation.isPending ? t("common.updating") : t("common.save")}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -347,13 +400,12 @@ export default function MatieresPremieres() {
                     >
                         <DialogHeader>
                             <DialogTitle className="text-destructive">
-                                Confirmer la suppression
+                                {t("matieresPremieres.confirm_delete")}
                             </DialogTitle>
                         </DialogHeader>
 
                         <p className="text-primary/80">
-                            Voulez-vous vraiment supprimer la matière première{" "}
-                            <strong>{matiereToDelete?.nom}</strong> ? Cette action est irréversible.
+                            {t("matieresPremieres.delete_confirmation", { name: matiereToDelete?.nom })}
                         </p>
 
                         <DialogFooter className="mt-4">
@@ -372,7 +424,7 @@ export default function MatieresPremieres() {
                                 onClick={confirmDelete}
                                 disabled={deleteMutation.isPending}
                             >
-                                {deleteMutation.isPending ? t('common.loading') : "Supprimer"}
+                                {deleteMutation.isPending ? t('common.loading') : t('matieresPremieres.delete')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

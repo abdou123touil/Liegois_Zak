@@ -183,7 +183,7 @@ export default function Achats() {
                                         </AnimatePresence>
                                     )}
                                 </tbody>
-                               </table>
+                            </table>
                         </div>
                     </CardContent>
                 </Card>
@@ -219,11 +219,33 @@ export default function Achats() {
                                     <SelectContent className="bg-card">
                                         {matieres.map(m => (
                                             <SelectItem key={m.id} value={m.id.toString()}>
-                                                {m.nom} ({m.uniteMesure})
+                                                {m.nom} ({t("achats.purchase_unit_conversion", {
+                                                    unit: m.uniteMesure,
+                                                    quantity: m.quantiteBaseParUnite || 1,
+                                                    baseUnit: m.uniteBase || "g",
+                                                })})
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                {matiereId && (
+                                    <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 text-sm text-primary/70">
+                                        {(() => {
+                                            const selected = matieres.find((m) => m.id.toString() === matiereId);
+                                            if (!selected) return null;
+
+                                            const qte = parseFloat(quantite || "0");
+                                            const base = selected.quantiteBaseParUnite || 1;
+                                            const totalBase = qte * base;
+
+                                            return (
+                                                <span>
+                                                    {t("achats.stock_added")}: <strong>{totalBase}</strong> {selected.uniteBase || "g"}
+                                                </span>
+                                            );
+                                        })()}
+                                    </div>
+                                )}
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">

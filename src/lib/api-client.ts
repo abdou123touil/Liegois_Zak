@@ -116,6 +116,9 @@ export interface MatierePremiere {
   seuilAlerte: number;
   fournisseurPrefere?: Fournisseur;
   actif: boolean;
+  uniteBase?: string;
+  quantiteBaseParUnite?: number;
+  seuilAlerteBase?: number;
 }
 
 export interface StockMatiere {
@@ -805,6 +808,54 @@ export function useCreateAchat() {
       return response.json() as Promise<Achat>;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["achats"] }),
+  });
+}
+
+export interface IngredientCoutRequest {
+  matierePremiereId: number;
+  quantiteBase: number;
+}
+
+export interface CalculCoutProduitRequest {
+  nomProduit: string;
+  nombrePieces: number;
+  ingredients: IngredientCoutRequest[];
+}
+
+export interface IngredientCoutResponse {
+  matierePremiereId: number;
+  nomMatiere: string;
+  quantiteBase: number;
+  uniteBase: string;
+  prixUnitaireAchat: number;
+  uniteAchat: string;
+  quantiteBaseParUnite: number;
+  prixParUniteBase: number;
+  cout: number;
+}
+
+export interface CalculCoutProduitResponse {
+  nomProduit: string;
+  nombrePieces: number;
+  coutTotal: number;
+  coutParPiece: number;
+  ingredients: IngredientCoutResponse[];
+}
+
+export function useCalculerCoutProduit() {
+  return useMutation({
+    mutationFn: async (data: CalculCoutProduitRequest) => {
+      const response = await apiRequest("/cout-produits/calculer", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to calculate product cost");
+      }
+
+      return response.json() as Promise<CalculCoutProduitResponse>;
+    },
   });
 }
 

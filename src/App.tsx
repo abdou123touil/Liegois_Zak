@@ -37,6 +37,7 @@ import ChefMatieresPremieres from "./pages/chef/matieres-premieres";
 import ResponsablePointages from "./pages/responsable/pointages";
 import ChefPointages from "./pages/chef/pointages";
 import Echanges from "./pages/admin/Echanges";
+import ChefCalculCoutProduit from "./pages/chef/calcul-cout-produit";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ function AppRouter() {
               <Route path="/chef/demandes-achat" component={ChefDemandesAchat} />
               <Route path="/chef/matieres-premieres" component={ChefMatieresPremieres} />
               <Route path="/chef/pointages" component={ChefPointages} />
+              <Route path="/chef/calcul-cout-produit" component={ChefCalculCoutProduit} />
             </>
           )}
 
