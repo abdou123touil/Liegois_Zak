@@ -43,6 +43,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     { href: "/chef/demandes-achat", icon: ClipboardList, label: t('dashboard.purchase_requests') },
                     { href: "/chef/matieres-premieres", icon: Package, label: t('dashboard.raw_materials') },
                     { href: "/chef/pointages", icon: Clock, label: t('dashboard.attendance') },
+                    { href: "/chef/calcul-cout-produit", icon: ShoppingBag, label: t('dashboard.cost_calculation') },
                 ];
             case "responsable":
                 return [
