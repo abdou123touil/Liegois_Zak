@@ -72,7 +72,8 @@
     "admin_panel": "Panneau d'administration",
     "chef_panel": "Espace Chef",
     "responsable_panel": "Espace Responsable",
-    "cost_calculation": "Calcul du coût de revient"
+    "cost_calculation": "Calcul du coût de revient",
+    "cake_requests": "Demandes de gâteaux"
   },
   "actions": {
     "logout": "Déconnexion"

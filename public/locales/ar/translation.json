@@ -66,7 +66,9 @@
     "time_tracking": "تتبع الوقت",
     "attendance": "الحضور",
     "pay_slips": "قسائم الدفع",
-    "cost_calculation": "Cost calculation"
+    "cost_calculation": "حساب تكلفة المنتج",
+    "cake_requests": "طلبات gâteaux"
+
   },
   "actions": {
     "logout": "تسجيل الخروج"
