@@ -46,28 +46,53 @@ const queryClient = new QueryClient();
 function AppRouter() {
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
-
+  const PUBLIC_ROUTES = ["/demande-gateau"];
   // Redirection initiale
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        setLocation("/login");
-      } else {
-        const currentPath = window.location.pathname;
-        if (currentPath === "/login" || currentPath === "/") {
-          const role = user.role?.toLowerCase();
-          if (role === "admin") setLocation("/admin");
-          else if (role === "chef") setLocation("/chef");
-          else if (role === "responsable") setLocation("/responsable");
-          else if (role === "other") setLocation("/other");
-          else if (role === "cashier") setLocation("/pos");
-          else setLocation("/login");
-        }
-      }
+    if (isLoading) return;
+
+    const currentPath = window.location.pathname;
+    const isPublicRoute = PUBLIC_ROUTES.includes(currentPath);
+
+    if (isPublicRoute) {
+      return;
+    }
+
+    if (!user) {
+      setLocation("/login");
+      return;
+    }
+
+    if (currentPath === "/login" || currentPath === "/") {
+      const role = user.role?.toLowerCase();
+
+      if (role === "admin") setLocation("/admin");
+      else if (role === "chef") setLocation("/chef");
+      else if (role === "responsable") setLocation("/responsable");
+      else if (role === "other") setLocation("/other");
+      else if (role === "cashier") setLocation("/pos");
+      else setLocation("/login");
     }
   }, [user, isLoading, setLocation]);
 
   if (isLoading) return <LoadingSpinner />;
+
+  const currentPath = window.location.pathname;
+
+  if (PUBLIC_ROUTES.includes(currentPath)) {
+    return (
+      <AnimatePresence mode="wait">
+        <AnimatedPage key={location}>
+          <Switch>
+            <Route path="/demande-gateau" component={DemandeGateau} />
+            <Route path="/:rest*" component={NotFound} />
+          </Switch>
+        </AnimatedPage>
+      </AnimatePresence>
+    );
+  }
+
+  if (!user) return <LoginRoutes />;
   if (!user) return <LoginRoutes />;
 
   const role = user.role?.toLowerCase();
@@ -152,10 +177,10 @@ function LoadingSpinner() {
 function LoginRoutes() {
   return (
     <Switch>
+      <Route path="/demande-gateau" component={DemandeGateau} />
       <Route path="/login" component={Login} />
       <Route path="/" component={Login} />
       <Route path="/:rest*" component={Login} />
-      <Route path="/demande-gateau" component={DemandeGateau} />
     </Switch>
   );
 }
