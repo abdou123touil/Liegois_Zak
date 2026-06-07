@@ -907,6 +907,7 @@ export interface DemandeGateau {
   budgetClient?: number;
   prixPropose?: number;
   status: DemandeGateauStatus;
+  orderId?: number;
   createdAt?: string;
   updatedAt?: string;
 }
