@@ -45,8 +45,7 @@
     "orders_by_employee": "Commandes par employé",
     "financial_summary": "Récapitulatif financier",
     "total_earnings_today": "Gains totaux aujourd'hui",
-        "cost_calculation": "Calcul du coût de revient"
-
+    "cost_calculation": "Calcul du coût de revient"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -349,7 +348,7 @@
     "title": "Matières premières",
     "subtitle": "Gérer les stocks de matières premières et les seuils d'alerte",
     "add_button": "Ajouter",
-      "purchase_unit": "Unité d'achat",
+    "purchase_unit": "Unité d'achat",
     "purchase_unit_placeholder": "sac, carton, kg, L...",
     "unitdeca": "Unité de calcul",
     "unitdeca_placeholder": "Choisir l'unité de calcul",
@@ -361,6 +360,7 @@
     "new_quantity": "Nouvelle quantité ({{unit}})",
     "delete_confirm": "Voulez-vous vraiment supprimer la matière première",
     "list_title": "Liste des matières",
+    "delete_confirmation": "Supprimer cette matière première ?",
     "table": {
       "name": "Nom",
       "unit": "Unité",
@@ -581,6 +581,7 @@
     "matieresPremieres": {
       "title": "Matières premières",
       "list_title": "Liste des matières",
+      "delete_confirmation": "Supprimer cette matière première ?",
       "empty": "Aucune matière première"
     },
     "pointages": {

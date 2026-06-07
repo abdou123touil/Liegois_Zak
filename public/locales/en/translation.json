@@ -45,7 +45,7 @@
     "orders_by_employee": "Orders by employee",
     "financial_summary": "Financial summary",
     "total_earnings_today": "Total earnings today",
-     "cost_calculation": "Cost calculation"
+    "cost_calculation": "Cost calculation"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -314,7 +314,7 @@
     "add_button": "New purchase",
     "list_title": "Purchase history",
     "select_matiere": "Select a raw material",
-     "purchase_unit_conversion": "1 {{unit}} = {{quantity}} {{baseUnit}}",
+    "purchase_unit_conversion": "1 {{unit}} = {{quantity}} {{baseUnit}}",
     "stock_added": "Stock added",
     "table": {
       "product": "Product",
@@ -354,6 +354,7 @@
     "threshold_base": "Alert threshold ({{unit}})",
     "edit_stock": "Edit stock",
     "matiere": "Material",
+    "delete_confirmation": "Delete this raw material?",
     "new_quantity": "New quantity ({{unit}})",
     "delete_confirm": "Do you really want to delete the raw material",
     "list_title": "Materials list",
@@ -578,6 +579,7 @@
     },
     "matieresPremieres": {
       "title": "Raw Materials",
+      "delete_confirmation": "Delete this raw material?",
       "list_title": "Material List",
       "empty": "No raw materials"
     },

@@ -324,7 +324,6 @@
     "subtitle": "إدارة مشتريات المواد الأولية والمستلزمات",
     "purchase_unit_conversion": "1 {{unit}} = {{quantity}} {{baseUnit}}",
     "stock_added": "تم إضافة المخزون",
-
     "add_button": "عملية شراء جديدة",
     "list_title": "سجل المشتريات",
     "select_matiere": "اختر مادة أولية",
@@ -364,6 +363,7 @@
     "threshold_base": "حد التنبيه ({{unit}})",
     "edit_stock": "تعديل المخزون",
     "matiere": "المادة الأولية",
+    "delete_confirmation": "هل تريد حقًا حذف المادة الأولية {{name}}؟ هذه العملية لا يمكن التراجع عنها.",
     "new_quantity": "الكمية الجديدة ({{unit}})",
     "delete_confirm": "هل تريد حقًا حذف المادة الأولية",
     "subtitle": "إدارة مخزون المواد الأولية وحدود التنبيه",
@@ -590,7 +590,8 @@
     },
     "matieresPremieres": {
       "title": "المواد الأولية",
-      "list_title": "قائمة المواد",
+      "list_title": "قائمة المواد الأولية",
+      "delete_confirmation": "هل تريد حقًا حذف المادة الأولية {{name}}؟ هذه العملية لا يمكن التراجع عنها.",
       "empty": "لا توجد مواد أولية"
     },
     "pointages": {
