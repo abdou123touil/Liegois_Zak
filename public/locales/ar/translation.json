@@ -65,7 +65,8 @@
     "leaves": "الإجازات",
     "time_tracking": "تتبع الوقت",
     "attendance": "الحضور",
-    "pay_slips": "قسائم الدفع"
+    "pay_slips": "قسائم الدفع",
+    "cost_calculation": "Cost calculation"
   },
   "actions": {
     "logout": "تسجيل الخروج"

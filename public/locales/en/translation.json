@@ -65,7 +65,8 @@
     "time_tracking": "Time Tracking",
     "pay_slips": "Pay Slips",
     "attendance": "Attendance",
-    "payroll": "Payroll"
+    "payroll": "Payroll",
+    "cost_calculation": "Cost calculation"
   },
   "actions": {
     "logout": "Logout"

@@ -44,7 +44,9 @@
     "top_products": "Top produits",
     "orders_by_employee": "Commandes par employé",
     "financial_summary": "Récapitulatif financier",
-    "total_earnings_today": "Gains totaux aujourd'hui"
+    "total_earnings_today": "Gains totaux aujourd'hui",
+        "cost_calculation": "Calcul du coût de revient"
+
   },
   "nav": {
     "dashboard": "Tableau de bord",
