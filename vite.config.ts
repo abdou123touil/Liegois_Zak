@@ -4,7 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 
 export default defineConfig({
-  
+
   plugins: [
     react(),
 
@@ -15,7 +15,8 @@ export default defineConfig({
         name: "Boulangerie Liegeois",
         short_name: "POS",
 
-        start_url: "/",
+        start_url: "/demande-gateau",
+        scope: "/",
 
         display: "fullscreen",
 
