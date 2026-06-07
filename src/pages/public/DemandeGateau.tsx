@@ -283,84 +283,7 @@ export default function DemandeGateau() {
                                                 </div>
                                             </>
                                         )}
-                                        function DateField({value, onChange}: {value: string; onChange: (value: string) => void }) {
-  return (
-                                        <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4 shadow-sm">
-                                            <Label className="flex items-center gap-2 text-primary/80 mb-3">
-                                                <CalendarDays className="h-4 w-4 text-primary" />
-                                                Date souhaitée
-                                            </Label>
 
-                                            <div className="relative">
-                                                <Input
-                                                    type="date"
-                                                    value={value}
-                                                    onChange={(e) => onChange(e.target.value)}
-                                                    className="h-12 rounded-xl border-primary/20 bg-card pl-4 pr-4 text-primary shadow-sm"
-                                                />
-                                            </div>
-
-                                            <p className="mt-2 text-xs text-primary/50">
-                                                Choisissez la date prévue pour la récupération ou la livraison.
-                                            </p>
-                                        </div>
-                                        );
-}
-
-                                        function Time24Field({
-                                            value,
-                                            onChangeHour,
-                                            onChangeMinute,
-}: {
-                                            value: string;
-  onChangeHour: (value: string) => void;
-  onChangeMinute: (value: string) => void;
-}) {
-  const [hour = "12", minute = "00"] = (value || "12:00").split(":");
-
-                                        return (
-                                        <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4 shadow-sm">
-                                            <Label className="flex items-center gap-2 text-primary/80 mb-3">
-                                                <Clock className="h-4 w-4 text-primary" />
-                                                Heure souhaitée
-                                            </Label>
-
-                                            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                                                <Select value={hour} onValueChange={onChangeHour}>
-                                                    <SelectTrigger className="h-12 rounded-xl border-primary/20 bg-card text-primary shadow-sm">
-                                                        <SelectValue placeholder="HH" />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-card">
-                                                        {hours24.map((h) => (
-                                                            <SelectItem key={h} value={h}>
-                                                                {h}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-
-                                                <span className="text-xl font-bold text-primary/50">:</span>
-
-                                                <Select value={minute} onValueChange={onChangeMinute}>
-                                                    <SelectTrigger className="h-12 rounded-xl border-primary/20 bg-card text-primary shadow-sm">
-                                                        <SelectValue placeholder="MM" />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-card">
-                                                        {minutesStep.map((m) => (
-                                                            <SelectItem key={m} value={m}>
-                                                                {m}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                            <div className="mt-3 rounded-xl bg-card px-3 py-2 text-sm text-primary/70">
-                                                Format 24h : <span className="font-semibold text-primary">{hour}:{minute}</span>
-                                            </div>
-                                        </div>
-                                        );
-}
                                         {step === 4 && (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <Field icon={Users} label="Nombre de personnes">
@@ -507,8 +430,8 @@ function StepChoice({ options, value, onChange }: any) {
                         type="button"
                         onClick={() => onChange(option.label)}
                         className={`rounded-2xl border p-4 text-left transition shadow-sm ${active
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-primary/10 bg-card hover:bg-primary/5"
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-primary/10 bg-card hover:bg-primary/5"
                             }`}
                     >
                         <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${active ? "bg-white/20" : "bg-primary/10"}`}>
@@ -533,8 +456,8 @@ function MultiChoice({ title, options, values, onToggle }: any) {
                         type="button"
                         onClick={() => onToggle(option)}
                         className={`rounded-full border px-4 py-2 text-sm transition ${values.includes(option)
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-primary/10 bg-card hover:bg-primary/5"
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-primary/10 bg-card hover:bg-primary/5"
                             }`}
                     >
                         {option}
