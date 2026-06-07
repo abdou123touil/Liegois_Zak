@@ -241,12 +241,7 @@ export default function ChefCalculCoutProduit() {
                                                                 </SelectContent>
                                                             </Select>
 
-                                                            {matiere && (
-                                                                <p className="text-xs text-primary/50">
-                                                                    Achat: 1 {matiere.uniteMesure} ={" "}
-                                                                    {matiere.quantiteBaseParUnite || 1} {matiere.uniteBase || "g"}
-                                                                </p>
-                                                            )}
+                                                          
                                                         </div>
 
                                                         <div className="grid gap-2">
