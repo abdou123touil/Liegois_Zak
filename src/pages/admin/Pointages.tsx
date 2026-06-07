@@ -23,7 +23,18 @@ export default function Pointages() {
   const today = new Date().toISOString().split("T")[0];
   const currentTime = () =>
     new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  const formatWorkedHours = (hours?: number | null) => {
+    if (hours === null || hours === undefined) return "-";
 
+    const totalMinutes = Math.round(hours * 60);
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+
+    if (h === 0) return `${m}min`;
+    if (m === 0) return `${h}h`;
+
+    return `${h}h${m.toString().padStart(2, "0")}`;
+  };
   const [isArrivalModalOpen, setIsArrivalModalOpen] = useState(false);
   const [isDepartModalOpen, setIsDepartModalOpen] = useState(false);
   const [selectedPointageId, setSelectedPointageId] = useState<number | null>(null);
@@ -216,8 +227,12 @@ export default function Pointages() {
                           <td className="p-4 text-primary/70">{new Date(pointage.date).toLocaleDateString()}</td>
                           <td className="p-4 text-primary/70">{pointage.heureArrivee}</td>
                           <td className="p-4 text-primary/70">{pointage.heureDepart || '-'}</td>
-                          <td className="p-4 text-primary/70">{pointage.heuresPause?.toFixed(2) || '0'}h</td>
-                          <td className="p-4 text-primary/70">{pointage.heuresTravaillees ?? '-'}</td>
+                          <td className="p-4 text-primary/70">
+                            {formatWorkedHours(pointage.heuresPause || 0)}
+                          </td>
+                          <td className="p-4 text-primary/70">
+                            {formatWorkedHours(pointage.heuresTravaillees)}
+                          </td>
                           <td className="p-4 text-right">
                             <div className="flex justify-end gap-2">
                               <Button
