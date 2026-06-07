@@ -45,7 +45,8 @@
     "orders_by_employee": "الطلبات حسب الموظف",
     "financial_summary": "الملخص المالي",
     "total_earnings_today": "إجمالي الأرباح اليوم",
-    "cost_calculation": "حساب تكلفة المنتج"
+    "cost_calculation": "حساب تكلفة المنتج",
+    "cake_requests": "طلبات كعكة"
   },
   "nav": {
     "dashboard": "لوحة القيادة",
@@ -67,7 +68,7 @@
     "attendance": "الحضور",
     "pay_slips": "قسائم الدفع",
     "cost_calculation": "حساب تكلفة المنتج",
-    "cake_requests": "طلبات gâteaux"
+    "cake_requests": "طلبات كعكة"
 
   },
   "actions": {

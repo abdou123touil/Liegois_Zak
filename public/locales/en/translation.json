@@ -45,7 +45,8 @@
     "orders_by_employee": "Orders by employee",
     "financial_summary": "Financial summary",
     "total_earnings_today": "Total earnings today",
-    "cost_calculation": "Cost calculation"
+    "cost_calculation": "Cost calculation",
+    "cake_requests": "Cake requests"
   },
   "nav": {
     "dashboard": "Dashboard",
