@@ -357,6 +357,7 @@
     "threshold_base": "Seuil d'alerte ({{unit}})",
     "edit_stock": "Modifier le stock",
     "matiere": "Matière",
+    "delete":"Supprimer",
     "new_quantity": "Nouvelle quantité ({{unit}})",
     "delete_confirm": "Voulez-vous vraiment supprimer la matière première",
     "list_title": "Liste des matières",

@@ -354,6 +354,7 @@
     "threshold_base": "Alert threshold ({{unit}})",
     "edit_stock": "Edit stock",
     "matiere": "Material",
+    "delete":"Delete",
     "delete_confirmation": "Delete this raw material?",
     "new_quantity": "New quantity ({{unit}})",
     "delete_confirm": "Do you really want to delete the raw material",
