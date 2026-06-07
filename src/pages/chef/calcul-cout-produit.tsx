@@ -329,57 +329,58 @@ export default function ChefCalculCoutProduit() {
                                 )}
                             </CardContent>
                         </Card>
+                        <Card className="border-primary/10 shadow-md rounded-2xl overflow-hidden">
+                            <CardHeader className="bg-primary/5 border-b border-primary/10">
+                                <CardTitle className="text-primary flex items-center gap-2">
+                                    <History className="h-5 w-5" />
+                                    Historique des calculs
+                                </CardTitle>
+                            </CardHeader>
+
+                            <CardContent className="p-0">
+                                {historique.length === 0 ? (
+                                    <div className="p-8 text-center text-primary/50">
+                                        Aucun calcul enregistré.
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-muted/50">
+                                                <tr>
+                                                    <th className="text-left p-4 text-sm font-medium text-primary/70">Produit</th>
+                                                    <th className="text-left p-4 text-sm font-medium text-primary/70">Date</th>
+                                                    <th className="text-left p-4 text-sm font-medium text-primary/70">Pièces</th>
+                                                    <th className="text-left p-4 text-sm font-medium text-primary/70">Coût total</th>
+                                                    <th className="text-left p-4 text-sm font-medium text-primary/70">Coût / pièce</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                {historique.map((item) => (
+                                                    <tr key={item.id} className="border-b border-primary/5 hover:bg-primary/5">
+                                                        <td className="p-4 font-medium text-primary">{item.nomProduit}</td>
+                                                        <td className="p-4 text-primary/70">
+                                                            {item.createdAt ? new Date(item.createdAt).toLocaleString("fr-TN") : "-"}
+                                                        </td>
+                                                        <td className="p-4 text-primary/70">{item.nombrePieces}</td>
+                                                        <td className="p-4 font-semibold text-primary">
+                                                            {formatCurrency(item.coutTotal)}
+                                                        </td>
+                                                        <td className="p-4 font-semibold text-green-700">
+                                                            {formatCurrency(item.coutParPiece)}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </div>
-            <Card className="border-primary/10 shadow-md rounded-2xl overflow-hidden">
-                <CardHeader className="bg-primary/5 border-b border-primary/10">
-                    <CardTitle className="text-primary flex items-center gap-2">
-                        <History className="h-5 w-5" />
-                        Historique des calculs
-                    </CardTitle>
-                </CardHeader>
 
-                <CardContent className="p-0">
-                    {historique.length === 0 ? (
-                        <div className="p-8 text-center text-primary/50">
-                            Aucun calcul enregistré.
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-muted/50">
-                                    <tr>
-                                        <th className="text-left p-4 text-sm font-medium text-primary/70">Produit</th>
-                                        <th className="text-left p-4 text-sm font-medium text-primary/70">Date</th>
-                                        <th className="text-left p-4 text-sm font-medium text-primary/70">Pièces</th>
-                                        <th className="text-left p-4 text-sm font-medium text-primary/70">Coût total</th>
-                                        <th className="text-left p-4 text-sm font-medium text-primary/70">Coût / pièce</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {historique.map((item) => (
-                                        <tr key={item.id} className="border-b border-primary/5 hover:bg-primary/5">
-                                            <td className="p-4 font-medium text-primary">{item.nomProduit}</td>
-                                            <td className="p-4 text-primary/70">
-                                                {item.createdAt ? new Date(item.createdAt).toLocaleString("fr-TN") : "-"}
-                                            </td>
-                                            <td className="p-4 text-primary/70">{item.nombrePieces}</td>
-                                            <td className="p-4 font-semibold text-primary">
-                                                {formatCurrency(item.coutTotal)}
-                                            </td>
-                                            <td className="p-4 font-semibold text-green-700">
-                                                {formatCurrency(item.coutParPiece)}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
         </DashboardLayout>
     );
 }
