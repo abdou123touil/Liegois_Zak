@@ -618,13 +618,22 @@ export default function Pos() {
                                 <Minus className="h-4 w-4" />
                               </Button>
                               <input
-                                type="number"
-                                step="any"
+                                type="text"
+                                inputMode="decimal"
                                 value={item.quantity}
                                 onChange={(e) => {
-                                  const newQty = parseFloat(e.target.value);
-                                  if (!isNaN(newQty) && newQty >= 0) {
-                                    setQuantity(item.productId, newQty);
+                                  let val = e.target.value;
+                                  // Autorise : chiffres, un point, nombres décimaux
+                                  if (val === "" || /^[0-9]*\.?[0-9]*$/.test(val)) {
+                                    const num = parseFloat(val);
+                                    if (!isNaN(num) && num >= 0) {
+                                      setQuantity(item.productId, num);
+                                    } else if (val === "") {
+                                      setQuantity(item.productId, 0);
+                                    } else if (val === ".") {
+                                      // Permet de commencer par un point (ex: .5 → 0.5)
+                                      setQuantity(item.productId, 0);
+                                    }
                                   }
                                 }}
                                 className="w-12 text-center text-sm font-bold text-primary bg-transparent border border-primary/20 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
