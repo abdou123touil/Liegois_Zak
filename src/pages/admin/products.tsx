@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Package, ArrowUpDown, Search, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +30,9 @@ export default function Products() {
   const queryClient = useQueryClient();
   const { data: products, isLoading } = useListProducts({});
   const { data: categories } = useListCategories();
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "price" | "categoryName" | "status">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
@@ -39,7 +41,43 @@ export default function Products() {
   const getProductIsActive = (product: Product) => {
     return Boolean((product as any).isActive ?? (product as any).active);
   };
+onst filteredAndSortedProducts = useMemo(() => {
+    if (!products) return [];
 
+    let filtered = products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    filtered.sort((a, b) => {
+      let compareA: any, compareB: any;
+      switch (sortBy) {
+        case "name":
+          compareA = a.name.toLowerCase();
+          compareB = b.name.toLowerCase();
+          break;
+        case "price":
+          compareA = a.price;
+          compareB = b.price;
+          break;
+        case "categoryName":
+          compareA = (a.categoryName || "").toLowerCase();
+          compareB = (b.categoryName || "").toLowerCase();
+          break;
+        case "status":
+          compareA = getProductIsActive(a);
+          compareB = getProductIsActive(b);
+          break;
+        default:
+          compareA = a.name.toLowerCase();
+          compareB = b.name.toLowerCase();
+      }
+      if (compareA < compareB) return sortOrder === "asc" ? -1 : 1;
+      if (compareA > compareB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [products, searchTerm, sortBy, sortOrder]);
   const openNewModal = () => {
     setEditingProduct(null);
     setName("");
@@ -114,7 +152,9 @@ export default function Products() {
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND' }).format(val);
   };
-
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -129,10 +169,47 @@ export default function Products() {
             <Plus className="h-4 w-4" /> {t('products.add_button')}
           </Button>
         </div>
-
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-end">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t('products.search_placeholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 rounded-xl border-primary/20"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+              <SelectTrigger className="w-40 rounded-xl border-primary/20">
+                <SelectValue placeholder={t('products.sort_by')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">{t('products.sort_by_name')}</SelectItem>
+                <SelectItem value="price">{t('products.sort_by_price')}</SelectItem>
+                <SelectItem value="categoryName">{t('products.sort_by_category')}</SelectItem>
+                <SelectItem value="status">{t('products.sort_by_status')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleSortOrder}
+              className="border-primary/20 rounded-xl"
+            >
+              <ArrowUpDown className="h-4 w-4" />
+            </Button>
+            <span className="text-xs text-muted-foreground ml-1">
+              {sortOrder === "asc" ? t('common.ascending') : t('common.descending')}
+            </span>
+          </div>
+        </div>
         <Card className="border-primary/10 shadow-md rounded-2xl overflow-hidden">
           <CardHeader className="bg-primary/5 border-b border-primary/10">
-            <CardTitle className="text-primary">{t('products.all_title')}</CardTitle>
+            <CardTitle className="text-primary">
+              {t('products.all_title')}
+              {searchTerm && ` • ${filteredAndSortedProducts.length} résultat(s)`}
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -150,11 +227,13 @@ export default function Products() {
                 <tbody>
                   {isLoading ? (
                     <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('common.loading')}...</td></tr>
-                  ) : products?.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('products.empty')}</td></tr>
+                  ) : filteredAndSortedProducts.length === 0 ? (
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">
+                      {searchTerm ? t('products.no_results') : t('products.empty')}
+                    </td></tr>
                   ) : (
                     <AnimatePresence>
-                      {products?.map((product, idx) => {
+                      {filteredAndSortedProducts.map((product, idx) => {
                         const productActive = getProductIsActive(product);
                         return (
                           <motion.tr

@@ -80,6 +80,8 @@
     "logout": "Déconnexion"
   },
   "common": {
+    "ascending": "Croissant",
+    "descending": "Décroissant",
     "loading": "Chargement...",
     "error": "Erreur",
     "success": "Succès",
@@ -235,6 +237,13 @@
     "confirm_delete": "Êtes-vous sûr de vouloir supprimer ce produit ?",
     "status_active": "Actif",
     "status_inactive": "Inactif",
+    "search_placeholder": "Rechercher un produit...",
+    "sort_by": "Trier par",
+    "sort_by_name": "Nom",
+    "sort_by_price": "Prix",
+    "sort_by_category": "Catégorie",
+    "sort_by_status": "Statut",
+    "no_results": "Aucun produit trouvé",
     "table": {
       "image": "Image",
       "name": "Nom",
@@ -359,7 +368,7 @@
     "threshold_base": "Seuil d'alerte ({{unit}})",
     "edit_stock": "Modifier le stock",
     "matiere": "Matière",
-    "delete":"Supprimer",
+    "delete": "Supprimer",
     "new_quantity": "Nouvelle quantité ({{unit}})",
     "delete_confirm": "Voulez-vous vraiment supprimer la matière première",
     "list_title": "Liste des matières",
