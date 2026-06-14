@@ -199,7 +199,7 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={salesData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                      <XAxis dataKey="date" tick={{ fontSize: 5 }} />
                       <YAxis tickFormatter={(val) => formatCurrency(Number(val))} />
                       <Tooltip formatter={(val: number) => formatCurrency(val)} labelFormatter={(label) => `Date: ${label}`} />
                       <Line type="monotone" dataKey="sales" stroke="#0f766e" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
