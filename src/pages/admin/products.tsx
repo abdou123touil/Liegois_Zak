@@ -171,12 +171,12 @@ export default function Products() {
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-end">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground bg-card" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground " />
             <Input
               placeholder={t('products.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 rounded-xl border-primary/20"
+              className="pl-9 rounded-xl border-primary/20 bg-card focus:ring-primary"
             />
           </div>
           <div className="flex items-center gap-2">
