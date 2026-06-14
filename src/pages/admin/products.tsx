@@ -39,7 +39,7 @@ export default function Products() {
 
   // Fonction pour déterminer si un produit est actif
   const getProductIsActive = (product: Product) => {
-    return Boolean((product as any).isActive ?? (product as any).active);
+    return product.active ?? product.isActive ?? false;
   };
   const filteredAndSortedProducts = useMemo(() => {
     if (!products) return [];
@@ -112,7 +112,7 @@ export default function Products() {
       categoryId: parseInt(categoryId),
       imageUrl: imageUrl || undefined,
       description: description || undefined,
-      isActive,
+      active: isActive,
     };
     try {
       if (editingProduct) {
