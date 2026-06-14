@@ -171,7 +171,7 @@ export default function Products() {
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-end">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground bg-card" />
             <Input
               placeholder={t('products.search_placeholder')}
               value={searchTerm}
@@ -181,10 +181,10 @@ export default function Products() {
           </div>
           <div className="flex items-center gap-2">
             <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
-              <SelectTrigger className="w-40 rounded-xl border-primary/20">
+              <SelectTrigger className="w-40 rounded-xl border-primary/20 bg-card">
                 <SelectValue placeholder={t('products.sort_by')} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card">
                 <SelectItem value="name">{t('products.sort_by_name')}</SelectItem>
                 <SelectItem value="price">{t('products.sort_by_price')}</SelectItem>
                 <SelectItem value="categoryName">{t('products.sort_by_category')}</SelectItem>
