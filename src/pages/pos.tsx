@@ -335,7 +335,7 @@ export default function Pos() {
       setPrintTicket(false);
       queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
       setTimeout(() => setSuccessModalOpen(false), 3000);
-      
+
     } catch (error) {
       toast({ title: t('common.error'), description: t('pos.payment_error'), variant: "destructive" });
     }
@@ -388,7 +388,15 @@ export default function Pos() {
     }
 
   };
-
+  const setQuantity = (productId: number, newQuantity: number) => {
+    setCart(prev =>
+      prev.map(item =>
+        item.productId === productId
+          ? { ...item, quantity: newQuantity }
+          : item
+      ).filter(item => item.quantity > 0)
+    );
+  };
   const handleCancelDevis = async (id: number) => {
     try {
       await cancelDevisMutation.mutateAsync(id);
@@ -609,7 +617,18 @@ export default function Pos() {
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
-                              <span className="w-6 text-center text-sm font-bold text-primary">{item.quantity}</span>
+                              <input
+                                type="number"
+                                step="any"
+                                value={item.quantity}
+                                onChange={(e) => {
+                                  const newQty = parseFloat(e.target.value);
+                                  if (!isNaN(newQty) && newQty >= 0) {
+                                    setQuantity(item.productId, newQty);
+                                  }
+                                }}
+                                className="w-12 text-center text-sm font-bold text-primary bg-transparent border border-primary/20 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                              />
                               <Button
                                 variant="ghost"
                                 size="icon"
