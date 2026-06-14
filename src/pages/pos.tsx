@@ -200,6 +200,7 @@ export default function Pos() {
   const confirmDevisMutation = useConfirmDevis();
   const [printTicket, setPrintTicket] = useState(false);
   const cancelDevisMutation = useCancelDevis();
+  const [editingQuantities, setEditingQuantities] = useState<{ [key: number]: string }>({});
   const handleLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
@@ -620,20 +621,35 @@ export default function Pos() {
                               <input
                                 type="text"
                                 inputMode="decimal"
-                                value={item.quantity}
+                                value={editingQuantities[item.productId] !== undefined ? editingQuantities[item.productId] : item.quantity.toString()}
                                 onChange={(e) => {
-                                  let val = e.target.value;
-                                  // Autorise : chiffres, un point, nombres décimaux
+                                  const val = e.target.value;
                                   if (val === "" || /^[0-9]*\.?[0-9]*$/.test(val)) {
-                                    const num = parseFloat(val);
+                                    setEditingQuantities(prev => ({ ...prev, [item.productId]: val }));
+                                  }
+                                }}
+                                onBlur={() => {
+                                  const raw = editingQuantities[item.productId];
+                                  if (raw !== undefined) {
+                                    const num = parseFloat(raw);
                                     if (!isNaN(num) && num >= 0) {
-                                      setQuantity(item.productId, num);
-                                    } else if (val === "") {
-                                      setQuantity(item.productId, 0);
-                                    } else if (val === ".") {
-                                      // Permet de commencer par un point (ex: .5 → 0.5)
-                                      setQuantity(item.productId, 0);
+                                      if (num === 0) {
+                                        // Supprimer l'article si quantité finale = 0
+                                        setCart(prev => prev.filter(i => i.productId !== item.productId));
+                                      } else {
+                                        setCart(prev =>
+                                          prev.map(i =>
+                                            i.productId === item.productId ? { ...i, quantity: num } : i
+                                          )
+                                        );
+                                      }
                                     }
+                                    // Nettoyer l'état d'édition
+                                    setEditingQuantities(prev => {
+                                      const newState = { ...prev };
+                                      delete newState[item.productId];
+                                      return newState;
+                                    });
                                   }
                                 }}
                                 className="w-12 text-center text-sm font-bold text-primary bg-transparent border border-primary/20 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
