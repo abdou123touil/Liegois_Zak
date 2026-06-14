@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useListCategories, Product } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Package, ArrowUpDown, Search, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Package, ArrowUpDown, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -41,7 +41,7 @@ export default function Products() {
   const getProductIsActive = (product: Product) => {
     return Boolean((product as any).isActive ?? (product as any).active);
   };
-onst filteredAndSortedProducts = useMemo(() => {
+  const filteredAndSortedProducts = useMemo(() => {
     if (!products) return [];
 
     let filtered = products.filter((product) =>
