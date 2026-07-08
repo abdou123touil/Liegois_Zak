@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Thmanyah';
+  src: url('/src/assets/fonts/thmanyah/Thmanyah-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Thmanyah';
+  src: url('/src/assets/fonts/thmanyah/Thmanyah-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 @layer base {
   :root {
     /* Mode clair */
@@ -58,9 +73,7 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
-  html[lang="ar"] body {
-  font-family: 'Thmanyah', 'Plus Jakarta Sans', sans-serif;
-}
+ 
 }
 
 @layer utilities {
