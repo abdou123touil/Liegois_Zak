@@ -26,7 +26,7 @@
     --sidebar-accent: 175 30% 92%;
     --sidebar-accent-foreground: 175 80% 25%;
   }
-
+  
   .dark {
     /* Mode sombre */
     --background: 0 0% 0%;
@@ -58,6 +58,9 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+  html[lang="ar"] body {
+  font-family: 'Thmanyah', 'Plus Jakarta Sans', sans-serif;
+}
 }
 
 @layer utilities {
