@@ -1,6 +1,6 @@
 // src/pages/responsable/stock-journalier.tsx
 import { useState } from "react";
-import { useListProducts, useListStockJournalier, useCreateStockJournalier, useUpdateStockJournalier, StockJournalier } from "@/lib/api-client";
+import { useListProducts, useListStockJournalier, useCreateStockJournalier, StockJournalier, StockJournalierLigne } from "@/lib/api-client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 export default function ResponsableStockJournalier() {
     const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingStock, setEditingStock] = useState<StockJournalier | null>(null);
+    const [editingStock, setEditingStock] = useState<(StockJournalierLigne & { date: string; stockId: number }) | null>(null);
     const [productId, setProductId] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [quantiteProduite, setQuantiteProduite] = useState("");
@@ -29,7 +29,7 @@ export default function ResponsableStockJournalier() {
     const { data: stocks = [], isLoading } = useListStockJournalier();
     const { data: products = [] } = useListProducts({});
     const createMutation = useCreateStockJournalier();
-    const updateMutation = useUpdateStockJournalier();
+    const stockRows = stocks.flatMap((stock) => stock.lignes.map((ligne) => ({ ...ligne, date: stock.date, stockId: stock.id })));
 
     const openNewModal = () => {
         setEditingStock(null);
@@ -40,9 +40,9 @@ export default function ResponsableStockJournalier() {
         setIsModalOpen(true);
     };
 
-    const openEditModal = (stock: StockJournalier) => {
+    const openEditModal = (stock: StockJournalierLigne & { date: string; stockId: number }) => {
         setEditingStock(stock);
-        setProductId(stock.product?.id.toString() || "");
+        setProductId(stock.productId.toString());
         setDate(stock.date);
         setQuantiteProduite(stock.quantiteProduite.toString());
         setQuantitePerdue((stock.quantitePerdue || 0).toString());
@@ -55,16 +55,18 @@ export default function ResponsableStockJournalier() {
             return;
         }
 
-        const data = {
-            product: { id: parseInt(productId) },
-            date,
-            quantiteProduite: parseInt(quantiteProduite),
-            quantitePerdue: quantitePerdue ? parseInt(quantitePerdue) : 0,
-        };
+        const productIdNumber = parseInt(productId);
+        const current = stocks.find((stock) => stock.date === date);
+        const lines = (current?.lignes || []).filter((line) => line.productId !== editingStock?.productId);
+        const lineIndex = lines.findIndex((line) => line.productId === productIdNumber);
+        const updatedLine = { productId: productIdNumber, quantiteProduite: parseInt(quantiteProduite), quantitePerdue: quantitePerdue ? parseInt(quantitePerdue) : 0 };
+        if (lineIndex >= 0) lines[lineIndex] = { ...lines[lineIndex], ...updatedLine };
+        else lines.push(updatedLine);
+        const data = { date, lignes: lines.map((line) => ({ productId: line.productId, quantiteProduite: line.quantiteProduite, quantitePerdue: line.quantitePerdue })) };
 
         try {
             if (editingStock) {
-                await updateMutation.mutateAsync({ id: editingStock.id, data });
+                await createMutation.mutateAsync(data);
                 toast({ title: t('common.success'), description: t('stockJournalier.update_success') });
             } else {
                 await createMutation.mutateAsync(data);
@@ -117,16 +119,16 @@ export default function ResponsableStockJournalier() {
                                         <tr><td colSpan={7} className="text-center py-12">{t('stockJournalier.empty')}</td></tr>
                                     ) : (
                                         <AnimatePresence>
-                                            {stocks.map((stock, idx) => (
+                                            {stockRows.map((stock, idx) => (
                                                 <motion.tr
-                                                    key={stock.id}
+                                                    key={`${stock.stockId}-${stock.productId}`}
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: idx * 0.03 }}
                                                     className="border-b border-primary/5 hover:bg-primary/5"
                                                 >
                                                     <td className="p-4 font-medium text-primary/90 flex items-center gap-2">
-                                                        <Package className="h-5 w-5 text-primary" /> {stock.product?.name}
+                                                        <Package className="h-5 w-5 text-primary" /> {stock.productName}
                                                     </td>
                                                     <td className="p-4 text-primary/70">{new Date(stock.date).toLocaleDateString()}</td>
                                                     <td className="p-4 text-primary/70">{stock.quantiteProduite}</td>
@@ -175,7 +177,7 @@ export default function ResponsableStockJournalier() {
                             </div>
                             <div className="grid gap-2">
                                 <Label>{t('stockJournalier.date')}</Label>
-                                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                                <Input type="date" value={date} disabled={!!editingStock} onChange={(e) => setDate(e.target.value)} />
                             </div>
                             <div className="grid gap-2">
                                 <Label>{t('stockJournalier.produced')}</Label>

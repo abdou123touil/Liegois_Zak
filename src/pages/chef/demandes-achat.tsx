@@ -50,7 +50,7 @@ export default function ChefDemandesAchat() {
                 produit,
                 quantite: parseFloat(quantite),
                 uniteMesure,
-                fournisseurSuggere: fournisseurData || null,
+                fournisseurSuggereId: fournisseurData?.id,
                 urgence,
             });
             toast({ title: t('common.success'), description: t('demandesAchat.create_success') });
@@ -144,8 +144,8 @@ export default function ChefDemandesAchat() {
                                                 <td className="p-4 font-medium">{demande.produit}</td>
                                                 <td className="p-4">{demande.quantite} {demande.uniteMesure}</td>
                                                 <td className="p-4">{demande.uniteMesure}</td>
-                                                <td className="p-4">{demande.fournisseurSuggere?.nom || '-'}</td>
-                                                <td className="p-4">{demande.demandePar?.name || '-'}</td>
+                                                <td className="p-4">{demande.fournisseurSuggereNom || '-'}</td>
+                                                <td className="p-4">{demande.demandeParNom || '-'}</td>
                                                 <td className="p-4">{getStatutBadge(demande.statut)}</td>
                                                 <td className="p-4 text-right space-x-2">
                                                     {demande.statut === "EN_ATTENTE" && (

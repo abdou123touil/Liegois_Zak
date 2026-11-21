@@ -8,6 +8,9 @@ import {
   useListDevis,
   useConfirmDevis,
   useCancelDevis,
+  useCustomerByPhone,
+  useListPromotions,
+  useCreateCustomer,
   Devis,
 } from "@/lib/api-client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -177,6 +180,8 @@ export default function Pos() {
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "other">("cash");
   const [amountEntered, setAmountEntered] = useState("0");
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [lastPointsEarned, setLastPointsEarned] = useState(0);
+  const [lastPointsBalance, setLastPointsBalance] = useState<number | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
   const { user, setUser } = useAuth();
@@ -190,16 +195,24 @@ export default function Pos() {
   const [devisNotes, setDevisNotes] = useState("");
   const [selectedDevis, setSelectedDevis] = useState<Devis | null>(null);
   const { data: categories } = useListCategories();
-  const { data: products, isLoading: isLoadingProducts } = useListProducts({ categoryId: activeCategory ?? null });
+  const { data: products, isLoading: isLoadingProducts } = useListProducts({ categoryId: activeCategory });
   const createOrderMutation = useCreateOrder();
   const [discountType, setDiscountType] = useState<"fixed" | "percentage">("fixed");
   const [discountValue, setDiscountValue] = useState("");
   const [discountReason, setDiscountReason] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [pointsToRedeem, setPointsToRedeem] = useState("0");
+  const [selectedPromotionId, setSelectedPromotionId] = useState("");
+  const [newCustomerOpen, setNewCustomerOpen] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState("");
   const { data: devis = [] } = useListDevis();
   const createDevisMutation = useCreateDevis();
   const confirmDevisMutation = useConfirmDevis();
   const [printTicket, setPrintTicket] = useState(false);
   const cancelDevisMutation = useCancelDevis();
+  const customerQuery = useCustomerByPhone(customerPhone);
+  const { data: promotions = [] } = useListPromotions();
+  const createCustomerMutation = useCreateCustomer();
   const [editingQuantities, setEditingQuantities] = useState<{ [key: number]: string }>({});
   const handleLogout = async () => {
     try {
@@ -207,8 +220,9 @@ export default function Pos() {
       setUser(null);
       // Redirection forcée pour réinitialiser complètement l'état React
       window.location.href = "/login";
-    } catch (error) {
-      console.error("Logout error", error);
+    } catch {
+      setUser(null);
+      window.location.href = "/login";
     }
   };
 
@@ -238,6 +252,12 @@ export default function Pos() {
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + item.price * item.quantity, 0), [cart]);
   const discountedTotal = useMemo(() => {
     let total = cartTotal;
+    const today = new Date().toISOString().slice(0, 10);
+    const promotion = promotions.find((p) => p.id.toString() === selectedPromotionId && p.active && p.startDate <= today && p.endDate >= today && cartTotal >= p.minimumAmount);
+    if (promotion) {
+      const amount = promotion.type === "FIXED" ? promotion.value : cartTotal * promotion.value / 100;
+      total = Math.max(0, total - amount);
+    }
     if (discountValue && parseFloat(discountValue) > 0) {
       if (discountType === "fixed") {
         total = Math.max(0, total - parseFloat(discountValue));
@@ -245,8 +265,10 @@ export default function Pos() {
         total = total * (1 - parseFloat(discountValue) / 100);
       }
     }
+    const redeemable = customerQuery.data ? Math.max(0, Math.min(Number(pointsToRedeem) || 0, customerQuery.data.points)) : 0;
+    total = Math.max(0, total - Math.floor(redeemable / 100) * 100 / 100);
     return total;
-  }, [cartTotal, discountType, discountValue]);
+  }, [cartTotal, discountType, discountValue, promotions, selectedPromotionId, customerQuery.data, pointsToRedeem]);
 
   const handleNumpad = (val: string) => {
     if (val === "C") {
@@ -291,17 +313,23 @@ export default function Pos() {
           amountPaid: paymentMethod === "cash" ? amountPaid : discountedTotal,
           paymentMethod,
           items: cart.map(item => ({ productId: item.productId, quantity: item.quantity })),
+          customerId: customerQuery.data?.id ?? null,
+          promotionId: selectedPromotionId ? Number(selectedPromotionId) : null,
+          pointsToRedeem: customerQuery.data ? Math.floor(Math.max(0, Math.min(Number(pointsToRedeem) || 0, customerQuery.data.points)) / 100) * 100 : 0,
           reductionMontant: discountType === "fixed" && discountValue ? parseFloat(discountValue) : null,
           reductionPourcentage: discountType === "percentage" && discountValue ? parseFloat(discountValue) : null,
           motifReduction: discountReason || "",
         },
       });
+      const redeemedOnThisOrder = customerQuery.data ? Math.floor(Math.max(0, Math.min(Number(pointsToRedeem) || 0, customerQuery.data.points)) / 100) * 100 : 0;
+      setLastPointsEarned(response.loyaltyPointsEarned || 0);
+      setLastPointsBalance(customerQuery.data ? customerQuery.data.points - redeemedOnThisOrder + (response.loyaltyPointsEarned || 0) : null);
 
       // Contenu du QR code (personnalisable)
       const qrData = `Commande #${response.id}\nTotal: ${formatCurrency(discountedTotal)}\nDate: ${new Date().toLocaleString()}`;
       const qrCodeUrl = generateQrCodeUrl(qrData, 100);
 
-      const discountAmount = discountType === "fixed" ? (parseFloat(discountValue) || 0) : (cartTotal * (parseFloat(discountValue) || 0) / 100);
+      const discountAmount = Math.max(0, cartTotal - discountedTotal);
       const ticketHtml = generateTicketHtml(
         response.id,
         new Date(),
@@ -333,6 +361,9 @@ export default function Pos() {
       setAmountEntered("0");
       setDiscountValue("");
       setDiscountReason("");
+      setCustomerPhone("");
+      setPointsToRedeem("0");
+      setSelectedPromotionId("");
       setPrintTicket(false);
       queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
       setTimeout(() => setSuccessModalOpen(false), 3000);
@@ -671,6 +702,20 @@ export default function Pos() {
                 </ScrollArea>
                 <div className="shrink-0 border-t border-primary/10 bg-card p-5 space-y-4">
                   <div className="space-y-2 border-t border-primary/10 pt-4">
+                    <div className="space-y-1">
+                      <Label className="text-primary/70">Client fidélité (téléphone)</Label>
+                      <Input value={customerPhone} onChange={(e) => { setCustomerPhone(e.target.value); setPointsToRedeem("0"); }} placeholder="Ex. 52 000 000" />
+                      {customerQuery.data && <p className="text-xs text-green-700">{customerQuery.data.name} · {customerQuery.data.points} points</p>}
+                      {customerPhone.trim().length >= 6 && customerQuery.data === null && <Button variant="outline" size="sm" className="mt-1" onClick={()=>{setNewCustomerName("");setNewCustomerOpen(true);}}>Créer la fiche client</Button>}
+                    </div>
+                    {customerQuery.data && <div className="space-y-1"><Label className="text-primary/70">Points à utiliser (100 points = 1 TND)</Label><Input type="number" min="0" max={customerQuery.data.points} step="100" value={pointsToRedeem} onChange={e=>setPointsToRedeem(e.target.value)} /></div>}
+                    <div className="space-y-1">
+                      <Label className="text-primary/70">Promotion</Label>
+                      <Select value={selectedPromotionId || "none"} onValueChange={(v) => setSelectedPromotionId(v === "none" ? "" : v)}>
+                        <SelectTrigger><SelectValue placeholder="Aucune promotion" /></SelectTrigger>
+                        <SelectContent><SelectItem value="none">Aucune promotion</SelectItem>{promotions.filter(p => p.active && p.startDate <= new Date().toISOString().slice(0,10) && p.endDate >= new Date().toISOString().slice(0,10)).map(p=><SelectItem key={p.id} value={p.id.toString()} disabled={cartTotal < p.minimumAmount}>{p.name} ({p.type === "FIXED" ? `${p.value} TND` : `${p.value}%`}) · {p.code}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Label className="text-primary/70 whitespace-nowrap">Réduction</Label>
                       <Select value={discountType} onValueChange={(v: any) => setDiscountType(v)}>
@@ -985,6 +1030,13 @@ export default function Pos() {
             </div>
           </DialogContent>
         </Dialog>
+        <Dialog open={newCustomerOpen} onOpenChange={setNewCustomerOpen}>
+          <DialogContent className="sm:max-w-[420px]">
+            <DialogHeader><DialogTitle>Inscrire un client fidélité</DialogTitle></DialogHeader>
+            <div className="space-y-3 py-2"><div><Label>Nom</Label><Input value={newCustomerName} onChange={e=>setNewCustomerName(e.target.value)} autoFocus/></div><div><Label>Téléphone</Label><Input value={customerPhone} onChange={e=>setCustomerPhone(e.target.value)}/></div></div>
+            <Button disabled={!newCustomerName.trim() || customerPhone.trim().length < 6 || createCustomerMutation.isPending} onClick={async()=>{try{const customer=await createCustomerMutation.mutateAsync({name:newCustomerName.trim(),phone:customerPhone.trim()});setCustomerPhone(customer.phone);await queryClient.invalidateQueries({queryKey:["customer-by-phone",customer.phone]});setNewCustomerOpen(false);toast({title:"Client inscrit",description:`${customer.name} peut gagner des points dès cette vente.`});}catch(e){toast({title:"Inscription impossible",description:e instanceof Error?e.message:"Vérifiez les informations.",variant:"destructive"});}}}>{createCustomerMutation.isPending?<Loader2 className="h-4 w-4 animate-spin"/>:"Inscrire le client"}</Button>
+          </DialogContent>
+        </Dialog>
 
         {/* Success Modal */}
         <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
@@ -1009,6 +1061,7 @@ export default function Pos() {
               </div>
               <h2 className="text-3xl font-serif font-bold text-primary mb-2">{t('pos.order_complete')}</h2>
               <p className="text-primary/70">{t('pos.ready_next')}</p>
+              {lastPointsBalance !== null && <div className="mt-4 rounded-xl bg-primary/5 px-4 py-3"><p className="font-semibold text-primary">+{lastPointsEarned} points fidélité</p><p className="text-sm text-primary/70">Nouveau solde : {lastPointsBalance} points</p></div>}
             </motion.div>
           </DialogContent>
         </Dialog>

@@ -63,9 +63,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }
     })();
 
-    const handleLogout = () => {
-        logout();
-        window.location.href = "/login";
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch {
+            // The local UI still returns to the login screen if the network is unavailable.
+        } finally {
+            window.location.href = "/login";
+        }
     };
 
     const formattedDate = new Date().toLocaleDateString(

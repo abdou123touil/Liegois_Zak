@@ -178,7 +178,7 @@ export default function MatieresPremieres() {
                     {quantite} {matiere.uniteBase || "g"}
                 </span>
                 {isLow && (
-                    <AlertTriangle className="h-4 w-4 text-destructive" title={t('matieresPremieres.stock_alert')} />
+                    <span title={t('matieresPremieres.stock_alert')}><AlertTriangle className="h-4 w-4 text-destructive" /></span>
                 )}
             </div>
         );

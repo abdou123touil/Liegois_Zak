@@ -115,7 +115,7 @@ export default function ChefDashboard() {
                       >
                         <td className="p-4 font-medium text-primary/90">{demande.produit}</td>
                         <td className="p-4 text-primary/70">{demande.quantite} {demande.uniteMesure}</td>
-                        <td className="p-4 text-primary/70">{demande.fournisseurSuggere?.nom || '-'}</td>
+                        <td className="p-4 text-primary/70">{demande.fournisseurSuggereNom || '-'}</td>
                         <td className="p-4 text-right">
                           <Link href="/chef/demandes-achat">
                             <Button variant="ghost" size="icon" className="hover:bg-primary/10">

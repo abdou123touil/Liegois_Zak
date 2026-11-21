@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;//     || "http://localhost:8081/api";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081/api").replace(/\/$/, "");
 
-let token: string | null = null;
+let csrfToken: string | null = null;
+if (typeof window !== "undefined") window.localStorage.removeItem("jwt_token");
 export type SalesByDay = {
   date: string;
   sales: number;
@@ -31,7 +32,7 @@ export type Employee = {
   name: string;
   username: string;
   password?: string; // Ajoutez ce champ pour la création/mise à jour
-  role: "admin" | "cashier" | "ADMIN" | "CASHIER" | "CHEF" | "RESPONSABLE" | "OTHER";
+  role: "admin" | "cashier" | "ADMIN" | "CASHIER" | "CHEF" | "RESPONSABLE" | "OTHER" | "COMMERCIAL";
   poste?: string;           // ← ajoutez ce champ
   hourlyRate?: number;
   hoursPerMonth?: number;
@@ -78,6 +79,10 @@ export type Order = {
   change?: number;
   items: Array<{ productName: string; quantity: number; unitPrice: number; subtotal: number }>;
 };
+
+export type Customer = { id: number; name: string; phone: string; email?: string; points: number; createdAt: string };
+export type Promotion = { id: number; name: string; code: string; type: "FIXED" | "PERCENTAGE"; value: number; minimumAmount: number; startDate: string; endDate: string; active: boolean };
+export type LoyaltyTransaction = { id: number; points: number; type: string; description: string; createdAt: string };
 // ==================== FOURNISSEURS ====================
 export interface Fournisseur {
   id: number;
@@ -96,7 +101,8 @@ export interface Fournisseur {
 // ==================== ACHATS ====================
 export interface Achat {
   id: number;
-  fournisseur: Fournisseur;
+  fournisseur: Pick<Fournisseur, "id"> & Partial<Fournisseur>;
+  matierePremiere?: Pick<MatierePremiere, "id"> & Partial<MatierePremiere>;
   nomProduit: string;
   quantite: number;
   uniteMesure: string;
@@ -160,10 +166,12 @@ export interface DemandeAchat {
   produit: string;
   quantite: number;
   uniteMesure: string;
-  fournisseurSuggere?: Fournisseur["id"];
+  fournisseurSuggereId?: number;
+  fournisseurSuggereNom?: string;
   urgence: boolean;
   statut: "EN_ATTENTE" | "VALIDEE" | "REJETEE";
-  demandePar?: Employee;
+  demandeParId?: number;
+  demandeParNom?: string;
   createdAt: string;
 }
 
@@ -180,7 +188,7 @@ export interface Conge {
   motif?: string;
   demandeLe: string;
   reponseLe?: string;
-  statue: "EN_ATTENTE" | "ACCEPTE" | "REFUSE";
+  statut: "EN_ATTENTE" | "APPROUVE" | "REJETE";
 }
 
 // ==================== POINTAGES ====================
@@ -217,19 +225,6 @@ export interface FichePaie {
   joursCongeNonPayes?: number;    // ajout
   dateGeneration: string;
 }
-// Demandes d'achat
-export interface DemandeAchat {
-  id: number;
-  produit: string;
-  quantite: number;
-  uniteMesure: string;
-  fournisseurSuggere?: Fournisseur["id"];
-  urgence: boolean;
-  statut: "EN_ATTENTE" | "VALIDEE" | "REJETEE";
-  demandePar?: Employee;
-  createdAt: string;
-}
-
 // Stock journalier
 
 export interface ParametresPaie {
@@ -280,22 +275,19 @@ export function useUpdateParametresPaie() {
 }
 
 
-// Gestion du token
-export function getToken(): string | null {
-  return localStorage.getItem("jwt_token");
+async function getCsrfToken(refresh = false): Promise<string> {
+  if (csrfToken && !refresh) return csrfToken;
+  const response = await fetch(`${API_BASE_URL}/csrf`, { credentials: "include" });
+  if (!response.ok) throw new Error("Unable to initialize secure session");
+  const result = await response.json() as { csrfToken: string };
+  csrfToken = result.csrfToken;
+  return csrfToken;
 }
 
-function setToken(token: string) {
-  localStorage.setItem("jwt_token", token);
-}
-
-export function removeToken() {
-  localStorage.removeItem("jwt_token");
-}
-
-function authHeaders(): HeadersInit {
-  const token = getToken();
-  return token ? { "Authorization": `Bearer ${token}` } : {};
+export async function logoutSession(): Promise<void> {
+  const response = await apiRequest("/logout", { method: "POST" });
+  if (!response.ok) throw new Error("Logout failed");
+  csrfToken = null;
 }
 
 // 🔹 UseLogin Hook (to be replaced by your actual API request)
@@ -303,16 +295,16 @@ export function useLogin() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ data }: { data: { username: string; password: string } }) => {
+      const token = await getCsrfToken(true);
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": token },
         body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error("Login failed");
       const result = await response.json();
-      if (result.token) {
-        setToken(result.token);
-      }
+      csrfToken = result.csrfToken;
       // Invalider la requête "me" pour qu'elle se relance avec le nouveau token
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       return {
@@ -343,7 +335,7 @@ export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      removeToken();
+      await logoutSession();
       // Invalider spécifiquement la query "me"
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       return true;
@@ -362,14 +354,19 @@ export function getListProductsQueryKey({ categoryId }: { categoryId: number | u
 // 🔹 Other existing API functions (useGetMe, useLogout, etc.)
 
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
-  const headers = {
-    "Content-Type": "application/json",
-    ...authHeaders(),
-    ...options.headers,
-  };
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
+  const method = (options.method ?? "GET").toUpperCase();
+  const headers = new Headers(options.headers);
+  if (options.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method)) {
+    headers.set("X-CSRF-TOKEN", await getCsrfToken());
+  }
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    credentials: "include",
+    headers,
+  });
   if (response.status === 401) {
-    removeToken();
+    csrfToken = null;
     throw new Error("Session expired");
   }
   return response;
@@ -387,19 +384,6 @@ export function useGetDashboardStats() {
     refetchOnWindowFocus: true,
   });
 }
-async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const headers = {
-    "Content-Type": "application/json",
-    ...authHeaders(),
-    ...options.headers,
-  };
-  const response = await fetch(url, { ...options, headers });
-  if (response.status === 401) {
-    removeToken();
-    throw new Error("Session expired");
-  }
-  return response;
-}
 // 🔹 Key for Dashboard Stats Query
 export function getGetDashboardStatsQueryKey() {
   return ["dashboardStats"];
@@ -411,7 +395,7 @@ export function useListCategories() {
       const response = await apiRequest("/categories");
       if (!response.ok) throw new Error("Failed to fetch categories");
       const data = await response.json();
-      return data;
+      return data as Category[];
     },
   });
 }
@@ -425,14 +409,14 @@ export function useListProducts({ categoryId }: { categoryId?: number }) {
         ? `${API_BASE_URL}/products?categoryId=${categoryId}`
         : `${API_BASE_URL}/products`;
 
-      const response = await fetch(url, { headers: authHeaders() });
+      const response = await apiRequest(url.replace(API_BASE_URL, ""));
 
       if (!response.ok) throw new Error("Failed to fetch products");
 
       const data = await response.json(); // ✅ UNE SEULE FOIS
 
 
-      return data; // ✅ retourne data
+      return data as Product[]; // ✅ retourne data
     },
   });
 }
@@ -440,7 +424,7 @@ export function useListProducts({ categoryId }: { categoryId?: number }) {
 // 🔹 useCreateOrder Hook (handles order creation)
 export function useCreateOrder() {
   return useMutation({
-    mutationFn: async ({ data }: { data: { employeeId: number; reductionMontant: number | null; reductionPourcentage: number | null; motifReduction: string; amountPaid: number; paymentMethod: string; items: any[] } }) => {
+    mutationFn: async ({ data }: { data: { employeeId: number; reductionMontant: number | null; reductionPourcentage: number | null; motifReduction: string; amountPaid: number; paymentMethod: string; items: any[]; customerId?: number | null; promotionId?: number | null; pointsToRedeem?: number } }) => {
       const response = await apiRequest("/orders", {
         method: "POST",
         body: JSON.stringify(data),
@@ -459,7 +443,7 @@ export function useCreateOrder() {
 // 🔹 useCreateProduct Hook (creates a new product)
 export function useCreateProduct() {
   return useMutation({
-    mutationFn: async ({ data }: { data: Product }) => {
+    mutationFn: async ({ data }: { data: Omit<Product, "id"> }) => {
       const response = await apiRequest("/products", {
         method: "POST",
         body: JSON.stringify(data),
@@ -473,7 +457,7 @@ export function useCreateProduct() {
 // 🔹 useUpdateProduct Hook (updates an existing product)
 export function useUpdateProduct() {
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Product }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Omit<Product, "id">> }) => {
       const response = await apiRequest(`/products/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
@@ -507,7 +491,7 @@ export function useDeleteProduct() {
 // 🔹 useCreateCategory Hook (creates a new category)
 export function useCreateCategory() {
   return useMutation({
-    mutationFn: async ({ data }: { data: Category }) => {
+    mutationFn: async ({ data }: { data: Omit<Category, "id"> }) => {
       const response = await apiRequest("/categories", {
         method: "POST",
         body: JSON.stringify(data),
@@ -521,7 +505,7 @@ export function useCreateCategory() {
 // 🔹 useUpdateCategory Hook (updates an existing category)
 export function useUpdateCategory() {
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Category }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Omit<Category, "id">> }) => {
       const response = await apiRequest(`/categories/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
@@ -559,7 +543,7 @@ export function useListEmployees() {
     queryFn: async () => {
       const response = await apiRequest("/employees");
       const data = await response.json();
-      return data;
+      return data as Employee[];
     },
   });
 }
@@ -620,7 +604,7 @@ export function useListExpenses() {
     queryFn: async () => {
       const response = await apiRequest("/expenses");
       const data = await response.json();
-      return data;
+      return data as Expense[];
     },
   });
 }
@@ -633,7 +617,7 @@ export function getListExpensesQueryKey() {
 // 🔹 useCreateExpense Hook (creates a new expense)
 export function useCreateExpense() {
   return useMutation({
-    mutationFn: async ({ data }: { data: Expense }) => {
+    mutationFn: async ({ data }: { data: Omit<Expense, "id"> }) => {
       const response = await apiRequest("/expenses", {
         method: "POST",
         body: JSON.stringify(data),
@@ -666,7 +650,7 @@ export function useListOrders() {
     queryFn: async () => {
       const response = await apiRequest("/orders");
       const data = await response.json();
-      return data;
+      return data as Order[];
     },
   });
 }
@@ -1225,9 +1209,7 @@ export function useListFichesPaieByEmployee(employeeId?: number) {
 export function useDownloadFichePaie() {
   return useMutation({
     mutationFn: async (ficheId: number) => {
-      const response = await fetch(`${API_BASE_URL}/paie/${ficheId}/download`, {
-        headers: authHeaders(),
-      });
+      const response = await apiRequest(`/paie/${ficheId}/download`);
       if (!response.ok) throw new Error("Erreur téléchargement");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -1483,4 +1465,56 @@ export function useCancelDevis() {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["devis"] }),
   });
+}
+
+export function useListCustomers() {
+  return useQuery({ queryKey: ["customers"], queryFn: async () => {
+    const response = await apiRequest("/customers");
+    if (!response.ok) throw new Error("Impossible de charger les clients");
+    return response.json() as Promise<Customer[]>;
+  } });
+}
+
+export function useCustomerByPhone(phone: string) {
+  const normalized = phone.trim();
+  return useQuery({ queryKey: ["customer-by-phone", normalized], enabled: normalized.length >= 6, retry: false, queryFn: async () => {
+    const response = await apiRequest(`/customers/phone/${encodeURIComponent(normalized)}`);
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error("Recherche client impossible");
+    return response.json() as Promise<Customer>;
+  } });
+}
+
+export function useCreateCustomer() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: async (data: Pick<Customer, "name" | "phone"> & { email?: string }) => {
+    const response = await apiRequest("/customers", { method: "POST", body: JSON.stringify(data) });
+    if (!response.ok) throw new Error(response.status === 409 ? "Ce numéro existe déjà" : "Impossible de créer le client");
+    return response.json() as Promise<Customer>;
+  }, onSuccess: () => qc.invalidateQueries({ queryKey: ["customers"] }) });
+}
+
+export function useListPromotions() {
+  return useQuery({ queryKey: ["promotions"], queryFn: async () => {
+    const response = await apiRequest("/promotions");
+    if (!response.ok) throw new Error("Impossible de charger les promotions");
+    return response.json() as Promise<Promotion[]>;
+  } });
+}
+
+export function useSavePromotion() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: async (data: Omit<Promotion, "id"> & { id?: number }) => {
+    const response = await apiRequest(data.id ? `/promotions/${data.id}` : "/promotions", { method: data.id ? "PUT" : "POST", body: JSON.stringify(data) });
+    if (!response.ok) throw new Error("Impossible d'enregistrer la promotion");
+    return response.json() as Promise<Promotion>;
+  }, onSuccess: () => qc.invalidateQueries({ queryKey: ["promotions"] }) });
+}
+
+export function useDeletePromotion() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: async (id: number) => {
+    const response = await apiRequest(`/promotions/${id}`, { method: "DELETE" });
+    if (!response.ok) throw new Error("Impossible de supprimer la promotion");
+  }, onSuccess: () => qc.invalidateQueries({ queryKey: ["promotions"] }) });
 }

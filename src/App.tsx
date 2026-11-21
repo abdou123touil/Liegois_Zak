@@ -40,6 +40,7 @@ import Echanges from "./pages/admin/Echanges";
 import ChefCalculCoutProduit from "./pages/chef/calcul-cout-produit";
 import DemandeGateau from "./pages/public/DemandeGateau";
 import ChefDemandesGateaux from "./pages/chef/demandes-gateaux";
+import Fidelite from "./pages/admin/Fidelite";
 const queryClient = new QueryClient();
 
 // Composant qui contient toute la logique de routage
@@ -71,6 +72,7 @@ function AppRouter() {
       else if (role === "responsable") setLocation("/responsable");
       else if (role === "other") setLocation("/other");
       else if (role === "cashier") setLocation("/pos");
+      else if (role === "commercial") setLocation("/commercial");
       else setLocation("/login");
     }
   }, [user, isLoading, setLocation]);
@@ -121,6 +123,9 @@ function AppRouter() {
           <Route path="/admin/conges" component={Conges} />
           <Route path="/admin/pointages" component={Pointages} />
           <Route path="/admin/fiches-paie" component={FichesPaie} />
+          {role === "admin" && <Route path="/admin/fidelite" component={Fidelite} />}
+
+          {role === "commercial" && <Route path="/commercial" component={Fidelite} />}
 
           {/* Routes Chef */}
           {role === "chef" && (

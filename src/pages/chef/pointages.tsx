@@ -20,7 +20,7 @@ export default function ChefPointages() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const employeeId = user?.id;
+  const employeeId = user?.id ?? 0;
 
   const [isArrivalModalOpen, setIsArrivalModalOpen] = useState(false);
   const [arrivalDate, setArrivalDate] = useState(format(new Date(), 'yyyy-MM-dd'));

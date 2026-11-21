@@ -1,7 +1,14 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 
-export function DataTable({ columns, data, isLoading }) {
+type DataTableProps<TData extends object> = {
+  columns: ColumnDef<TData, unknown>[];
+  data: TData[];
+  isLoading?: boolean;
+};
+
+export function DataTable<TData extends object>({ columns, data, isLoading = false }: DataTableProps<TData>) {
   const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
   if (isLoading) return <div>Chargement...</div>;
   return (

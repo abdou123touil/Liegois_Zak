@@ -83,7 +83,7 @@ export default function DemandesAchat() {
                           </td>
                           <td className="p-4 text-primary/70">{demande.quantite} {demande.uniteMesure}</td>
                           <td className="p-4 text-primary/70">{demande.uniteMesure}</td>
-                          <td className="p-4 text-primary/70">{demande.fournisseurSuggere?.nom || '-'}</td>
+                          <td className="p-4 text-primary/70">{demande.fournisseurSuggereNom || '-'}</td>
                           <td className="p-4">{demande.urgence ? <span className="text-destructive font-bold">Oui</span> : "Non"}</td>
                           <td className="p-4">{getStatutBadge(demande.statut)}</td>
                           <td className="p-4 text-right space-x-2">

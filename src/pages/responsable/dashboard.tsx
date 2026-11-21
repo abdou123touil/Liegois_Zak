@@ -23,7 +23,8 @@ export default function ResponsableDashboard() {
   const demandesEnAttente = demandes.filter(d => d.statut === "EN_ATTENTE");
   const aujourdHui = new Date().toISOString().split('T')[0];
   const productionAujourdhui = stockJournalier.find(s => s.date === aujourdHui);
-  const quantiteProduiteAujourdhui = productionAujourdhui?.quantiteProduite || 0;
+  const quantiteProduiteAujourdhui = productionAujourdhui?.lignes.reduce((sum, ligne) => sum + (ligne.quantiteProduite || 0), 0) || 0;
+  const productionRows = stockJournalier.flatMap((stock) => stock.lignes.map((ligne) => ({ ...ligne, date: stock.date, stockId: stock.id })));
   const employesActifs = employees.filter(e => e.isActive).length;
 
   const handleApprove = async (id: number, valide: boolean) => {
@@ -114,8 +115,8 @@ export default function ResponsableDashboard() {
                       >
                         <td className="p-4 font-medium text-primary/90">{demande.produit}</td>
                         <td className="p-4 text-primary/70">{demande.quantite} {demande.uniteMesure}</td>
-                        <td className="p-4 text-primary/70">{demande.fournisseurSuggere?.nom || '-'}</td>
-                        <td className="p-4 text-primary/70">{demande.demandePar?.name || '-'}</td>
+                        <td className="p-4 text-primary/70">{demande.fournisseurSuggereNom || '-'}</td>
+                        <td className="p-4 text-primary/70">{demande.demandeParNom || '-'}</td>
                         <td className="p-4 text-right space-x-2">
                           <Button variant="ghost" size="icon" className="hover:bg-green-100" onClick={() => handleApprove(demande.id, true)}>
                             <CheckCircle className="h-4 w-4 text-green-600" />
@@ -141,7 +142,7 @@ export default function ResponsableDashboard() {
           <CardContent className="p-0">
             {loadingStock ? (
               <div className="p-8 text-center text-muted-foreground">{t('common.loading')}</div>
-            ) : stockJournalier.length === 0 ? (
+            ) : productionRows.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">{t('responsable.dashboard.no_productions')}</div>
             ) : (
               <div className="overflow-x-auto">
@@ -156,16 +157,16 @@ export default function ResponsableDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {stockJournalier.slice(0, 7).map((stock) => (
+                    {productionRows.slice(0, 7).map((stock) => (
                       <motion.tr
-                        key={stock.id}
+                        key={`${stock.stockId}-${stock.productId}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
                         className="border-b border-primary/5 hover:bg-primary/5"
                       >
                         <td className="p-4 text-primary/70">{new Date(stock.date).toLocaleDateString()}</td>
-                        <td className="p-4 font-medium text-primary/90">{stock.product?.name}</td>
+                        <td className="p-4 font-medium text-primary/90">{stock.productName}</td>
                         <td className="p-4 text-primary/70">{stock.quantiteProduite}</td>
                         <td className="p-4 text-primary/70">{stock.quantiteVendue ?? 0}</td>
                         <td className="p-4 text-primary/70">{stock.quantiteInvendue ?? 0}</td>

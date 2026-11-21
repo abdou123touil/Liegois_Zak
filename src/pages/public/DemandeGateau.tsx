@@ -259,18 +259,18 @@ export default function DemandeGateau() {
                                         className="space-y-6"
                                     >
                                         {step === 1 && (
-                                            <StepChoice options={eventTypes} value={form.typeEvenement} onChange={(v) => update("typeEvenement", v)} />
+                                            <StepChoice options={eventTypes} value={form.typeEvenement} onChange={(v: string) => update("typeEvenement", v)} />
                                         )}
 
                                         {step === 2 && (
-                                            <StepChoice options={cakeFormats} value={form.formatGateau} onChange={(v) => update("formatGateau", v)} />
+                                            <StepChoice options={cakeFormats} value={form.formatGateau} onChange={(v: string) => update("formatGateau", v)} />
                                         )}
 
                                         {step === 3 && (
                                             <>
-                                                <MultiChoice title="Goûts" options={flavors} values={form.gouts} onToggle={(v) => toggleArray("gouts", v)} />
-                                                <MultiChoice title="Garnitures" options={creams} values={form.garnitures} onToggle={(v) => toggleArray("garnitures", v)} />
-                                                <MultiChoice title="Décoration" options={decorations} values={form.decoration} onToggle={(v) => toggleArray("decoration", v)} />
+                                                <MultiChoice title="Goûts" options={flavors} values={form.gouts} onToggle={(v: string) => toggleArray("gouts", v)} />
+                                                <MultiChoice title="Garnitures" options={creams} values={form.garnitures} onToggle={(v: string) => toggleArray("garnitures", v)} />
+                                                <MultiChoice title="Décoration" options={decorations} values={form.decoration} onToggle={(v: string) => toggleArray("decoration", v)} />
 
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     <Field icon={Palette} label="Couleurs souhaitées">

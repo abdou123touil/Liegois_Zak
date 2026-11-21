@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useGetMe, Employee, removeToken } from "@/lib/api-client";
+import { useGetMe, Employee, logoutSession } from "@/lib/api-client";
 import { useLocation } from "wouter";
 
 type AuthContextType = {
@@ -25,9 +25,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [meData, isError]);
 
-  const logout = () => {
-    removeToken();
-    setUser(null);
+  const logout = async () => {
+    try {
+      await logoutSession();
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
@@ -52,7 +55,6 @@ export function ProtectedRoute({ children, allowedRoles }: { children: React.Rea
       if (!user) {
         setLocation("/login");
       } else if (allowedRoles && !allowedRoles.includes(user.role)) {
-        console.warn("Unauthorized access attempt by user with role:", user.role);
         setLocation("/login");
       }
     }

@@ -22,7 +22,7 @@ export default function Employees() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState<"ADMIN" | "CASHIER" | "CHEF" | "RESPONSABLE" | "OTHER">("CASHIER");
+  const [role, setRole] = useState<"ADMIN" | "CASHIER" | "CHEF" | "RESPONSABLE" | "OTHER" | "COMMERCIAL">("CASHIER");
   const [hourlyRate, setHourlyRate] = useState("");
   const [hoursPerMonth, setHoursPerMonth] = useState("");
   const [monthlySalary, setMonthlySalary] = useState("");
@@ -265,6 +265,7 @@ export default function Employees() {
                     <SelectItem value="CHEF">{t('employees.role_chef')}</SelectItem>
                     <SelectItem value="RESPONSABLE">{t('employees.role_responsable')}</SelectItem>
                     <SelectItem value="OTHER">{t('employees.role_other')}</SelectItem>
+                    <SelectItem value="COMMERCIAL">Commercial (fidélité & promotions)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

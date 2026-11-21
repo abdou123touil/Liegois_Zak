@@ -24,7 +24,8 @@ import {
   Umbrella,
   ArrowRightLeft,
   Settings,
-  ArrowRightLeft
+  Gift,
+  
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -63,7 +64,7 @@ useEffect(() => {
     toast({
       title: "⚠️ Stock faible détecté",
       description: newAlertes
-        .map((a) => `${a.nom} : ${a.quantiteRestante} ${a.uniteMesure} (seuil ${a.seuilAlerte})`)
+        .map((a) => `${a.nom} : ${a.stockActuel} ${a.uniteMesure} (seuil ${a.seuilAlerte})`)
         .join(", "),
       variant: "destructive",
     });
@@ -80,6 +81,7 @@ useEffect(() => {
   const navItems = [
     { href: "/admin", icon: LayoutDashboard, label: t('nav.dashboard') },
     { href: "/admin/orders", icon: FileText, label: t('nav.orders') },
+    { href: "/admin/fidelite", icon: Gift, label: "Fidélité & promotions" },
     { href: "/admin/products", icon: Package, label: t('nav.products') },
     { href: "/admin/categories", icon: Tags, label: t('nav.categories') },
     { href: "/admin/employees", icon: Users, label: t('nav.employees') },
