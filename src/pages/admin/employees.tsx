@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { useListEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee, Employee } from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -215,9 +217,9 @@ export default function Employees() {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="py-12 text-center">{t('common.loading')}</td></tr>
+                    <TableLoadingRow colSpan={6} label={t('common.loading')} />
                   ) : employees?.length === 0 ? (
-                    <tr><td colSpan={6} className="py-12 text-center">{t('employees.empty')}</td></tr>
+                    <TableEmptyRow colSpan={6} title={t('employees.empty')} />
                   ) : (
                     <AnimatePresence>
                       {employees?.map((emp, idx) => (

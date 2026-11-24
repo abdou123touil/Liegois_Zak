@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useListCategories, Product } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Package, ArrowUpDown, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Package, ArrowUpDown, Search, Power } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -101,15 +103,25 @@ export default function Products() {
   };
 
   const handleSave = async () => {
-    if (!name || !price || !categoryId) {
+    const parsedPrice = Number(price);
+    const parsedCategoryId = Number(categoryId);
+    if (!name.trim() || !price.trim() || !categoryId) {
       toast({ title: t('common.error'), description: t('products.validation_required'), variant: "destructive" });
+      return;
+    }
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0 || !Number.isInteger(parsedCategoryId)) {
+      toast({ title: t('common.error'), description: t('products.validation_required'), variant: "destructive" });
+      return;
+    }
+    if (name.trim().length > 150 || imageUrl.length > 1000 || description.length > 500) {
+      toast({ title: t('common.error'), description: "Nom : 150 caractères max. Image : 1000. Description : 500.", variant: "destructive" });
       return;
     }
 
     const productData = {
-      name,
-      price: parseFloat(price),
-      categoryId: parseInt(categoryId),
+      name: name.trim(),
+      price: parsedPrice,
+      categoryId: parsedCategoryId,
       imageUrl: imageUrl || undefined,
       description: description || undefined,
       isActive,
@@ -125,13 +137,41 @@ export default function Products() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setIsModalOpen(false);
     } catch (error) {
-      toast({ title: t('common.error'), description: t('products.save_error'), variant: "destructive" });
+      toast({ title: t('common.error'), description: error instanceof Error ? error.message : t('products.save_error'), variant: "destructive" });
     }
   };
 
   const handleDeleteClick = (product: Product) => {
     setProductToDelete(product);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleToggleActive = async (product: Product) => {
+    const nextIsActive = !getProductIsActive(product);
+    try {
+      await updateMutation.mutateAsync({
+        id: product.id,
+        data: {
+          name: product.name,
+          price: product.price,
+          categoryId: product.categoryId,
+          imageUrl: product.imageUrl,
+          description: product.description,
+          isActive: nextIsActive,
+        },
+      });
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({
+        title: t("common.success"),
+        description: nextIsActive ? t("products.status_active") : t("products.status_inactive"),
+      });
+    } catch (error) {
+      toast({
+        title: t("common.error"),
+        description: error instanceof Error ? error.message : t("products.save_error"),
+        variant: "destructive",
+      });
+    }
   };
 
   const confirmDelete = async () => {
@@ -226,11 +266,9 @@ export default function Products() {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('common.loading')}...</td></tr>
+                    <TableLoadingRow colSpan={6} label={t('common.loading')} />
                   ) : filteredAndSortedProducts.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">
-                      {searchTerm ? t('products.no_results') : t('products.empty')}
-                    </td></tr>
+                    <TableEmptyRow colSpan={6} title={searchTerm ? t('products.no_results') : t('products.empty')} />
                   ) : (
                     <AnimatePresence>
                       {filteredAndSortedProducts.map((product, idx) => {
@@ -265,6 +303,17 @@ export default function Products() {
                             <td className="p-4 text-right space-x-2">
                               <Button variant="ghost" size="icon" onClick={() => openEditModal(product)} className="hover:bg-primary/10">
                                 <Edit className="h-4 w-4 text-primary" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleToggleActive(product)}
+                                disabled={updateMutation.isPending}
+                                title={productActive ? t('products.status_inactive') : t('products.status_active')}
+                                aria-label={productActive ? t('products.status_inactive') : t('products.status_active')}
+                                className={productActive ? "hover:bg-amber-500/10" : "hover:bg-green-500/10"}
+                              >
+                                <Power className={`h-4 w-4 ${productActive ? "text-amber-600" : "text-green-600"}`} />
                               </Button>
                               <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(product)} className="hover:bg-destructive/10">
                                 <Trash2 className="h-4 w-4 text-destructive" />

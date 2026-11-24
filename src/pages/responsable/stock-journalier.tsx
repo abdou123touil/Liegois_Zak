@@ -1,5 +1,7 @@
 // src/pages/responsable/stock-journalier.tsx
 import { useState } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { useListProducts, useListStockJournalier, useCreateStockJournalier, StockJournalier, StockJournalierLigne } from "@/lib/api-client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -114,9 +116,9 @@ export default function ResponsableStockJournalier() {
                                 </thead>
                                 <tbody>
                                     {isLoading ? (
-                                        <tr><td colSpan={7} className="text-center py-12">{t('common.loading')}</td></tr>
+                                        <TableLoadingRow colSpan={7} label={t('common.loading')} />
                                     ) : stocks.length === 0 ? (
-                                        <tr><td colSpan={7} className="text-center py-12">{t('stockJournalier.empty')}</td></tr>
+                                        <TableEmptyRow colSpan={7} title={t('stockJournalier.empty')} />
                                     ) : (
                                         <AnimatePresence>
                                             {stockRows.map((stock, idx) => (

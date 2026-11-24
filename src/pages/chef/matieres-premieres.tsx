@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import {
     useListMatieresPremieres,
     useCreateMatierePremiere,
@@ -221,9 +223,9 @@ export default function MatieresPremieres() {
                                 </thead>
                                 <tbody>
                                     {isLoading ? (
-                                        <tr><td colSpan={7} className="text-center py-12">{t('common.loading')}</td></tr>
+                                        <TableLoadingRow colSpan={7} label={t('common.loading')} />
                                     ) : matieres.length === 0 ? (
-                                        <tr><td colSpan={7} className="text-center py-12">{t('matieresPremieres.empty')}</td></tr>
+                                        <TableEmptyRow colSpan={7} title={t('matieresPremieres.empty')} />
                                     ) : (
                                         <AnimatePresence>
                                             {matieres.map((item, idx) => (

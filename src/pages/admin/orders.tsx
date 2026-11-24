@@ -1,4 +1,5 @@
 import { useListOrders } from "@/lib/api-client";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +66,7 @@ export default function Orders() {
                   {isLoading ? (
                     <tr><td colSpan={6} className="text-center py-12"><Skeleton className="h-8 w-full" /></td></tr>
                   ) : orders?.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">{t('orders.empty')}</td></tr>
+                    <TableEmptyRow colSpan={6} title={t('orders.empty')} />
                   ) : (
                     <AnimatePresence>
                       {orders?.map((order, idx) => (

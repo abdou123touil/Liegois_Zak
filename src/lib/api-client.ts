@@ -4,6 +4,17 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:808
 
 let csrfToken: string | null = null;
 if (typeof window !== "undefined") window.localStorage.removeItem("jwt_token");
+
+async function readApiError(response: Response, fallback: string): Promise<string> {
+  const body = await response.text();
+  if (!body || response.headers.get("content-type")?.includes("text/html")) return fallback;
+  try {
+    const parsed = JSON.parse(body);
+    return parsed.message || parsed.error || parsed.detail || fallback;
+  } catch {
+    return body.slice(0, 300) || fallback;
+  }
+}
 export type SalesByDay = {
   date: string;
   sales: number;
@@ -347,8 +358,8 @@ export function getListCategoriesQueryKey() {
 }
 
 // 🔹 getListProductsQueryKey
-export function getListProductsQueryKey({ categoryId }: { categoryId: number | undefined }) {
-  return ["products", categoryId];
+export function getListProductsQueryKey({ categoryId, activeOnly = false }: { categoryId: number | undefined; activeOnly?: boolean }) {
+  return ["products", categoryId, activeOnly];
 }
 
 // 🔹 Other existing API functions (useGetMe, useLogout, etc.)
@@ -401,13 +412,15 @@ export function useListCategories() {
 }
 
 // 🔹 useListProducts Hook (fetches products based on category)
-export function useListProducts({ categoryId }: { categoryId?: number }) {
+export function useListProducts({ categoryId, activeOnly = false }: { categoryId?: number; activeOnly?: boolean }) {
   return useQuery({
-    queryKey: ["products", categoryId],
+    queryKey: ["products", categoryId, activeOnly],
     queryFn: async () => {
-      const url = categoryId
-        ? `${API_BASE_URL}/products?categoryId=${categoryId}`
-        : `${API_BASE_URL}/products`;
+      const params = new URLSearchParams();
+      if (categoryId) params.set("categoryId", String(categoryId));
+      if (activeOnly) params.set("activeOnly", "true");
+      const query = params.toString();
+      const url = `${API_BASE_URL}/products${query ? `?${query}` : ""}`;
 
       const response = await apiRequest(url.replace(API_BASE_URL, ""));
 
@@ -448,7 +461,7 @@ export function useCreateProduct() {
         method: "POST",
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to create product.");
+      if (!response.ok) throw new Error(await readApiError(response, "Échec de la création du produit."));
       return await response.json();
     },
   });
@@ -462,7 +475,7 @@ export function useUpdateProduct() {
         method: "PUT",
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to update product.");
+      if (!response.ok) throw new Error(await readApiError(response, "Échec de la modification du produit."));
       return await response.json();
     },
   });

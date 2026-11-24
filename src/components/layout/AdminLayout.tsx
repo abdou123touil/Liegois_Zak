@@ -25,6 +25,8 @@ import {
   ArrowRightLeft,
   Settings,
   Gift,
+  PanelLeftClose,
+  PanelLeftOpen,
   
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { t, i18n } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const logoutMutation = useLogout();
@@ -104,15 +107,13 @@ useEffect(() => {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Image de fond pains */}
+    <div className="app-shell relative min-h-screen overflow-hidden">
       <div
+        aria-hidden="true"
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072&auto=format&fit=crop')" }}
       />
-      {/* Superposition turquoise avec opacité */}
-      <div className="absolute inset-0 bg-primary/60 backdrop-blur-sm" />
-
+      <div aria-hidden="true" className="absolute inset-0 bg-background/65 backdrop-blur-[2px] dark:bg-background/75" />
       {/* Contenu principal */}
       <div className="relative z-10 flex h-screen">
         {isSidebarOpen && (
@@ -123,14 +124,27 @@ useEffect(() => {
         )}
 
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border shadow-xl transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex flex-col",
+          "fixed inset-y-0 left-0 z-50 w-72 shrink-0 bg-card/95 border-r border-border/80 shadow-xl backdrop-blur-xl transition-[transform,width] duration-300 ease-in-out lg:relative lg:translate-x-0",
+          "flex flex-col",
+          isSidebarCollapsed ? "lg:w-20" : "lg:w-72",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
-          <div className="flex items-center justify-between h-16 px-6 border-b border-border bg-card">
+          <div className={cn("flex items-center h-16 border-b border-border bg-card", isSidebarCollapsed ? "justify-center px-3 lg:px-2" : "justify-between px-6")}>
             <div className="flex items-center gap-2">
               <Croissant className="w-6 h-6 text-primary" />
-              <span className="font-serif font-bold text-lg tracking-wide text-primary">{t('app.short_name')}</span>
+              <span className={cn("font-serif font-bold text-lg tracking-wide text-primary", isSidebarCollapsed && "lg:hidden")}>{t('app.short_name')}</span>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:inline-flex shrink-0"
+              onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
+              aria-label={isSidebarCollapsed ? "Développer le menu" : "Réduire le menu"}
+              aria-expanded={!isSidebarCollapsed}
+              title={isSidebarCollapsed ? "Développer le menu" : "Réduire le menu"}
+            >
+              {isSidebarCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+            </Button>
             <button className="lg:hidden text-foreground/70" onClick={() => setIsSidebarOpen(false)}>
               <X className="h-5 w-5" />
             </button>
@@ -141,15 +155,16 @@ useEffect(() => {
               {navItems.map((item) => {
                 const isActive = location === item.href;
                 return (
-                  <Link key={item.href} href={item.href}>
+                  <Link key={item.href} href={item.href} aria-label={item.label}>
                     <span className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all text-sm font-medium cursor-pointer",
+                      "flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent transition-all duration-200 text-sm font-medium cursor-pointer",
+                      isSidebarCollapsed && "lg:justify-center lg:px-2",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-foreground/70 hover:bg-accent hover:text-foreground"
-                    )}>
-                      <item.icon className="h-5 w-5" />
-                      {item.label}
+                        ? "border-primary/15 bg-primary/10 text-primary shadow-sm"
+                        : "text-foreground/70 hover:border-border/70 hover:bg-background/80 hover:text-foreground"
+                    )} title={isSidebarCollapsed ? item.label : undefined}>
+                      <item.icon className="h-5 w-5 shrink-0" />
+                      <span className={cn("truncate", isSidebarCollapsed && "lg:hidden")}>{item.label}</span>
                     </span>
                   </Link>
                 );
@@ -158,11 +173,11 @@ useEffect(() => {
           </ScrollArea>
 
           <div className="p-4 border-t border-border bg-card">
-            <div className="mb-4 px-3 flex items-center gap-3">
+            <div className={cn("mb-4 flex items-center gap-3", isSidebarCollapsed ? "justify-center px-0 lg:px-0" : "px-3")}>
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-sm">
                 {user?.name?.charAt(0) || "A"}
               </div>
-              <div className="overflow-hidden">
+              <div className={cn("overflow-hidden", isSidebarCollapsed && "lg:hidden")}>
                 <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
                 <p className="text-xs text-foreground/60 capitalize">{user?.role}</p>
               </div>
@@ -170,18 +185,19 @@ useEffect(() => {
 
             <Button
               variant="ghost"
-              className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all"
+              className={cn("w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all", isSidebarCollapsed && "lg:justify-center lg:px-0")}
+              title={isSidebarCollapsed ? t('actions.logout') : undefined}
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
             >
               <LogOut className="h-4 w-4" />
-              {t('actions.logout')}
+              <span className={cn(isSidebarCollapsed && "lg:hidden")}>{t('actions.logout')}</span>
             </Button>
           </div>
         </aside>
 
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="h-16 flex items-center justify-between px-6 lg:px-8 border-b border-border bg-background/80 backdrop-blur-sm">
+          <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-6 lg:px-8 border-b border-border/80 bg-background/80 backdrop-blur-xl">
             <button
               className="lg:hidden text-foreground p-2 -ml-2 rounded-md hover:bg-accent transition"
               onClick={() => setIsSidebarOpen(true)}
@@ -197,7 +213,7 @@ useEffect(() => {
             </div>
             <ThemeToggle />
           </header>
-          <div className="flex-1 overflow-auto p-6 lg:p-8">
+          <div className="flex-1 overflow-auto p-5 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>

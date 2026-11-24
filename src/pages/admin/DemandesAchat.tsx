@@ -1,4 +1,6 @@
 import { useListDemandesAchat, useApproveDemandeAchat } from "@/lib/api-client";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,9 +67,9 @@ export default function DemandesAchat() {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={7} className="text-center py-12">{t('common.loading')}</td></tr>
+                    <TableLoadingRow colSpan={7} label={t('common.loading')} />
                   ) : demandes.length === 0 ? (
-                    <tr><td colSpan={7} className="text-center py-12">{t('demandesAchat.empty')}</td></tr>
+                    <TableEmptyRow colSpan={7} title={t('demandesAchat.empty')} />
                   ) : (
                     <AnimatePresence>
                       {demandes.map((demande, idx) => (

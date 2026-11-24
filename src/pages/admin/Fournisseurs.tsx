@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { useListFournisseurs, useCreateFournisseur, useUpdateFournisseur, useDeleteFournisseur, Fournisseur } from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -147,9 +149,9 @@ const confirmDelete = async () => {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12">{t('common.loading')}</td></tr>
+                    <TableLoadingRow colSpan={6} label={t('common.loading')} />
                   ) : fournisseurs?.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12">{t('fournisseurs.empty')}</td></tr>
+                    <TableEmptyRow colSpan={6} title={t('fournisseurs.empty')} />
                   ) : (
                     <AnimatePresence>
                       {fournisseurs?.map((f, idx) => (

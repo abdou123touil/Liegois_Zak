@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import {
   useListPointages,
   useCreatePointageArrivee,
@@ -208,9 +210,9 @@ export default function Pointages() {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={7} className="text-center py-12">{t('common.loading')}</td></tr>
+                    <TableLoadingRow colSpan={7} label={t('common.loading')} />
                   ) : pointages.length === 0 ? (
-                    <tr><td colSpan={7} className="text-center py-12">{t('pointages.empty')}</td></tr>
+                    <TableEmptyRow colSpan={7} title={t('pointages.empty')} />
                   ) : (
                     <AnimatePresence>
                       {pointages.map((pointage, idx) => (

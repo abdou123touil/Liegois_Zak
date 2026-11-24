@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import {
   useListProducts,
   useListStockJournalier,
@@ -150,9 +152,9 @@ export default function StockJournalier() {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12">{t('common.loading')}</td></tr>
+                    <TableLoadingRow colSpan={6} label={t('common.loading')} />
                   ) : stocks.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-12">{t('stockJournalier.empty')}</td></tr>
+                    <TableEmptyRow colSpan={6} title={t('stockJournalier.empty')} />
                   ) : (
                     <AnimatePresence>
                       {stocks.map((stock, idx) => {

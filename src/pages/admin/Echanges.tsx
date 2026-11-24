@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { useCreateEchange, useListEchanges } from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -161,15 +163,9 @@ export default function Echanges() {
 
                                 <tbody>
                                     {isLoading ? (
-                                        <tr>
-                                            <td colSpan={5} className="text-center py-12">Chargement...</td>
-                                        </tr>
+                                        <TableLoadingRow colSpan={5} label="Chargement" />
                                     ) : echanges.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={5} className="text-center py-12 text-muted-foreground">
-                                                Aucun échange enregistré
-                                            </td>
-                                        </tr>
+                                        <TableEmptyRow colSpan={5} title="Aucun échange enregistré" />
                                     ) : (
                                         <AnimatePresence>
                                             {echanges.map((echange, idx) => (

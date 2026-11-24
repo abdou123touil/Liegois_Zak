@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useListCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, Category } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -110,9 +112,13 @@ export default function Categories() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <AnimatePresence>
             {isLoading ? (
-              <div className="col-span-full text-center py-12 text-muted-foreground">{t('common.loading')}</div>
+              <div className="col-span-full grid gap-5 sm:grid-cols-2 lg:grid-cols-3" role="status" aria-label={t('common.loading')}>
+                <Skeleton className="h-44 w-full" />
+                <Skeleton className="h-44 w-full" />
+                <Skeleton className="h-44 w-full" />
+              </div>
             ) : categories?.length === 0 ? (
-              <div className="col-span-full text-center py-12 text-muted-foreground">{t('categories.empty')}</div>
+              <div className="col-span-full"><EmptyState title={t('categories.empty')} /></div>
             ) : (
               categories?.map((cat, idx) => (
                 <motion.div

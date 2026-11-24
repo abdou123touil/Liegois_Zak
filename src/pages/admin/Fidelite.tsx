@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { Users, TicketPercent, Plus, Trash2, Gift } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Customer, Promotion, useCreateCustomer, useDeletePromotion, useListCustomers, useListPromotions, useSavePromotion } from "@/lib/api-client";
@@ -67,10 +69,10 @@ export default function Fidelite() {
       </CardContent></Card>
     </div>
     <Card><CardHeader><CardTitle>Promotions disponibles</CardTitle></CardHeader><CardContent className="space-y-3">
-      {promotions.length === 0 && <p className="text-sm text-muted-foreground">Aucune promotion pour le moment.</p>}
+      {promotions.length === 0 && <EmptyState title="Aucune promotion pour le moment" description="Créez une offre pour la faire apparaître ici." icon={TicketPercent} />}
       {promotions.map(p => <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"><div><p className="font-semibold">{p.name} <span className="ml-2 rounded bg-primary/10 px-2 py-1 text-sm text-primary">{p.code}</span></p><p className="text-sm text-muted-foreground">{p.type === "FIXED" ? `${p.value} TND` : `${p.value}%`} · minimum {p.minimumAmount} TND · {p.startDate} au {p.endDate}</p></div><Button variant="ghost" size="icon" aria-label="Supprimer" disabled={deletePromotion.isPending} onClick={async()=>{try{await deletePromotion.mutateAsync(p.id);toast({title:"Promotion supprimée"});}catch{toast({title:"Suppression impossible",variant:"destructive"});}}}><Trash2 className="h-4 w-4"/></Button></div>)}
     </CardContent></Card>
-    <Card><CardHeader className="flex-row items-center justify-between"><CardTitle>Clients fidélité</CardTitle><Input className="max-w-xs" placeholder="Nom ou téléphone" value={search} onChange={e=>setSearch(e.target.value)}/></CardHeader><CardContent className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left"><th className="p-2">Client</th><th className="p-2">Téléphone</th><th className="p-2 text-right">Points</th></tr></thead><tbody>{visibleCustomers.map((c: Customer)=><tr key={c.id} className="border-b last:border-0"><td className="p-2 font-medium">{c.name}</td><td className="p-2">{c.phone}</td><td className="p-2 text-right font-semibold">{c.points}</td></tr>)}{visibleCustomers.length===0&&<tr><td colSpan={3} className="p-5 text-center text-muted-foreground">Aucun client trouvé.</td></tr>}</tbody></table></CardContent></Card>
+    <Card><CardHeader className="flex-row items-center justify-between"><CardTitle>Clients fidélité</CardTitle><Input className="max-w-xs" placeholder="Nom ou téléphone" value={search} onChange={e=>setSearch(e.target.value)}/></CardHeader><CardContent className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left"><th className="p-2">Client</th><th className="p-2">Téléphone</th><th className="p-2 text-right">Points</th></tr></thead><tbody>{visibleCustomers.map((c: Customer)=><tr key={c.id} className="border-b last:border-0"><td className="p-2 font-medium">{c.name}</td><td className="p-2">{c.phone}</td><td className="p-2 text-right font-semibold">{c.points}</td></tr>)}{visibleCustomers.length===0&&<TableEmptyRow colSpan={3} title="Aucun client trouvé." />}</tbody></table></CardContent></Card>
     <p className="text-xs text-muted-foreground">Règle actuelle : 1 point gagné par TND dépensé. 100 points donnent 1 TND de réduction à la caisse.</p>
   </div>);
 }

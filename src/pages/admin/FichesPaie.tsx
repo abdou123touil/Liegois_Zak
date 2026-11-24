@@ -1,4 +1,6 @@
 import { useState} from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { useListEmployees, useListFichesPaieByEmployee, useDownloadFichePaie, useGenerateFichePaie} from "@/lib/api-client";
 import ADMINLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -145,9 +147,9 @@ const handleGenerate = async () => {
                   </thead>
                   <tbody>
                     {isLoading ? (
-                      <tr><td colSpan={6} className="text-center py-12">Chargement...</td></tr>
+                      <TableLoadingRow colSpan={6} label={t('common.loading')} />
                     ) : fiches.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center py-12">Aucune fiche</td></tr>
+                      <TableEmptyRow colSpan={6} title="Aucune fiche" />
                     ) : (
                       <AnimatePresence>
                         {fiches.map((fiche, idx) => (

@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { TableLoadingRow } from "@/components/ui/table-loading-row";
+import { TableEmptyRow } from "@/components/ui/table-empty-row";
 import { useListExpenses, useCreateExpense, useDeleteExpense } from "@/lib/api-client";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -148,9 +150,9 @@ export default function Expenses() {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={5} className="text-center py-12">{t('common.loading')}</td></tr>
+                    <TableLoadingRow colSpan={5} label={t('common.loading')} />
                   ) : expenses?.length === 0 ? (
-                    <tr><td colSpan={5} className="text-center py-12">{t('expenses.empty')}</td></tr>
+                    <TableEmptyRow colSpan={5} title={t('expenses.empty')} />
                   ) : (
                     <AnimatePresence>
                       {expenses?.map((exp, idx) => (

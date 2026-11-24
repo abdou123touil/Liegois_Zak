@@ -195,7 +195,7 @@ export default function Pos() {
   const [devisNotes, setDevisNotes] = useState("");
   const [selectedDevis, setSelectedDevis] = useState<Devis | null>(null);
   const { data: categories } = useListCategories();
-  const { data: products, isLoading: isLoadingProducts } = useListProducts({ categoryId: activeCategory });
+  const { data: products, isLoading: isLoadingProducts } = useListProducts({ categoryId: activeCategory, activeOnly: true });
   const createOrderMutation = useCreateOrder();
   const [discountType, setDiscountType] = useState<"fixed" | "percentage">("fixed");
   const [discountValue, setDiscountValue] = useState("");
